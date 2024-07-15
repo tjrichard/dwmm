@@ -1,0 +1,7 @@
+// _home.scss
+.home {
+    @include flex-center;
+    height: 100vh;
+    background-color: lighten($primary-color, 40%);
+  }
+  
