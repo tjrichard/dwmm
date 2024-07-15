@@ -3,20 +3,22 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import logo from './logo.svg';
 
-function HomePage() {
+function BlogPage() {
   return (
     <div>
     <header className="header">
-        <h1>홈페이지</h1>
+        <h1>블로그</h1>
         <img src={logo} className="App-logo" alt="logo" />
       </header>
       <main>
         <section className="home">
           <h2>안녕하세요 장승환입니다.</h2>
-          <p>이곳은 홈 페이지입니다.</p>
+          <p>이곳은 블로그 페이지입니다.</p>
         </section>
         <section>
-          <Link to="/first-page">첫 번째 페이지로 이동</Link>
+          <Link to="/">홈으로 이동</Link>
+          <Link to="/blog">블로그로 이동</Link>
+          <Link to="/side-hustle">사이드 허슬로 이동</Link>
         </section>
       </main>
       <footer className="footer">
@@ -26,4 +28,4 @@ function HomePage() {
   );
 }
 
-export default HomePage;
+export default BlogPage;
