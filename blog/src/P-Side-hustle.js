@@ -1,15 +1,13 @@
-// src/FirstPage.js
-import React from 'react';
-import { Link } from 'react-router-dom';
-import logo from './logo.svg';
+// src/P-Side-hustle.js
+import React from "react";
+import { Link } from "react-router-dom";
+import Header from "./C-header.js";
+import Footer from "./C-footer.js";
 
-function SideHustlePage() {
+function SideHustle() {
   return (
     <div>
-    <header className="header">
-        <h1>사이드 허슬</h1>
-        <img src={logo} className="App-logo" alt="logo" />
-      </header>
+      <Header />
       <main>
         <section className="home">
           <h2>안녕하세요 장승환입니다.</h2>
@@ -21,11 +19,9 @@ function SideHustlePage() {
           <Link to="/side-hustle">사이드 허슬로 이동</Link>
         </section>
       </main>
-      <footer className="footer">
-        <p>DWMM, all rights reserved</p>
-      </footer>
+      <Footer />
     </div>
   );
 }
 
-export default SideHustlePage;
+export default SideHustle;

@@ -1,15 +1,13 @@
-// src/HomePage.js
-import React from 'react';
-import { Link } from 'react-router-dom';
-import logo from './logo.svg';
+// src/P-Blog.js
+import React from "react";
+import { Link } from "react-router-dom";
+import Header from "./C-header.js";
+import Footer from "./C-footer.js";
 
-function BlogPage() {
+function Blog() {
   return (
     <div>
-    <header className="header">
-        <h1>블로그</h1>
-        <img src={logo} className="App-logo" alt="logo" />
-      </header>
+      <Header />
       <main>
         <section className="home">
           <h2>안녕하세요 장승환입니다.</h2>
@@ -21,11 +19,9 @@ function BlogPage() {
           <Link to="/side-hustle">사이드 허슬로 이동</Link>
         </section>
       </main>
-      <footer className="footer">
-        <p>DWMM, all rights reserved</p>
-      </footer>
+      <Footer />
     </div>
   );
 }
 
-export default BlogPage;
+export default Blog;
