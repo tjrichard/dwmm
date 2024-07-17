@@ -1,14 +1,14 @@
 // _button.scss
 .button {
-    background-color: $primary-color;
-    color: #fff;
-    padding: $spacing-unit;
+    background-color: $primary-normal;
+    color: $white-dark;
+    padding: $spacing-xxs $spacing-s;
     border: none;
-    border-radius: 4px;
+    border-radius: $radius-s;
     cursor: pointer;
     
     &:hover {
-      background-color: darken($primary-color, 10%);
+      background-color: darken($primary-normal, 10%);
     }
   }
   

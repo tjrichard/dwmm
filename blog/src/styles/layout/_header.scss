@@ -1,6 +1,13 @@
 // _header.scss
 .header {
-    background-color: $secondary-color;
-    padding: $spacing-unit;
+    padding: $spacing-sm;
+    background-color: rgba(0,0,0,0.04);
+    background-blend-mode: difference;
+    display: flex;
+    align-items: center;
+    gap: $spacing-m;
+    position: sticky;
   }
-  
+.App-logo {
+  width: 36px;
+}

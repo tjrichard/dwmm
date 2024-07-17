@@ -1,4 +1,121 @@
 // _variables.scss
-$primary-color: #3498db;
-$secondary-color: #2ecc71;
-$spacing-unit: 16px;
+
+/* Colors  */
+$blue-01: #FCFDFEFF;
+$blue-02: #F7F9FEFF;
+$blue-03: #EEF2FCFF;
+$blue-04: #E2EAFEFF;
+$blue-05: #D4DFFDFF;
+$blue-06: #C4D1F9FF;
+$blue-07: #AEBFEFFF;
+$blue-08: #91A6E6FF;
+$blue-09: #5D77DFFF;
+$blue-10: #526ACFFF;
+$blue-11: #4D64C4FF;
+$blue-12: #242F59FF;
+$grey-01: #FBFBFFFF;
+$grey-02: #F8F8FFFF;
+$grey-03: #EFEFF5FF;
+$grey-04: #E7E7EDFF;
+$grey-05: #E0E0E6FF;
+$grey-06: #D8D8DEFF;
+$grey-07: #CDCDD3FF;
+$grey-08: #BABABFFF;
+$grey-09: #8D8D91FF;
+$grey-10: #828286FF;
+$grey-11: #646467FF;
+$grey-12: #202021FF;
+$grey-white: #FFFFFFFF;
+$grey-black: #000000FF;
+$success-dark: #1A9F61FF;
+$success-normal: #2CDD8AFF;
+$success-lighter: #72E8B1FF;
+$success-lightest: #B9F4D8FF;
+$warning-normal: #F5AC2EFF;
+$warning-lighter: #F8C874FF;
+$warning-lightest: #FCE3B9FF;
+$warning-dark: #C17E09FF;
+$error-normal: #E55757FF;
+$error-lighter: #EE8F8FFF;
+$error-lightest: #F6C7C7FF;
+$error-dark: #BE1D1DFF;
+$paleblue-01: #ECF2F6FF;
+$paleblue-02: #E3ECF2FF;
+$paleblue-03: #D9E4EDFF;
+$paleblue-04: #C6D7E4FF;
+$paleblue-05: #AFC6DAFF;
+$paleblue-06: #97B5CEFF;
+$paleblue-07: #7BA1C0FF;
+$paleblue-08: #5F8DB3FF;
+$paleblue-09: #4B789EFF;
+$paleblue-10: #3D6382FF;
+$paleblue-11: #304E66FF;
+$paleblue-12: #233849FF;
+
+ /* Aliases  */
+$primary-light: $blue-06;
+$primary-normal: $blue-09;
+$primary-dark: $blue-10;
+$primary-lighter: $blue-04;
+$primary-lightest: $blue-03;
+$secondary-normal: $paleblue-09;
+$secondary-light: $paleblue-06;
+$secondary-lighter: $paleblue-04;
+$secondary-lightest: $paleblue-03;
+$secondary-dark: $paleblue-10;
+$black-darkest: $grey-12;
+$black-darker: $grey-10;
+$black-dark: $grey-06;
+$black-light: $grey-04;
+$black-lighter: $grey-02;
+$black-lightest: $grey-01;
+$white-darkest: $grey-white;
+$white-darker: $grey-01;
+$white-dark: $grey-02;
+$white-light: $grey-03;
+$white-lighter: $grey-04;
+$white-lightest: $grey-05;
+
+// spacing
+$spacing-base: 16px;
+$spacing-xxs: 4px;
+$spacing-xs: 6px;
+$spacing-s: 8px;
+$spacing-sm: 12px;
+$spacing-m: 16px;
+$spacing-ml: 24px;
+$spacing-l: 32px;
+$spacing-xl: 48px;
+
+// radius
+$radius-sharp: 0px;
+$radius-xxs: 2px;
+$radius-xs: 4px;
+$radius-s: 6px;
+$radius-sm: 10px;
+$radius-m: 16px;
+$radius-ml: 24px;
+$radius-lg: 36px;
+$radius-xl: 54px;
+$radius-round: 999px;
+
+// shadow
+.shadow-1 {
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.08), 0px 0px 2px 1px rgba(0, 0, 0, 0.05), 0px 0px 2px 0px rgba(255, 255, 255, 0.12) inset;
+  }
+  
+  .shadow-2 {
+    box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.08), 0px 0px 2px 1px rgba(0, 0, 0, 0.05), 0px 0px 2px 0px rgba(255, 255, 255, 0.12) inset;
+  }
+  
+  .shadow-3 {
+    box-shadow: 0px 4px 16px 0px rgba(0, 0, 0, 0.15), 0px 0px 2px 1px rgba(0, 0, 0, 0.05), 0px 0px 2px 0px rgba(255, 255, 255, 0.12) inset;
+  }
+  
+  .shadow-4 {
+    box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.22), 0px 0px 2px 1px rgba(0, 0, 0, 0.05), 0px 0px 2px 0px rgba(255, 255, 255, 0.12) inset;
+  }
+  
+  .shadow-5 {
+    box-shadow: 0px 6px 40px 0px rgba(0, 0, 0, 0.3), 0px 0px 2px 1px rgba(0, 0, 0, 0.05), 0px 0px 2px 0px rgba(255, 255, 255, 0.12) inset;
+  }
