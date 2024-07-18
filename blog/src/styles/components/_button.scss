@@ -1,14 +1,29 @@
 // _button.scss
 .button {
-    background-color: $primary-normal;
-    color: $white-dark;
-    padding: $spacing-xxs $spacing-s;
-    border: none;
-    border-radius: $radius-s;
-    cursor: pointer;
-    
-    &:hover {
-      background-color: darken($primary-normal, 10%);
-    }
+  padding: $spacing-xs $spacing-sm;
+  border: none;
+  border-radius: $radius-s;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 14px;
+  font-family: Inter;
+  line-height: 120%;
+}
+
+.button.primary {
+  background-color: $primary-normal;
+  color: $white-darkest;
+
+  &:hover {
+    background-color: $primary-dark;
   }
-  
+}
+
+.button.tertiary {
+  background-color: none;
+  color: $black-darkest;
+
+  &:hover {
+    background-color: $black-lighter;
+  }
+}
