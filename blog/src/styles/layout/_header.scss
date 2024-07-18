@@ -1,12 +1,15 @@
 // _header.scss
 .header {
     padding: $spacing-sm;
-    background-color: rgba(0,0,0,0.04);
+    background-color: rgba(255,255,255,0.4);
     background-blend-mode: difference;
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     gap: $spacing-m;
-    position: sticky;
+    position: fixed;
+    width: 100%;
+    z-index: 999;
   }
 .App-logo {
   width: 36px;
