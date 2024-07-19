@@ -4,21 +4,22 @@ import { Link } from "react-router-dom";
 
 function Header() {
   return (
-    <header className="header">
-      <h1>홈페이지</h1>
-      <img src={logo} className="App-logo" alt="logo" />
-      <div class="tab-container">
-        <Link to="/" className="button tertiary">
-          Home
-        </Link>
-        <Link to="/blog" className="button tertiary">
-          Blog
-        </Link>
-        <Link to="/side-hustle" className="button tertiary">
-          Side Hustle
-        </Link>
+    <div className="header-container">
+      <div className="header shadow-3">
+        <img src={logo} className="App-logo" alt="logo" />
+        <div className="tab-container">
+          <Link to="/" className="button tertiary bold">
+            Home
+          </Link>
+          <Link to="/blog" className="button tertiary bold">
+            Blog
+          </Link>
+          <Link to="/side-hustle" className="button tertiary bold">
+            Side Hustle
+          </Link>
+        </div>
       </div>
-    </header>
+    </div>
   );
 }
 

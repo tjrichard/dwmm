@@ -1,15 +1,23 @@
 // _header.scss
+.header-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
 .header {
-    padding: $spacing-sm;
-    background-color: rgba(255,255,255,0.4);
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    gap: $spacing-m;
-    position: fixed;
-    width: 100%;
-    z-index: 999;
-  }
+  padding: $spacing-sm;
+  background-color: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  gap: $spacing-m;
+  position: fixed;
+  z-index: 999;
+  margin: $spacing-ml auto;
+  justify-content: center;
+  border-radius: $radius-m;
+}
 .App-logo {
-  width: 36px;
+  width: 24px;
 }
