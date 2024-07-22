@@ -6,6 +6,7 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
   font-size: 16px;
   line-height: 120%;
+  font-weight: 400;
   letter-spacing: 0%;
   color: #333;
   -webkit-font-smoothing: antialiased;
@@ -18,318 +19,145 @@ code {
 }
 
 .bold {
-  font-weight: 600;
+  font-weight: 700;
+}
+
+.black {
+  font-weight: 800;
+}
+
+.italic {
+  font-style: italic;
 }
 
 // styled typography
 .desktop-headings-display-1 {
-  font-family: Inter;
   font-size: 120px;
-  font-weight: 400;
 }
 
 .desktop-headings-display-2 {
-  font-family: Inter;
   font-size: 96px;
-  font-weight: 400;
 }
 
 .desktop-headings-display-3 {
-  font-family: Inter;
   font-size: 64px;
-  font-weight: 400;
 }
 
 .desktop-headings-heading-1 {
-  font-family: Inter;
   font-size: 56px;
-  font-weight: 700;
 }
 
 .desktop-headings-heading-2 {
-  font-family: Inter;
   font-size: 48px;
-  font-weight: 700;
 }
 
 .desktop-headings-heading-3 {
-  font-family: Inter;
   font-size: 40px;
-  font-weight: 700;
 }
 
 .desktop-headings-heading-4 {
-  font-family: Inter;
   font-size: 32px;
-  font-weight: 700;
 }
 
-.desktop-body-hero-bold {
-  font-family: Inter;
+.desktop-body-hero {
   font-size: 28px;
-  font-weight: 700;
 }
 
-.desktop-body-hero-accent {
-  font-family: Inter;
-  font-size: 28px;
-  font-weight: 400;
-}
-
-.desktop-body-hero-emphasis {
-  font-family: Inter;
-  font-size: 28px;
-  font-weight: 400;
-}
-
-.desktop-body-hero-standard {
-  font-family: Inter;
-  font-size: 28px;
-  font-weight: 400;
-}
-
-.desktop-body-feature-bold {
-  font-family: Inter;
+.desktop-body-feature {
   font-size: 24px;
-  font-weight: 700;
 }
 
-.desktop-body-feature-accent {
-  font-family: Inter;
-  font-size: 24px;
-  font-weight: 400;
-}
-
-.desktop-body-feature-emphasis {
-  font-family: Inter;
-  font-size: 24px;
-  font-weight: 400;
-}
-
-.desktop-body-feature-standard {
-  font-family: Inter;
-  font-size: 24px;
-  font-weight: 400;
-}
-
-.desktop-body-highlight-bold {
-  font-family: Inter;
+.desktop-body-highlight {
   font-size: 18px;
-  font-weight: 700;
 }
 
-.desktop-body-highlight-accent {
-  font-family: Inter;
-  font-size: 18px;
-  font-weight: 400;
-}
-
-.desktop-body-highlight-emphasis {
-  font-family: Inter;
-  font-size: 18px;
-  font-weight: 400;
-}
-
-.desktop-body-highlight-standard {
-  font-family: Inter;
-  font-size: 18px;
-  font-weight: 400;
-}
-
-.desktop-body-content-bold {
-  font-family: Inter;
+.desktop-body-content {
   font-size: 16px;
-  font-weight: 700;
 }
 
-.desktop-body-content-accent {
-  font-family: Inter;
-  font-size: 16px;
-  font-weight: 400;
-}
-
-.desktop-body-content-emphasis {
-  font-family: Inter;
-  font-size: 16px;
-  font-weight: 400;
-}
-
-.desktop-body-content-regular {
-  font-family: Inter;
-  font-size: 16px;
-  font-weight: 400;
-}
-
-.desktop-body-caption-bold {
-  font-family: Inter;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.desktop-body-caption-accent {
-  font-family: Inter;
-  font-size: 14px;
-  font-weight: 400;
-}
-
-.desktop-body-caption-emphasis {
-  font-family: Inter;
-  font-size: 14px;
-  font-weight: 400;
-}
-
-.desktop-body-caption-regular {
-  font-family: Inter;
-  font-size: 14px;
-  font-weight: 400;
+.desktop-body-caption {
+  font-size: 12px;
 }
 
 .mobile-headings-display-1 {
   font-family: Newsreader;
   font-size: 44px;
-  font-weight: 700;
 }
 
 .mobile-headings-display-2 {
   font-family: Newsreader;
   font-size: 40px;
-  font-weight: 700;
 }
 
 .mobile-headings-display-3 {
   font-family: Newsreader;
   font-size: 32px;
-  font-weight: 700;
 }
 
 .mobile-headings-heading-1 {
-  font-family: Inter;
   font-size: 28px;
-  font-weight: 700;
 }
 
 .mobile-headings-heading-2 {
-  font-family: Inter;
   font-size: 24px;
-  font-weight: 700;
 }
 
 .mobile-headings-heading-3 {
-  font-family: Inter;
   font-size: 20px;
-  font-weight: 700;
 }
 
 .mobile-headings-heading-4 {
-  font-family: Inter;
   font-size: 18px;
-  font-weight: 700;
 }
 
 .mobile-body-feature-bold {
-  font-family: Inter;
   font-size: 18px;
-  font-weight: 700;
 }
 
 .mobile-body-feature-accent {
-  font-family: Inter;
   font-size: 18px;
-  font-weight: 400;
-}
-
-.mobile-body-feature-emphasis {
-  font-family: Inter;
-  font-size: 18px;
-  font-weight: 400;
 }
 
 .mobile-body-feature-standard {
-  font-family: Inter;
   font-size: 18px;
-  font-weight: 400;
 }
 
 .mobile-body-highlight-bold {
-  font-family: Inter;
   font-size: 16px;
-  font-weight: 700;
 }
 
 .mobile-body-highlight-accent {
-  font-family: Inter;
   font-size: 16px;
-  font-weight: 400;
-}
-
-.mobile-body-highlight-emphasis {
-  font-family: Inter;
-  font-size: 16px;
-  font-weight: 400;
 }
 
 .mobile-body-highlight-standard {
-  font-family: Inter;
   font-size: 16px;
-  font-weight: 400;
 }
 
 .mobile-body-content-bold {
-  font-family: Inter;
   font-size: 14px;
-  font-weight: 700;
 }
 
 .mobile-body-content-accent {
-  font-family: Inter;
   font-size: 14px;
-  font-weight: 400;
-}
-
-.mobile-body-content-emphasis {
-  font-family: Inter;
-  font-size: 14px;
-  font-weight: 400;
 }
 
 .mobile-body-content-regular {
-  font-family: Inter;
   font-size: 14px;
-  font-weight: 400;
 }
 
 .mobile-body-caption-accent {
-  font-family: Inter;
   font-size: 12px;
-  font-weight: 400;
-}
-
-.mobile-body-caption-emphasis {
-  font-family: Inter;
-  font-size: 12px;
-  font-weight: 400;
 }
 
 .mobile-body-caption-regular {
-  font-family: Inter;
   font-size: 12px;
-  font-weight: 400;
 }
 
 .mobile-body-footnote-accent {
-  font-family: Inter;
   font-size: 10px;
-  font-weight: 400;
-}
-
-.mobile-body-footnote-emphasis {
-  font-family: Inter;
-  font-size: 10px;
-  font-weight: 400;
 }
 
 .mobile-body-footnote-regular {
-  font-family: Inter;
   font-size: 10px;
-  font-weight: 400;
 }

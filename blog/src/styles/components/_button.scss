@@ -1,15 +1,37 @@
 // _button.scss
 .button {
-  padding: $spacing-xs $spacing-sm;
+  padding: $spacing-xxs $spacing-sm;
   border: none;
   border-radius: $radius-s;
   cursor: pointer;
-  text-decoration: none;
-  font-size: 14px;
   font-family: Inter;
   line-height: 120%;
 }
 
+a.button {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+// size
+a.button.l{
+  height: 40px;
+  font-size: 22px;
+  padding: 0 $spacing-sm;
+}
+a.button.m{
+  height: 32px;
+  font-size: 14px;
+  padding: 0 $spacing-s;
+}
+a.button.s{
+  height: 20px;
+  font-size: 12px;
+  padding: 0 $spacing-xs;
+}
+
+// color
 .button.primary {
   background-color: $primary-normal;
   color: $white-darkest;

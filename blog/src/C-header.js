@@ -8,13 +8,13 @@ function Header() {
       <div className="header shadow-3">
         <img src={logo} className="App-logo" alt="logo" />
         <div className="tab-container">
-          <Link to="/" className="button tertiary bold">
+          <Link to="/" className="button m tertiary bold">
             Home
           </Link>
-          <Link to="/blog" className="button tertiary bold">
+          <Link to="/blog" className="button m tertiary bold">
             Blog
           </Link>
-          <Link to="/side-hustle" className="button tertiary bold">
+          <Link to="/side-hustle" className="button m tertiary bold">
             Side Hustle
           </Link>
         </div>
