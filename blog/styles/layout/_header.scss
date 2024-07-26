@@ -6,12 +6,12 @@
 }
 
 .header {
-  padding: $spacing-sm;
+  padding: $spacing-s $spacing-sm;
   background-color: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(20px);
   display: flex;
   align-items: center;
-  gap: $spacing-m;
+  gap: $spacing-sm;
   position: fixed;
   z-index: 999;
   margin: $spacing-ml auto;
@@ -20,4 +20,6 @@
 }
 .dwmm-logo {
   width: 24px;
+  margin: 0 4px;
+  border-radius: $radius-s;
 }
