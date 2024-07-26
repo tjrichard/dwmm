@@ -24,9 +24,9 @@
 .vscode
 .idea
 
-# Netlify specific
-# Ignore Netlify build output directory
-/.netlify
+# Next
+.next
+out
 
 # Logs
 *.log

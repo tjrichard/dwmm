@@ -1,8 +1,22 @@
-// src/P-Side-hustle.js
-import React, { useState, useEffect } from 'react';
-import Header from "./C-header.js";
-import Footer from "./C-footer.js";
-import { supabase } from './lib/supabase.js';
+// Side-hustle.js
+import React, { useState, useEffect } from "react";
+import Header from "../components/header.js";
+import Footer from "../components/footer.js";
+import { supabase } from "../lib/supabase.js";
+import Meta from "../components/meta";
+
+export async function getStaticProps() {
+  // 여기에 필요한 데이터를 서버에서 가져오거나 정의합니다.
+  const pageProps = {
+    title: "DWMM | Side-Hustle",
+    content: "Things I have been working on",
+  };
+
+  // 이 객체가 MyApp 컴포넌트로 전달됩니다.
+  return {
+    props: pageProps,
+  };
+}
 
 function FetchSupabase() {
   const [data, setData] = useState([]);
@@ -11,10 +25,7 @@ function FetchSupabase() {
 
   useEffect(() => {
     async function fetchData() {
-      let { data, error } = await supabase
-        .from('emojis')
-        .select('*')
-        .limit(10);
+      let { data, error } = await supabase.from("emojis").select("*").limit(10);
 
       if (error) {
         setError(error);
@@ -42,9 +53,10 @@ function FetchSupabase() {
   );
 }
 
-function SideHustle() {
+function SideHustle({ title, description }) {
   return (
     <div>
+      <Meta title={title} description={description} />
       <Header />
       <main>
         <section className="home">

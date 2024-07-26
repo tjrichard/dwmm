@@ -1,0 +1,12 @@
+.PostLists {
+    width:100svw;
+    display: inline-flex;
+    padding: 20px;
+    gap: 20px;
+}
+.PostListItem {
+    width: 50%;
+    & a {
+        width: 100%;
+    }
+}
