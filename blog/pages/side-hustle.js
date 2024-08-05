@@ -18,25 +18,32 @@ export async function getStaticProps() {
   };
 }
 
-function FetchSupabase() {
+function FetchSupabase({ input }) {
   const [data, setData] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchData() {
-      let { data, error } = await supabase.from("emojis").select("*").limit(10);
+  async function fetchData() {
+    let LikeInput = `%${input}%`;
+    let { data, error } = await supabase
+      .from("emojis")
+      .select("shortname")
+      .or("emoji.eq."+input+",name.eq.LikeInput,shortname.eq."+LikeInput)
+      .limit(10);
 
-      if (error) {
-        setError(error);
-      } else {
-        setData(data);
-      }
-      setLoading(false);
+    if (error) {
+      setError(error);
+    } else {
+      const extractedData = data.map(item => item.shortname.replace(/:/g, ''));
+      setData(extractedData);
+      console.log(extractedData);
     }
+    setLoading(false);
+  }
 
+  useEffect(() => {
     fetchData();
-  }, []);
+  }, [input]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -47,13 +54,22 @@ function FetchSupabase() {
   }
 
   return (
-    <div>
-      <pre>{JSON.stringify(data, null, 2)}</pre>
+    <div className="resultConatiner">
+      {data.map((item, index) => (
+        <div key={index} className="result">{item}</div>
+      ))}
     </div>
   );
 }
 
 function SideHustle({ title, description }) {
+  const [input, setInput] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+
+  const handleSearch = () => {
+    setSearchInput(input);
+  };
+
   return (
     <div>
       <Meta title={title} description={description} />
@@ -62,7 +78,26 @@ function SideHustle({ title, description }) {
         <section className="home">
           <h2>안녕하세요 장승환입니다.</h2>
           <p>이곳은 사이드 허슬 페이지입니다.</p>
-          <FetchSupabase />
+          <div id="container">
+            <span id="title">Emoji Translator</span>
+            <input
+              type="text"
+              id="submittedEmoji"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+            />
+            <button
+              type="button"
+              id="submit"
+              onClick={handleSearch}
+              className="button m primary"
+            >
+              Get short name
+            </button>
+            <div id="apiResponse">
+              {searchInput && <FetchSupabase input={searchInput} />}
+            </div>
+          </div>
         </section>
       </main>
       <Footer />
