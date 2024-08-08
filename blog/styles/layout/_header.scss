@@ -11,12 +11,12 @@
   backdrop-filter: blur(20px);
   display: flex;
   align-items: center;
-  gap: $spacing-sm;
+  gap: $spacing-m;
   position: fixed;
   z-index: 999;
   margin: $spacing-ml auto;
   justify-content: center;
-  border-radius: $radius-m;
+  border-radius: $radius-sm;
 }
 .dwmm-logo {
   width: 24px;
