@@ -14,8 +14,8 @@ function Header() {
           <Link href="/blog" className="button m tertiary bold">
             Blog
           </Link>
-          <Link href="/side-hustle" className="button m tertiary bold">
-            Side Hustle
+          <Link href="/bookmarks" className="button m tertiary bold">
+            Bookmarks
           </Link>
         </div>
       </div>
