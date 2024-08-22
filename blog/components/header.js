@@ -1,5 +1,4 @@
 import React from "react";
-import logo from "../public/logo.svg";
 import Link from "next/link";
 
 function Header() {
