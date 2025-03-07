@@ -8,7 +8,7 @@
 .header {
   padding: $spacing-s $spacing-sm;
   background-color: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   gap: $spacing-m;

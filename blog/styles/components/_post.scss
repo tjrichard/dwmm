@@ -1,8 +1,9 @@
 .PostLists {
     width:100svw;
     display: inline-flex;
+    flex-wrap: wrap;
     padding: 20px;
-    // gap: 20px;
+    gap: 20px;
 }
 .PostListItem {
     width: 50%;
@@ -16,6 +17,7 @@
         gap: $spacing-sm;
         margin-bottom:0;
         text-decoration: none;
+        color: $black-darkest;
     }
     & img {
         width: 100%;

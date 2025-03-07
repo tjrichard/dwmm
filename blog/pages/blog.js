@@ -1,8 +1,11 @@
 // Blog.js
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../components/header.js";
 import Footer from "../components/footer.js";
 import Meta from "../components/meta";
+import { supabase } from "../lib/supabase.js";
+import Link from 'next/link';
+import SkeletonLoader from '../components/skeletonLoader.js';
 
 export async function getStaticProps() {
   // 여기에 필요한 데이터를 서버에서 가져오거나 정의합니다.
@@ -17,34 +20,76 @@ export async function getStaticProps() {
   };
 }
 
-function PostList({ title, url, thumbnail }) {
+// Supabase로 부터 PostList를 받아오는 컴포넌트
+function stripHtml(html) {
+  let doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent || "";
+}
+
+function FetchPostLists() {
+  const [data, setData] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [imageLoading, setImageLoading] = useState(true);
+
+  async function fetchData() {
+    // Simulate a longer loading time
+    await new Promise(resolve => setTimeout(resolve, 1000)); // 1 seconds delay
+
+    let { data, error } = await supabase
+      .from("posts")
+      .select("*")
+      .eq("public", true)
+      .order("id", { ascending: false })
+      .limit(10);
+
+    if (error) {
+      setError(error);
+    } else {
+      setData(data);
+      console.log(data);
+    }
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="PostLists">
+        {[...Array(10)].map((_, index) => (
+          <SkeletonLoader key={index} />
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
   return (
-    <div className="PostListItem">
-      <a href={url}>
-        <img src={thumbnail} alt={title} />
-        <h2>{title}</h2>
-      </a>
+    <div className="PostLists">
+      {data.map((item, index) => (
+        <div key={index} className="PostListItem animate-fade-in">
+          <Link href={`/blog/${item.slug}`}>
+            {imageLoading && <div className="skeleton-loader skeleton-thumbnail"></div>}
+            <img
+              src={item.thumbnail}
+              alt={item.title}
+              onLoad={() => setImageLoading(false)}
+              style={{ display: imageLoading ? 'none' : 'block', width: '100%', height: 'auto' }}
+            />
+            <h2 className="desktop-headings-heading-3 bold">{item.title}</h2>
+            <p>{stripHtml(item.content).substring(0, 100)}...</p>
+          </Link>
+        </div>
+      ))}
     </div>
   );
 }
-
-const blogPosts = [
-  {
-    index: 1,
-    title: "B2B 프로덕트 디자이너가 신경써야 할 8가지 #1 - B2B 프로덕트의 특징",
-    url: "https://dwmm.site/blog/8-things-keep-in-mind-as-b2b-product-designer/",
-    thumbnail:
-      "https://dwmm.site/blog/8-things-keep-in-mind-as-b2b-product-designer/img/header_img.png",
-  },
-  {
-    index: 2,
-    title:
-      "B2B 프로덕트 디자이너가 신경써야 할 8가지 #2 - 디자이너가 고려해야 하는 점",
-    url: "https://dwmm.site/blog/8-things-keep-in-mind-as-b2b-product-designer_2/",
-    thumbnail:
-      "https://dwmm.site/blog/8-things-keep-in-mind-as-b2b-product-designer_2/img/header_img.png",
-  },
-];
 
 function Blog({ title, description }) {
   return (
@@ -52,19 +97,12 @@ function Blog({ title, description }) {
       <Meta title={title} description={description} />
       <Header />
       <main>
-        <section className="home">
+        {/* <section className="home">
           <h2>안녕하세요 장승환입니다.</h2>
           <p>이곳은 블로그 페이지입니다.</p>
-        </section>
-        <section className="PostLists">
-          {blogPosts.map((posts, index) => (
-            <PostList
-              key={index}
-              title={posts.title}
-              url={posts.url}
-              thumbnail={posts.thumbnail}
-            />
-          ))}
+        </section> */}
+        <section>
+          <FetchPostLists />
         </section>
       </main>
       <Footer />
