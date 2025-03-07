@@ -13,6 +13,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
@@ -40,132 +46,132 @@ p {
 
 // styled typography
 .desktop-headings-display-1 {
-  font-size: 120px;
+  font-size: 7.5rem;
 }
 
 .desktop-headings-display-2 {
-  font-size: 96px;
+  font-size: 6rem;
 }
 
 .desktop-headings-display-3 {
-  font-size: 64px;
+  font-size: 4rem;
 }
 
 .desktop-headings-heading-1 {
-  font-size: 56px;
+  font-size: 3.5rem;
 }
 
 .desktop-headings-heading-2 {
-  font-size: 48px;
+  font-size: 3rem;
 }
 
 .desktop-headings-heading-3 {
-  font-size: 40px;
+  font-size: 2.5rem;
 }
 
 .desktop-headings-heading-4 {
-  font-size: 32px;
+  font-size: 2rem;
 }
 
 .desktop-body-hero {
-  font-size: 28px;
+  font-size: 1.75rem;
 }
 
 .desktop-body-feature {
-  font-size: 24px;
+  font-size: 1.5rem;
 }
 
 .desktop-body-highlight {
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 
 .desktop-body-content {
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .desktop-body-caption {
-  font-size: 12px;
+  font-size: 1rem;
 }
 
 .mobile-headings-display-1 {
   font-family: Newsreader;
-  font-size: 44px;
+  font-size: 2.75rem;
 }
 
 .mobile-headings-display-2 {
   font-family: Newsreader;
-  font-size: 40px;
+  font-size: 2.5rem;
 }
 
 .mobile-headings-display-3 {
   font-family: Newsreader;
-  font-size: 32px;
+  font-size: 2rem;
 }
 
 .mobile-headings-heading-1 {
-  font-size: 28px;
+  font-size: 1.75rem;
 }
 
 .mobile-headings-heading-2 {
-  font-size: 24px;
+  font-size: 1.5rem;
 }
 
 .mobile-headings-heading-3 {
-  font-size: 20px;
+  font-size: 1.25rem;
 }
 
 .mobile-headings-heading-4 {
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 
 .mobile-body-feature-bold {
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 
 .mobile-body-feature-accent {
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 
 .mobile-body-feature-standard {
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 
 .mobile-body-highlight-bold {
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .mobile-body-highlight-accent {
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .mobile-body-highlight-standard {
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .mobile-body-content-bold {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .mobile-body-content-accent {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .mobile-body-content-regular {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .mobile-body-caption-accent {
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .mobile-body-caption-regular {
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .mobile-body-footnote-accent {
-  font-size: 10px;
+  font-size: 0.625rem;
 }
 
 .mobile-body-footnote-regular {
-  font-size: 10px;
+  font-size: 0.625rem;
 }

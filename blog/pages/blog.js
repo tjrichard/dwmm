@@ -5,7 +5,7 @@ import Footer from "../components/footer.js";
 import Meta from "../components/meta";
 import { supabase } from "../lib/supabase.js";
 import Link from 'next/link';
-import SkeletonLoader from '../components/skeletonLoader.js';
+import SkeletonLoader from '../components/skeleton-loader.js';
 
 export async function getStaticProps() {
   // 여기에 필요한 데이터를 서버에서 가져오거나 정의합니다.
@@ -34,7 +34,7 @@ function FetchPostLists() {
 
   async function fetchData() {
     // Simulate a longer loading time
-    await new Promise(resolve => setTimeout(resolve, 1000)); // 1 seconds delay
+    // await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
 
     let { data, error } = await supabase
       .from("posts")
@@ -82,8 +82,8 @@ function FetchPostLists() {
               onLoad={() => setImageLoading(false)}
               style={{ display: imageLoading ? 'none' : 'block', width: '100%', height: 'auto' }}
             />
-            <h2 className="desktop-headings-heading-3 bold">{item.title}</h2>
-            <p>{stripHtml(item.content).substring(0, 100)}...</p>
+            <h2 className="postTitle desktop-headings-heading-4 bold">{item.title}</h2>
+            <p className="postContent">{stripHtml(item.content).substring(0, 400)}...</p>
           </Link>
         </div>
       ))}
