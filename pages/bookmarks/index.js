@@ -26,6 +26,7 @@ const Bookmarks = ({ title, description }) => {
       const { data, error } = await supabase
         .from('bookmarks')
         .select('*')
+        .eq("public", true)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -43,9 +44,9 @@ const Bookmarks = ({ title, description }) => {
       <Meta title={title} description={description} />
       <Header />
       <h1>Bookmarks</h1>
-      <ul>
+      <div className="bookmarkLists">
         {bookmarks.map((bookmark) => (
-          <li key={bookmark.id}>
+          <div key={bookmark.id} className="bookmarkListItem card">
             <a
               href={`${bookmark.original_link}?utm_source=dwmm&utm_medium=link-share&utm_content=b2b-designers`}
               target="_blank"
@@ -53,11 +54,11 @@ const Bookmarks = ({ title, description }) => {
             >
               {bookmark.title}
             </a>
-            <p>{bookmark.description}</p>
+            <p className="desktop-body-content">{bookmark.description}</p>
             <p>Tags: {bookmark.tags.join(', ')}</p>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
       <Footer />
     </div>
   );
