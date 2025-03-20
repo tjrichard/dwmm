@@ -1,9 +1,9 @@
 // Side-hustle.js
 import React, { useState, useEffect } from "react";
-import Header from "../components/header.js";
-import Footer from "../components/footer.js";
+import Header from "../components/Header.js";
+import Footer from "../components/Footer.js";
 import { supabase } from "../lib/supabase.js";
-import Meta from "../components/meta";
+import Meta from "../components/Meta";
 
 export async function getStaticProps() {
   // 여기에 필요한 데이터를 서버에서 가져오거나 정의합니다.

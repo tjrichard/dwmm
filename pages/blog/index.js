@@ -1,11 +1,11 @@
 // pages/blog/index.js
 import React, { useEffect, useState } from "react";
-import Header from "../../components/header";
-import Footer from "../../components/footer";
-import Meta from "../../components/meta";
+import Header from "../../components/Header.js";
+import Footer from "../../components/Footer.js";
+import Meta from "../../components/Meta.js";
 import { supabase } from "../../lib/supabase";
 import Link from 'next/link';
-import SkeletonLoader from '../../components/skeleton-loader';
+import SkeletonLoader from '../../components/SkeletonLoader.js';
 
 export async function getStaticProps() {
   // 여기에 필요한 데이터를 서버에서 가져오거나 정의합니다.

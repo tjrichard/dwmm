@@ -1,0 +1,248 @@
+.website-request-form {
+  background-color: $white-a-pure;
+  padding: $spacing-m;
+  border-radius: $radius-m;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: 0 auto;
+
+  h3 {
+    margin-bottom: $spacing-m;
+    font-weight: 600;
+    color: $black-a-darkest;
+    text-align: left;
+  }
+
+  .message {
+    padding: $spacing-xs $spacing-sm;
+    margin-bottom: $spacing-m;
+    border-radius: $radius-s;
+    background-color: $error-lightest;
+    color: $error-dark;
+
+    &.success {
+      background-color: $success-lightest;
+      color: $success-dark;
+    }
+  }
+
+  .form-group {
+    margin-bottom: $spacing-m;
+
+    label {
+      display: block;
+      margin-bottom: $spacing-xs;
+      font-weight: 500;
+      color: $black-a-darkest;
+      text-align: left;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: $spacing-xs $spacing-sm;
+      border: 1px solid $black-a-light;
+      border-radius: $radius-s;
+      font-size: 1rem;
+      height: 36px;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-normal;
+      }
+    }
+  }
+
+  .checkbox-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-m;
+
+    input[type="checkbox"] {
+      width: auto;
+      height: auto;
+      margin: 0;
+    }
+
+    label {
+      margin-bottom: 0;
+      display: inline;
+    }
+  }
+
+  .tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-sm;
+
+    .tag-button {
+      padding: $spacing-xxs $spacing-xs;
+      background-color: $white-a-pure;
+      border: 1px solid $black-a-light;
+      border-radius: $radius-round;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      height: 36px;
+
+      &:hover {
+        background-color: $black-a-lightest;
+      }
+
+      &.active {
+        background-color: $primary-normal;
+        color: $white-a-pure;
+        border-color: $primary-normal;
+      }
+    }
+  }
+
+  .custom-tag-input {
+    display: flex;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-sm;
+
+    input {
+      flex: 1;
+    }
+
+    button {
+      white-space: nowrap;
+      height: 36px;
+    }
+  }
+
+  button[type="submit"] {
+    width: 100%;
+    height: 36px;
+    max-width: 100%;
+    overflow: hidden;
+  }
+}
+
+.thank-you-container {
+  background-color: $white-a-pure;
+  padding: $spacing-m;
+  border-radius: $radius-m;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-m;
+
+  .thank-you-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: $success-normal;
+    color: $white-a-pure;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: $spacing-xs;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: $black-a-darkest;
+    margin-bottom: $spacing-xs;
+  }
+
+  p {
+    color: $black-a-darker;
+    margin-bottom: $spacing-xs;
+    line-height: 1.5;
+  }
+
+  button {
+    margin-top: $spacing-sm;
+  }
+}
+
+.subscribe-form-container {
+  background-color: $blue-03;
+  padding: $spacing-l;
+  border-radius: $radius-m;
+  text-align: center;
+  margin: $spacing-xl 0;
+
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: $spacing-xs;
+    color: $black-a-darkest;
+  }
+
+  p {
+    color: $black-a-darker;
+    margin-bottom: $spacing-m;
+  }
+
+  .subscribe-form {
+    max-width: 500px;
+    margin: 0 auto;
+
+    .form-input-group {
+      display: flex;
+
+      input {
+        flex: 1;
+        padding: $spacing-sm;
+        border: 1px solid $black-a-light;
+        border-radius: $radius-s 0 0 $radius-s;
+        font-size: 1rem;
+
+        &:focus {
+          outline: none;
+          border-color: $primary-normal;
+        }
+      }
+
+      button {
+        border-radius: 0 $radius-s $radius-s 0;
+      }
+    }
+
+    .message {
+      margin-top: $spacing-sm;
+      padding: $spacing-xs;
+      border-radius: $radius-s;
+
+      &.success {
+        background-color: $success-lightest;
+        color: $success-dark;
+      }
+
+      &.error {
+        background-color: $error-lightest;
+        color: $error-dark;
+      }
+    }
+  }
+}
+
+.empty-results {
+  text-align: center;
+  padding: $spacing-xl 0;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: $spacing-sm;
+    color: $black-a-darkest;
+  }
+
+  p {
+    color: $black-a-darker;
+    margin-bottom: $spacing-sm;
+
+    &:last-of-type {
+      margin-bottom: $spacing-m;
+    }
+  }
+}

@@ -20,7 +20,7 @@
 .env.test.local
 .env.production.local
 
-# IDE files (if using specific IDEs)
+# IDE files (if using specific IDEs)a
 .vscode
 .idea
 
