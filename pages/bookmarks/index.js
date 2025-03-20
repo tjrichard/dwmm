@@ -1,72 +1,4 @@
-// // Blog.js
-// import React, { useState, useEffect } from "react";
-// import Header from "../../components/Header.js";
-// import Footer from "../../components/Footer.js";
-// import Meta from "../../components/Meta.js";
-// import { supabase } from "../../lib/supabase.js";
-
-// export async function getStaticProps() {
-//   // 여기에 필요한 데이터를 서버에서 가져오거나 정의합니다.
-//   const pageProps = {
-//     title: "DWMM | Bookmarks",
-//     content: "Bookmarks for Designers",
-//   };
-
-//   // 이 객체가 MyApp 컴포넌트로 전달됩니다.
-//   return {
-//     props: pageProps,
-//   };
-// }
-
-// const Bookmarks = ({ title, description }) => {
-//   const [bookmarks, setBookmarks] = useState([]);
-
-//   useEffect(() => {
-//     const fetchBookmarks = async () => {
-//       const { data, error } = await supabase
-//         .from('bookmarks')
-//         .select('*')
-//         .eq("public", true)
-//         .order('created_at', { ascending: false });
-
-//       if (error) {
-//         console.error('Error fetching bookmarks:', error);
-//       } else {
-//         setBookmarks(data);
-//       }
-//     };
-
-//     fetchBookmarks();
-//   }, []);
-
-//   return (
-//     <div>
-//       <Meta title={title} description={description} />
-//       <Header />
-//       <h1>Bookmarks</h1>
-//       <div className="bookmarkLists">
-//         {bookmarks.map((bookmark) => (
-//           <div key={bookmark.id} className="bookmarkListItem card">
-//             <a
-//               href={`${bookmark.original_link}?utm_source=dwmm&utm_medium=link-share&utm_content=b2b-designers`}
-//               target="_blank"
-//               rel="noopener noreferrer"
-//             >
-//               {bookmark.title}
-//             </a>
-//             <p className="desktop-body-content">{bookmark.description}</p>
-//             <p>Tags: {bookmark.tags.join(', ')}</p>
-//           </div>
-//         ))}
-//       </div>
-//       <Footer />
-//     </div>
-//   );
-// };
-
-// export default Bookmarks;
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Meta from "../../components/Meta.js";
 import Hero from "../../components/Hero";
 import ContentGrid from "../../components/ContentGrid";
@@ -77,224 +9,142 @@ import { supabase } from "../../lib/supabase";
 import Header from "../../components/Header.js";
 import Footer from "../../components/Footer.js";
 import { getUserVotedWebsites } from "../../lib/voteUtils";
+import SubscribeForm from "../../components/SubscribeForm.js";
 
 // Number of items per page
 const ITEMS_PER_PAGE = 9;
 
 export async function getStaticProps() {
-  // Fetch initial data for static generation
-  let bookmarks = [];
-  let allTags = [];
-  let totalCount = 0;
-
   try {
-    // Get total count for pagination
-    const { count, error: countError } = await supabase
+    // 초기 데이터 한 번에 가져오기
+    const { data: bookmarks, error: bookmarksError } = await supabase
       .from("bookmarks")
-      .select("id", { count: "exact" })
-      .eq("public", true);
-
-    if (!countError) {
-      totalCount = count;
-    }
-
-    // Fetch first page of bookmarks with vote counts
-    const { data, error } = await supabase
-      .from("bookmarks")
-      .select(
-        `
+      .select(`
         *,
         vote:vote(count)
-      `,
-      )
+      `)
       .eq("public", true)
       .order("created_at", { ascending: false })
-      .limit(ITEMS_PER_PAGE);
 
-    if (!error) {
-      // Process the data to format vote_count
-      bookmarks = data.map((item) => ({
-        ...item,
-        vote_count: item.vote && item.vote.length ? item.vote.length : 0,
-      }));
+    if (bookmarksError) throw bookmarksError
 
-      // Extract all tags and remove duplicates
-      const tags = data.flatMap((item) => item.tags);
-      allTags = [...new Set(tags)];
+    // 태그와 카테고리 추출
+    const allTags = [...new Set(bookmarks.flatMap(item => item.tags))]
+    const allCategories = [...new Set(bookmarks.map(item => item.category))]
+
+    const processedBookmarks = bookmarks.map(item => ({
+      ...item,
+      vote_count: item.vote?.length || 0
+    }))
+
+    return {
+      props: {
+        title: "DWMM | Bookmarks",
+        description: "Curated design resources for B2B SaaS product designers",
+        initialBookmarks: processedBookmarks,
+        initialTags: allTags,
+        initialCategories: allCategories,
+      },
+      revalidate: 3600
     }
   } catch (error) {
-    console.error("Error fetching initial data:", error);
+    console.error("Error in getStaticProps:", error)
+    return { props: { error: "Failed to load initial data" } }
   }
-
-  const pageProps = {
-    title: "DWMM | Bookmarks",
-    description: "Curated design resources for B2B SaaS product designers",
-  };
-
-  return {
-    props: {
-      ...pageProps,
-      initialBookmarks: bookmarks,
-      initialTags: allTags,
-      totalCount,
-    },
-    revalidate: 3600, // Revalidate every hour
-  };
 }
 
-function Bookmarks({
-  title,
-  description,
-  initialBookmarks,
-  initialTags,
-  totalCount: initialTotalCount,
+function Bookmarks({ 
+  title, 
+  description, 
+  initialBookmarks, 
+  initialTags, 
+  initialCategories,
+  error 
 }) {
-  const [bookmarks, setBookmarks] = useState(initialBookmarks || []);
-  const [filteredBookmarks, setFilteredBookmarks] = useState(
-    initialBookmarks || [],
-  );
-  const [tags, setTags] = useState(initialTags || []);
-  const [categories, setCategories] = useState([
-    "AI",
-    "Tool",
-    "Website",
-    "Article",
-    "Collection",
-    "Book",
-  ]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(
-    Math.ceil((initialTotalCount || 0) / ITEMS_PER_PAGE),
-  );
-  const [totalCount, setTotalCount] = useState(initialTotalCount || 0);
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchParams, setSearchParams] = useState(null);
-  const [userVotedWebsites, setUserVotedWebsites] = useState([]);
+  const [displayedBookmarks, setDisplayedBookmarks] = useState(initialBookmarks)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [searchParams, setSearchParams] = useState({
+    query: '',
+    category: '',
+    tags: []
+  })
+  const [userVotedWebsites, setUserVotedWebsites] = useState([])
 
+  const handleSearch = useCallback((searchParams) => {
+    setSearchParams(searchParams)
+  }, [])
+
+  // Update the search filtering effect
   useEffect(() => {
-    // If we didn't get initial data or want to refresh, fetch it client-side
-    if (!initialBookmarks || initialBookmarks.length === 0) {
-      fetchBookmarks(1);
+    let filtered = [...initialBookmarks]
+    const { query, category, tags } = searchParams
+
+    if (query) {
+      const searchLower = query.toLowerCase()
+      filtered = filtered.filter(item => 
+        (item.title?.toLowerCase()?.includes(searchLower) || false) ||
+        (item.description?.toLowerCase()?.includes(searchLower) || false)
+      )
     }
 
-    // Fetch user's voted websites once on component mount
+    if (category) {
+      filtered = filtered.filter(item => item.category === category)
+    }
+
+    if (tags?.length > 0) {
+      filtered = filtered.filter(item => 
+        item.tags?.some(tag => tags.includes(tag))
+      )
+    }
+
+    setDisplayedBookmarks(filtered)
+    setCurrentPage(1)
+  }, [searchParams, initialBookmarks])
+
+  // 컴포넌트 마운트 시 사용자 투표 정보만 가져오기
+  useEffect(() => {
     const fetchUserVotes = async () => {
-      const votedWebsites = await getUserVotedWebsites();
-      setUserVotedWebsites(votedWebsites);
-    };
-
-    fetchUserVotes();
-  }, [initialBookmarks]);
-
-  const fetchBookmarks = async (page = 1, params = null) => {
-    setIsLoading(true);
-    const offset = (page - 1) * ITEMS_PER_PAGE;
-
-    try {
-      let query = supabase
-        .from("bookmarks")
-        .select(
-          `
-          *,
-          vote:vote(count)
-        `,
-          { count: "exact" },
-        )
-        .eq("public", true);
-
-      // Apply search filters if provided
-      if (params) {
-        const { query: searchQuery, category, tags } = params;
-
-        if (searchQuery) {
-          const lowercaseQuery = searchQuery.toLowerCase();
-          query = query.or(
-            `title.ilike.%${lowercaseQuery}%,description.ilike.%${lowercaseQuery}%`,
-          );
-        }
-
-        if (category) {
-          query = query.eq("category", category);
-        }
-
-        if (tags && tags.length > 0) {
-          // This is a simplification - in a real app you'd need a more sophisticated approach
-          // for filtering by multiple tags in an array field
-          query = query.contains("tags", tags);
-        }
-      }
-
-      // Apply pagination and ordering
-      const { data, count, error } = await query
-        .order("created_at", { ascending: false })
-        .range(offset, offset + ITEMS_PER_PAGE - 1);
-
-      if (error) throw error;
-
-      // Process the data to format vote_count and add user's vote status
-      const processedData = data.map((item) => ({
-        ...item,
-        vote_count: item.vote && item.vote.length ? item.vote.length : 0,
-        user_has_voted: userVotedWebsites.includes(item.id),
-      }));
-
-      setBookmarks(processedData);
-      setFilteredBookmarks(processedData);
-      setTotalCount(count || 0);
-      setTotalPages(Math.ceil((count || 0) / ITEMS_PER_PAGE));
-
-      // Extract all tags and remove duplicates if this is the first page
-      if (page === 1 && !params) {
-        const allTags = data.flatMap((item) => item.tags);
-        setTags([...new Set(allTags)]);
-      }
-    } catch (error) {
-      console.error("Error fetching bookmarks:", error);
-    } finally {
-      setIsLoading(false);
+      const votedWebsites = await getUserVotedWebsites()
+      setUserVotedWebsites(votedWebsites)
     }
-  };
-
-  const handleSearch = (params) => {
-    setIsSearching(true);
-    setSearchParams(params);
-    setCurrentPage(1); // Reset to first page on new search
-    fetchBookmarks(1, params);
-  };
+    fetchUserVotes()
+  }, [])
 
   const handlePageChange = (page) => {
-    setCurrentPage(page);
-    fetchBookmarks(page, searchParams);
-    // Scroll to top of content grid
+    setCurrentPage(page)
     window.scrollTo({
-      top: document.querySelector(".main-content").offsetTop - 100,
-      behavior: "smooth",
-    });
-  };
+      top: document.querySelector(".main-content")?.offsetTop - 100,
+      behavior: "smooth"
+    })
+  }
 
-  const handleRequestSubmit = (newRequest) => {
-    // Just acknowledge the submission, no need to add to the list
-    // as it starts as non-public
-    console.log("New resource request submitted:", newRequest);
-  };
+  if (error) return <div>Failed to load bookmarks</div>
+
+  const paginatedBookmarks = displayedBookmarks.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  )
+
+  const totalPages = Math.ceil(displayedBookmarks.length / ITEMS_PER_PAGE)
+  const isSearchActive = Boolean(searchParams.query || searchParams.category || searchParams.tags.length)
 
   return (
     <div>
       <Meta title={title} description={description} />
       <Header />
-
-      <Hero onSearch={handleSearch} categories={categories} tags={tags} />
+      <Hero 
+        onSearch={handleSearch} 
+        categories={initialCategories} 
+        tags={initialTags}
+      />
 
       <main className="main-content">
-        {isLoading && (
-          <div className="loading-indicator">Loading resources...</div>
-        )}
-
         <ContentGrid
-          contents={filteredBookmarks}
-          isSearching={isSearching}
-          onRequestSubmit={handleRequestSubmit}
+          contents={paginatedBookmarks.map(bookmark => ({
+            ...bookmark,
+            user_has_voted: userVotedWebsites.includes(bookmark.id)
+          }))}
+          isSearching={isSearchActive}
         />
 
         <Pagination
@@ -302,14 +152,13 @@ function Bookmarks({
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
-
-        {/* <SubscribeForm /> */}
       </main>
 
       <FloatingCTA />
+      <SubscribeForm />
       <Footer />
     </div>
-  );
+  )
 }
 
-export default Bookmarks;
+export default Bookmarks

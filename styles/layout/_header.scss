@@ -3,21 +3,32 @@
   width: 100%;
   display: flex;
   justify-content: center;
+  position: fixed;
+  z-index: 999;
+  padding: $spacing-ml 0;
 }
 
 .header {
   padding: $spacing-sm $spacing-m;
-  background-color: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   gap: $spacing-m;
-  position: fixed;
-  z-index: 999;
-  margin: $spacing-ml auto;
   justify-content: center;
+  position: relative;
   border-radius: $radius-m;
+  border: $black-a-lightest 1px solid;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(8px);
+    border-radius: $radius-m;
+    z-index: -1;
+  }
 }
+
 .dwmm-logo {
   width: 24px;
   border-radius: $radius-xxs;

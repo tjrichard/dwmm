@@ -34,6 +34,11 @@ const ContentCard = ({ content }) => {
     }
   };
 
+  const handleVoteClick = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
   return (
     <a
       href={getUtmLink()}
@@ -66,11 +71,13 @@ const ContentCard = ({ content }) => {
       <div className="card__content">
         <div className="card__title-row">
           <h3 className="card__title">{title}</h3>
-          <VoteButton
-            contentId={id}
-            initialVoteCount={vote_count}
-            userHasVoted={user_has_voted}
-          />
+          <div onClick={handleVoteClick}>
+            <VoteButton
+              contentId={id}
+              initialVoteCount={vote_count}
+              userHasVoted={user_has_voted}
+            />
+          </div>
         </div>
         <div className="card__meta">
           <div className="card__category">{category}</div>

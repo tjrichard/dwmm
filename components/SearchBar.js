@@ -1,58 +1,56 @@
-import React, { useState, useEffect, useCallback } from "react";
+'use client'
 
-const SearchBar = ({ onSearch, categories, tags }) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedTags, setSelectedTags] = useState([]);
+import React, { useState, useEffect, useCallback } from "react"
 
-  // Debounce function
+function SearchBar({ onSearch, categories, tags }) {
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("")
+  const [selectedTags, setSelectedTags] = useState([])
+
+  // Debounce helper
   const debounce = (func, delay) => {
-    let timeoutId;
+    let timeoutId
     return (...args) => {
-      if (timeoutId) clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        func(...args);
-      }, delay);
-    };
-  };
-
-  // Create a debounced search function
-  const debouncedSearch = useCallback(
-    debounce(() => {
-      onSearch({
-        query: searchQuery,
-        category: selectedCategory,
-        tags: selectedTags,
-      });
-    }, 500),
-    [searchQuery, selectedCategory, selectedTags, onSearch],
-  );
-
-  // Trigger search on input change with debounce, but only if there's a query, category, or tags
-  useEffect(() => {
-    // Only search if there's actual search criteria
-    if (searchQuery.trim() || selectedCategory || selectedTags.length > 0) {
-      debouncedSearch();
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => func(...args), delay)
     }
-  }, [searchQuery, selectedCategory, selectedTags, debouncedSearch]);
+  }
+
+  // Create debounced search callback
+  const debouncedSearch = useCallback(
+    debounce((params) => {
+      onSearch(params)
+    }, 500),
+    [onSearch]
+  )
+
+  // Trigger search on any filter change
+  useEffect(() => {
+    const searchParams = {
+      query: searchQuery.trim(),
+      category: selectedCategory,
+      tags: selectedTags
+    }
+    debouncedSearch(searchParams)
+  }, [searchQuery, selectedCategory, selectedTags, debouncedSearch])
 
   const handleSearch = (e) => {
-    if (e) e.preventDefault();
+    if (e) e.preventDefault()
     // Immediate search on form submit
     onSearch({
       query: searchQuery,
       category: selectedCategory,
       tags: selectedTags,
-    });
-  };
+    })
+  }
 
   const handleTagToggle = (tag) => {
     if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter((t) => t !== tag));
+      setSelectedTags(selectedTags.filter((t) => t !== tag))
     } else {
-      setSelectedTags([...selectedTags, tag]);
+      setSelectedTags([...selectedTags, tag])
     }
-  };
+  }
 
   return (
     <div className="search-container">
@@ -112,7 +110,7 @@ const SearchBar = ({ onSearch, categories, tags }) => {
         </div>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default SearchBar;
+export default SearchBar
