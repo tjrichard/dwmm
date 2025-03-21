@@ -1,6 +1,4 @@
 // pages/index.js
-import Header from "../components/Header";
-import Footer from "../components/Footer.js";
 import Meta from "../components/Meta";
 
 export async function getStaticProps() {
@@ -20,14 +18,12 @@ function Home({ title, description }) {
   return (
     <div>
       <Meta title={title} description={description} />
-      <Header />
       <main>
         <section className="home">
           <h2>안녕하세요 장승환입니다.</h2>
           <p>이곳은 홈 페이지입니다.</p>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

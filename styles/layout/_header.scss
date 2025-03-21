@@ -9,21 +9,22 @@
 }
 
 .header {
-  padding: $spacing-sm $spacing-m;
+  padding: $spacing-xxs $spacing-sm;
   display: flex;
   align-items: center;
   gap: $spacing-m;
   justify-content: center;
   position: relative;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.78) 0%, rgba(245, 245, 245, 0.86) 100%);
   border-radius: $radius-m;
-  border: $black-a-lightest 1px solid;
+  border: $black-a-lighter 1px solid;
   
   &::before {
     content: '';
     position: absolute;
     inset: 0;
-    background-color: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(8px);
+    box-shadow: 0px 0px 0px 0px $white-a-pure;
+    backdrop-filter: blur(2px);
     border-radius: $radius-m;
     z-index: -1;
   }
@@ -31,5 +32,5 @@
 
 .dwmm-logo {
   width: 24px;
-  border-radius: $radius-xxs;
+  border-radius: $radius-s;
 }

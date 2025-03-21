@@ -25,7 +25,6 @@
 
     .card__arrow {
       opacity: 1;
-      transform: translate(-50%, -50%);
     }
   }
 
@@ -33,7 +32,6 @@
     position: relative;
     height: 80%;
     overflow: hidden;
-    background-color: $blue-03;
   }
 
   .card__image {
@@ -45,9 +43,8 @@
 
   .card__arrow {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -30%);
+    top: $spacing-sm;
+    right: $spacing-sm;
     background-color: $primary-normal;
     color: white;
     width: 48px;

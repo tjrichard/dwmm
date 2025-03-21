@@ -6,8 +6,6 @@ import FloatingCTA from "../../components/FloatingCTA";
 // import SubscribeForm from "../../components/SubscribeForm";
 import Pagination from "../../components/Pagination";
 import { supabase } from "../../lib/supabase";
-import Header from "../../components/Header.js";
-import Footer from "../../components/Footer.js";
 import { getUserVotedWebsites } from "../../lib/voteUtils";
 import SubscribeForm from "../../components/SubscribeForm.js";
 
@@ -131,7 +129,6 @@ function Bookmarks({
   return (
     <div>
       <Meta title={title} description={description} />
-      <Header />
       <Hero 
         onSearch={handleSearch} 
         categories={initialCategories} 
@@ -156,7 +153,6 @@ function Bookmarks({
 
       <FloatingCTA />
       <SubscribeForm />
-      <Footer />
     </div>
   )
 }

@@ -1,7 +1,5 @@
 // pages/blog/index.js
 import React, { useEffect, useState } from "react";
-import Header from "../../components/Header.js";
-import Footer from "../../components/Footer.js";
 import Meta from "../../components/Meta.js";
 import { supabase } from "../../lib/supabase";
 import Link from 'next/link';
@@ -95,7 +93,6 @@ function Blog({ title, description }) {
   return (
     <div>
       <Meta title={title} description={description} />
-      <Header />
       <main>
         {/* <section className="home">
           <h2>안녕하세요 장승환입니다.</h2>
@@ -105,7 +102,6 @@ function Blog({ title, description }) {
           <FetchPostLists />
         </section>
       </main>
-      <Footer />
     </div>
   );
 }
