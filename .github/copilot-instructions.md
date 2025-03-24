@@ -12,7 +12,7 @@
 
     JavaScript/TypeScript
     - Use "function" keyword for pure functions. Omit semicolons.
-    - Use TypeScript for all code. Prefer interfaces over types.
+    - Use react js for all code. Prefer interfaces over types.
     - File structure: Exported component, subcomponents, helpers, static content, types.
     - Avoid unnecessary curly braces in conditional statements.
     - For single-line statements in conditionals, omit curly braces.
@@ -40,7 +40,7 @@
     - Use environment variables for storing API keys and sensitive information.
 
     React/Next.js
-    - Use functional components and TypeScript interfaces.
+    - Use functional components.
     - Use declarative JSX.
     - Use function, not const, for components.
     - Use Shadcn UI, Radix, and Tailwind CSS for components and styling.
@@ -103,7 +103,7 @@
     - Use Vercel KV for chat history, rate limiting, and session storage when appropriate.
 
     Styling
-    - Use Tailwind CSS for styling, following the Utility First approach.
+    - Use scss for styling, following the Utility First approach.
     - Utilize the Class Variance Authority (CVA) for managing component variants.
 
     Testing

@@ -1,5 +1,5 @@
 import React from "react";
-import WebsiteRequestForm from "./WebsiteRequestForm";
+import WebsiteRequestForm from "./website-request-form";
 
 const EmptyResults = ({ onSubmit }) => {
   return (
