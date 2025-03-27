@@ -1,5 +1,6 @@
 import React from "react";
 import VoteButton from "./VoteButton";
+import { supabase } from "../lib/supabase";
 
 const ContentCard = ({ content }) => {
   const {
@@ -39,12 +40,42 @@ const ContentCard = ({ content }) => {
     e.stopPropagation()
   }
 
+  const handleClick = async (e) => {
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Get referrer and user agent
+      const referrer = document.referrer || '';
+      const userAgent = navigator.userAgent;
+
+      // Insert click tracking data
+      const { error } = await supabase
+        .from('click_tracking')
+        .insert([
+          {
+            bookmark_id: id,
+            user_id: user?.id || null,
+            referrer: referrer,
+            user_agent: userAgent
+          }
+        ]);
+
+      if (error) {
+        console.error('Error tracking click:', error);
+      }
+    } catch (error) {
+      console.error('Error in click tracking:', error);
+    }
+  };
+
   return (
     <a
       href={getUtmLink()}
       target="_blank"
       rel="noopener noreferrer"
       className="content-card card"
+      onClick={handleClick}
     >
       <div className="card__image-container">
         <img

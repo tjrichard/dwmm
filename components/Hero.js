@@ -1,7 +1,15 @@
 import React from "react";
 import SearchBar from "./SearchBar";
 
-const Hero = ({ onSearch, categories, tags }) => {
+const Hero = ({
+  categories,
+  tags,
+  selectedCategory,
+  selectedTags,
+  onCategorySelect,
+  onTagSelect,
+  onSearch
+}) => {
   return (
     <div className="hero-section">
       <div className="hero-content">
@@ -11,7 +19,15 @@ const Hero = ({ onSearch, categories, tags }) => {
           SaaS product design
         </p>
 
-        <SearchBar onSearch={onSearch} categories={categories} tags={tags} />
+        <SearchBar
+          categories={categories}
+          tags={tags}
+          selectedCategory={selectedCategory}
+          selectedTags={selectedTags}
+          onCategorySelect={onCategorySelect}
+          onTagSelect={onTagSelect}
+          onSearch={onSearch}
+        />
       </div>
     </div>
   );

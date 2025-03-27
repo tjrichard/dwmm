@@ -1,16 +1,17 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Meta from "../../components/Meta.js";
 import Hero from "../../components/Hero";
 import ContentGrid from "../../components/ContentGrid";
+import ContentCard from "../../components/ContentCard";
 import FloatingCTA from "../../components/FloatingCTA";
+import SearchBar from "../../components/SearchBar";
 // import SubscribeForm from "../../components/SubscribeForm";
-import Pagination from "../../components/Pagination";
 import { supabase } from "../../lib/supabase";
 import { getUserVotedWebsites } from "../../lib/voteUtils";
 import SubscribeForm from "../../components/SubscribeForm.js";
 
 // Number of items per page
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 9;
 
 export async function getStaticProps() {
   try {
@@ -63,6 +64,9 @@ export async function getStaticProps() {
     allTags.push(...additionalTags);
     allCategories.push(...additionalCategories);
 
+    console.log('Initial Categories:', [...new Set(allCategories)].filter(Boolean));
+    console.log('Initial Tags:', [...new Set(allTags)].filter(Boolean));
+
     const processedBookmarks = bookmarks.map(item => ({
       ...item,
       url: item.original_link // original_link를 url로 매핑
@@ -93,165 +97,149 @@ export async function getStaticProps() {
   }
 }
 
-function Bookmarks({ 
-  title, 
-  description, 
-  initialBookmarks = [], 
-  initialTags = [], 
-  initialCategories = [],
-  error 
+export default function Bookmarks({
+  title,
+  description,
+  initialBookmarks,
+  initialTags,
+  initialCategories,
 }) {
-  console.log("Bookmarks component props:", {
-    title,
-    description,
-    initialBookmarks,
-    initialTags,
-    initialCategories,
-    error
-  })
+  const [bookmarks, setBookmarks] = useState(initialBookmarks);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const observer = useRef();
+  const loadingRef = useRef(null);
 
-  const [displayedBookmarks, setDisplayedBookmarks] = useState(initialBookmarks)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [searchParams, setSearchParams] = useState({
-    query: '',
-    category: '',
-    tags: []
-  })
-  const [userVotedWebsites, setUserVotedWebsites] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
+  const fetchBookmarks = async (pageNumber) => {
+    setLoading(true);
+    try {
+      let query = supabase
+        .from("bookmarks_public")
+        .select(`
+          id,
+          title,
+          description,
+          original_link,
+          category,
+          tags,
+          vote_count,
+          created_at
+        `)
+        .order("created_at", { ascending: false })
+        .range((pageNumber - 1) * ITEMS_PER_PAGE, pageNumber * ITEMS_PER_PAGE - 1);
 
-  const handleSearch = useCallback((searchParams) => {
-    setSearchParams(searchParams)
-  }, [])
-
-  // Update the search filtering effect
-  useEffect(() => {
-    const filterBookmarks = () => {
-      let filtered = [...initialBookmarks]
-      const { query, category, tags } = searchParams
-
-      if (query) {
-        const searchLower = query.toLowerCase()
-        filtered = filtered.filter(item => 
-          (item.title?.toLowerCase()?.includes(searchLower) || false) ||
-          (item.description?.toLowerCase()?.includes(searchLower) || false)
-        )
+      // Apply filters
+      if (selectedCategory) {
+        query = query.eq("category", selectedCategory);
+      }
+      if (selectedTags.length > 0) {
+        query = query.contains("tags", selectedTags);
+      }
+      if (searchQuery) {
+        query = query.ilike("title", `%${searchQuery}%`);
       }
 
-      if (category) {
-        filtered = filtered.filter(item => item.category === category)
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      if (data.length < ITEMS_PER_PAGE) {
+        setHasMore(false);
       }
 
-      if (tags?.length > 0) {
-        filtered = filtered.filter(item => 
-          item.tags?.some(tag => tags.includes(tag))
-        )
+      if (pageNumber === 1) {
+        setBookmarks(data);
+      } else {
+        setBookmarks(prev => [...prev, ...data]);
       }
-
-      return filtered
+    } catch (error) {
+      console.error("Error fetching bookmarks:", error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const filteredBookmarks = filterBookmarks()
-    
-    // 현재 표시된 북마크와 필터링된 결과가 다를 때만 상태 업데이트
-    if (JSON.stringify(displayedBookmarks) !== JSON.stringify(filteredBookmarks)) {
-      setDisplayedBookmarks(filteredBookmarks)
-      setCurrentPage(1)
-    }
-  }, [searchParams, initialBookmarks])
+  // Intersection Observer callback
+  const lastBookmarkRef = useCallback(node => {
+    if (loading) return;
+    if (observer.current) observer.current.disconnect();
 
-  // 컴포넌트 마운트 시 사용자 투표 정보만 가져오기
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        setPage(prevPage => prevPage + 1);
+      }
+    });
+
+    if (node) observer.current.observe(node);
+  }, [loading, hasMore]);
+
+  // Fetch bookmarks when page changes
   useEffect(() => {
-    const fetchUserVotes = async () => {
-      const votedWebsites = await getUserVotedWebsites()
-      setUserVotedWebsites(votedWebsites)
-    }
-    fetchUserVotes()
-  }, [])
+    fetchBookmarks(page);
+  }, [page, selectedCategory, selectedTags, searchQuery]);
 
+  // Reset pagination when filters change
   useEffect(() => {
-    setIsLoading(false)
-  }, [])
+    setPage(1);
+    setHasMore(true);
+    setBookmarks([]);
+  }, [selectedCategory, selectedTags, searchQuery]);
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page)
-    window.scrollTo({
-      top: document.querySelector(".main-content")?.offsetTop - 100,
-      behavior: "smooth"
-    })
-  }
+  const handleTagSelect = (tag) => {
+    setSelectedTags(prev =>
+      prev.includes(tag)
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
+    );
+  };
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Failed to load bookmarks</h1>
-          <p className="text-gray-600">Please try again later.</p>
-        </div>
-      </div>
-    )
-  }
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+  };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Loading...</h1>
-        </div>
-      </div>
-    )
-  }
-
-  const paginatedBookmarks = displayedBookmarks.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  )
-
-  const totalPages = Math.ceil(displayedBookmarks.length / ITEMS_PER_PAGE)
-  const isSearchActive = Boolean(searchParams.query || searchParams.category || searchParams.tags.length)
+  const handleSearch = (params) => {
+    setSearchQuery(params.query || '');
+    setSelectedCategory(params.category || '');
+    setSelectedTags(params.tags || []);
+  };
 
   return (
-    <div>
+    <div className="container">
       <Meta title={title} description={description} />
-      {!error && (
-        <>
-          <Hero 
-            onSearch={handleSearch} 
-            categories={initialCategories} 
-            tags={initialTags}
-          />
+      <Hero 
+        categories={initialCategories}
+        tags={initialTags}
+        selectedCategory={selectedCategory}
+        selectedTags={selectedTags}
+        onCategorySelect={handleCategorySelect}
+        onTagSelect={handleTagSelect}
+        onSearch={handleSearch}
+      />
+      
+      <ContentGrid
+        contents={bookmarks}
+        isSearching={loading}
+        lastBookmarkRef={lastBookmarkRef}
+      />
 
-          <main className="main-content">
-            {displayedBookmarks.length > 0 ? (
-              <>
-                <ContentGrid
-                  contents={paginatedBookmarks.map(bookmark => ({
-                    ...bookmark,
-                    user_has_voted: userVotedWebsites.includes(bookmark.id)
-                  }))}
-                  isSearching={isSearchActive}
-                />
-
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handlePageChange}
-                />
-              </>
-            ) : (
-              <div className="text-center py-12">
-                <h2 className="text-xl font-semibold mb-2">No bookmarks found</h2>
-                <p className="text-gray-600">Try adjusting your search criteria</p>
-              </div>
-            )}
-          </main>
-
-          <FloatingCTA />
-          <SubscribeForm />
-        </>
+      {loading && (
+        <div className="loading-spinner">
+          Loading more bookmarks...
+        </div>
       )}
-    </div>
-  )
-}
 
-export default Bookmarks
+      {!hasMore && bookmarks.length > 0 && (
+        <div className="no-more-content">
+          No more bookmarks to load
+        </div>
+      )}
+
+      <FloatingCTA />
+      <SubscribeForm />
+    </div>
+  );
+}

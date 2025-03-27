@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react"
 
-function SearchBar({ onSearch, categories, tags }) {
+function SearchBar({ onSearch, categories = [], tags = [] }) {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("")
   const [selectedTags, setSelectedTags] = useState([])
