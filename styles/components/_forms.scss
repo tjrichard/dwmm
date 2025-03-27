@@ -2,7 +2,6 @@
   background-color: $white-a-pure;
   padding: $spacing-m;
   border-radius: $radius-m;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   max-width: 600px;
   margin: 0 auto;
 
@@ -11,6 +10,7 @@
     font-weight: 600;
     color: $black-a-darkest;
     text-align: left;
+    font-size: 1.25rem;
   }
 
   .message {
@@ -19,6 +19,7 @@
     border-radius: $radius-s;
     background-color: $error-lightest;
     color: $error-dark;
+    font-size: 0.875rem;
 
     &.success {
       background-color: $success-lightest;
@@ -35,20 +36,28 @@
       font-weight: 500;
       color: $black-a-darkest;
       text-align: left;
+      font-size: 0.875rem;
     }
 
     input,
     select {
       width: 100%;
-      padding: $spacing-xs $spacing-sm;
-      border: 1px solid $black-a-light;
+      padding: $spacing-sm;
+      border: none;
       border-radius: $radius-s;
       font-size: 1rem;
-      height: 36px;
+      height: 40px;
+      background: $black-a-lightest;
+      transition: all 0.2s ease;
 
       &:focus {
         outline: none;
-        border-color: $primary-normal;
+        background: $white-a-pure;
+      }
+
+      &::placeholder {
+        color: $black-a-darker;
+        opacity: 0.5;
       }
     }
   }
@@ -61,14 +70,16 @@
     margin-bottom: $spacing-m;
 
     input[type="checkbox"] {
-      width: auto;
-      height: auto;
+      width: 18px;
+      height: 18px;
       margin: 0;
+      accent-color: $primary-normal;
     }
 
     label {
       margin-bottom: 0;
       display: inline;
+      font-size: 0.875rem;
     }
   }
 
@@ -117,9 +128,25 @@
 
   button[type="submit"] {
     width: 100%;
-    height: 36px;
+    height: 40px;
     max-width: 100%;
-    overflow: hidden;
+    background: $black-a-darkest;
+    color: $white-a-pure;
+    border: none;
+    border-radius: $radius-s;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: $black-a-darker;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   }
 }
 
@@ -134,20 +161,19 @@
   gap: $spacing-m;
 
   .thank-you-icon {
-    width: 60px;
-    height: 60px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     background-color: $success-normal;
     color: $white-a-pure;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
-    margin-bottom: $spacing-xs;
+    font-size: 1.5rem;
   }
 
   h3 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 600;
     color: $black-a-darkest;
     margin-bottom: $spacing-xs;
@@ -157,10 +183,24 @@
     color: $black-a-darker;
     margin-bottom: $spacing-xs;
     line-height: 1.5;
+    font-size: 0.875rem;
   }
 
   button {
     margin-top: $spacing-sm;
+    background: $black-a-darkest;
+    color: $white-a-pure;
+    border: none;
+    border-radius: $radius-s;
+    padding: $spacing-sm $spacing-m;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: $black-a-darker;
+    }
   }
 }
 
