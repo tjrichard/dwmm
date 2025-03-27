@@ -1,9 +1,9 @@
 // Side-hustle.js
 import React, { useState, useEffect } from "react";
-import Header from "../components/Header.js";
-import Footer from "../components/Footer.js";
-import { supabase } from "../lib/supabase.js";
-import Meta from "../components/Meta";
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
+import { supabase } from "../../lib/supabase";
+import Meta from "../../components/Meta";
 
 export async function getStaticProps() {
   // 여기에 필요한 데이터를 서버에서 가져오거나 정의합니다.
@@ -62,7 +62,7 @@ function FetchSupabase({ input }) {
   );
 }
 
-function SideHustle({ title, description }) {
+export default function SideHustle() {
   const [input, setInput] = useState("");
   const [searchInput, setSearchInput] = useState("");
 
@@ -72,7 +72,7 @@ function SideHustle({ title, description }) {
 
   return (
     <div>
-      <Meta title={title} description={description} />
+      <Meta title="Side Hustle" description="Side Hustle" />
       <Header />
       <main>
         <section className="home">
@@ -104,5 +104,3 @@ function SideHustle({ title, description }) {
     </div>
   );
 }
-
-export default SideHustle;
