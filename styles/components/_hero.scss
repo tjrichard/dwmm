@@ -1,37 +1,40 @@
-.hero {
-  padding: 6rem 2rem;
+.hero-section {
   color: $black-a-darkest;
-  background-color: $white-a-pure;
-  
+  padding: calc($spacing-xl * 3) 0 calc($spacing-xl * 2);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: $spacing-xl;
+
   .hero-content {
     max-width: 1200px;
     margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 3rem;
+    padding: 0 $spacing-m;
+    position: relative;
+    z-index: 1;
   }
 
-  .hero-text {
-    text-align: center;
-  }
-
-  .hero-title {
-    font-size: 2.5rem;
+  h1 {
+    font-size: 3.5rem;
     font-weight: 700;
-    line-height: 1.4;
-    margin-bottom: 1.5rem;
-    
-    @media (min-width: 768px) {
-      font-size: 3rem;
+    margin-bottom: $spacing-m;
+    line-height: 1.2;
+
+    @media (max-width: 768px) {
+      font-size: 2.5rem;
     }
   }
 
-  .hero-description {
-    font-size: 1.125rem;
+  .hero-subtitle {
+    font-size: 1.5rem;
+    margin-bottom: $spacing-l;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
     line-height: 1.6;
-    color: $black-a-light;
-    
-    @media (min-width: 768px) {
+    color: $black-a-darker;
+
+    @media (max-width: 768px) {
       font-size: 1.25rem;
     }
   }

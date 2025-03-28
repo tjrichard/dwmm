@@ -71,6 +71,7 @@ function SearchBar({
   }
 
   return (
+<<<<<<< HEAD
     <div className="search-section">
       <form onSubmit={handleSearch} className="search-bar">
         <input
@@ -108,20 +109,54 @@ function SearchBar({
                 onClick={() => handleCategorySelect("")}
               >
                 전체
+=======
+    <div className="search-container">
+      <form onSubmit={handleSearch} className="search-form">
+        <div className="search-input-container">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search for design resources..."
+            className="search-input"
+          />
+          <button type="submit" className="button primary search-button">
+            Search
+          </button>
+        </div>
+
+        <div className="filter-container">
+          <div className="category-filter">
+            <h4>Categories</h4>
+            <div className="category-options">
+              <button
+                type="button"
+                className={`filter-button ${selectedCategory === "" ? "active" : ""}`}
+                onClick={() => setSelectedCategory("")}
+              >
+                All
+>>>>>>> parent of 861b518 (fix errors)
               </button>
               {categories.map((category) => (
                 <button
                   key={category}
+<<<<<<< HEAD
                   className={`badge ${
                     localSelectedCategory === category ? "badge-active" : ""
                   }`}
                   onClick={() => handleCategorySelect(category)}
+=======
+                  type="button"
+                  className={`filter-button ${selectedCategory === category ? "active" : ""}`}
+                  onClick={() => setSelectedCategory(category)}
+>>>>>>> parent of 861b518 (fix errors)
                 >
                   {category}
                 </button>
               ))}
             </div>
           </div>
+<<<<<<< HEAD
         )}
 
         {tags.length > 0 && (
@@ -134,6 +169,17 @@ function SearchBar({
                   className={`badge ${
                     localSelectedTags.includes(tag) ? "badge-active" : ""
                   }`}
+=======
+
+          <div className="tag-filter">
+            <h4>Tags</h4>
+            <div className="tag-options">
+              {tags.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  className={`tag-button ${selectedTags.includes(tag) ? "active" : ""}`}
+>>>>>>> parent of 861b518 (fix errors)
                   onClick={() => handleTagToggle(tag)}
                 >
                   {tag}
@@ -141,8 +187,13 @@ function SearchBar({
               ))}
             </div>
           </div>
+<<<<<<< HEAD
         )}
       </div>
+=======
+        </div>
+      </form>
+>>>>>>> parent of 861b518 (fix errors)
     </div>
   )
 }

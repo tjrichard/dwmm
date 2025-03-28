@@ -1,13 +1,10 @@
 import React from "react";
 import ContentCard from "./ContentCard";
+import EmptyResults from "./EmptyResults";
 
-export default function ContentGrid({ contents = [], isSearching = false, lastBookmarkRef }) {
-  if (!contents || contents.length === 0) {
-    return (
-      <div className="no-content">
-        {isSearching ? "검색 결과가 없습니다." : "북마크가 없습니다."}
-      </div>
-    );
+const ContentGrid = ({ contents = [], isSearching = false, lastBookmarkRef = null }) => {
+  if (isSearching && contents.length === 0) {
+    return <EmptyResults />;
   }
 
   return (
@@ -19,13 +16,12 @@ export default function ContentGrid({ contents = [], isSearching = false, lastBo
               <ContentCard content={content} />
             </div>
           );
+        } else {
+          return <ContentCard key={content.id} content={content} />;
         }
-        return (
-          <div key={content.id}>
-            <ContentCard content={content} />
-          </div>
-        );
       })}
     </div>
   );
-}
+};
+
+export default ContentGrid;
