@@ -2,27 +2,51 @@
     width: 100%;
     max-width: 800px;
     margin: 0 auto;
-    padding: $spacing-m;
     background-color: $white-a-pure;
     border-radius: $radius-m;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-s;
+    align-items: flex-start;
 }
 
 .search-form {
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-m;
+    display: inline-flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 0;
+    border: 2px solid $black-darkest;
+    border-radius: $radius-s;
+    overflow:clip;
+
+    .search-button {
+        border-radius: 0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:focus {
+            outline: 2px solid $primary-a-light;
+            outline-offset: -2px;
+            border-radius: 0 $radius-xs $radius-xs 0;
+        }
+    }
 }
 
 .search-input-container {
     display: flex;
     width: 100%;
     background: $black-a-lightest;
-    border-radius: $radius-m;
+    border-radius: $radius-s 0 0 $radius-s;
+    border: none;
     padding: $spacing-xs;
-    transition: all 0.2s ease;
 
     &:focus-within {
         background: $white-a-pure;
+    }
+    &:focus {
+        outline: 2px solid $primary-a-dark;
+        outline-offset: -2px;
+        border-radius: $radius-xs 0 0 $radius-xs;
     }
 
     .search-input {
@@ -42,20 +66,6 @@
             opacity: 0.5;
         }
     }
-
-    .search-button {
-        border-radius: $radius-s;
-        padding: $spacing-sm $spacing-m;
-        background: none;
-        border: none;
-        color: $black-a-darker;
-        cursor: pointer;
-        transition: all 0.2s ease;
-
-        &:hover {
-            background: rgba(0, 0, 0, 0.05);
-        }
-    }
 }
 
 .filter-container {
@@ -64,13 +74,18 @@
     gap: $spacing-m;
     padding: $spacing-xs;
 
-    h4 {
+    .filter-group .filter-label {
+        text-align: left;
         margin-bottom: $spacing-xs;
         font-weight: 600;
         color: $black-a-darker;
-        font-size: 0.875rem;
+        font-size: 0.75rem;
     }
-
+    .filter-badges{
+        display: flex;
+        flex-wrap: wrap;
+        gap: $spacing-xs;
+    }
     .category-filter,
     .tag-filter {
         flex: 1;

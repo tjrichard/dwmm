@@ -1,17 +1,20 @@
-.hero-section {
+.LNB-section {
   color: $black-a-darkest;
   padding: calc($spacing-xl * 3) 0 calc($spacing-xl * 2);
   text-align: center;
   position: relative;
   overflow: hidden;
   margin-bottom: $spacing-xl;
+  max-width: 360px;
+  padding: $spacing-ml;
 
-  .hero-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 $spacing-m;
+  .LNB-content {
+    max-width: 360px;
     position: relative;
     z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   h1 {
@@ -19,19 +22,18 @@
     font-weight: 700;
     margin-bottom: $spacing-m;
     line-height: 1.2;
+    text-align: left;
+    color: $black-a-pure;
 
     @media (max-width: 768px) {
       font-size: 2.5rem;
     }
   }
-
-  .hero-subtitle {
-    font-size: 1.5rem;
+  
+  .LNB-subtitle {
+    font-size: 1rem;
+    text-align: left;
     margin-bottom: $spacing-l;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.6;
     color: $black-a-darker;
 
     @media (max-width: 768px) {

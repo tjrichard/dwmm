@@ -3,7 +3,8 @@
   width: 100%;
   display: flex;
   justify-content: center;
-  position: fixed;
+  position: sticky;
+  top: 0;
   z-index: 999;
   padding: $spacing-ml 0;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);

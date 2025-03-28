@@ -4,31 +4,58 @@
   border: none;
   border-radius: $radius-s;
   cursor: pointer;
-  font-family: Inter;
   line-height: 120%;
+  transition: all 0.15s ease;
+
+  &.l{
+    height: 40px;
+    font-size: 22px;
+    padding: $spacing-s $spacing-sm;
+    border-radius: $radius-m;
+  }
+  &.m{
+    font-size: 1rem;
+    padding: $spacing-xs $spacing-s;
+    border-radius: $radius-s;
+  }
+  &.s{
+    font-size: 0.75rem;
+    padding: $spacing-xxs $spacing-xs;
+    border-radius: $radius-xs;
+  }
+  &.text {
+    background-color: none;
+
+    &.inactive {
+      color: $black-darkest;
+    }
+    
+    &.active {
+      color: $white-a-normal;
+      background-color: $black-darkest;
+      &:hover {
+        background-color: $black-a-darkest;
+      }
+    }
+
+    &.selected {
+      color: $primary-a-normal;
+      background-color: $primary-a-lighter;
+      &:hover {
+        background-color: $primary-a-lightest;
+      }
+    }
+
+    &:hover {
+      background-color: $black-a-lightest;
+    }
+  }
 }
 
 a.button {
   text-decoration: none;
   display: flex;
   align-items: center;
-}
-
-// size
-a.button.l{
-  height: 40px;
-  font-size: 22px;
-  padding: 0 $spacing-sm;
-}
-a.button.m{
-  height: 32px;
-  font-size: 14px;
-  padding: 0 $spacing-s;
-}
-a.button.s{
-  height: 20px;
-  font-size: 12px;
-  padding: 0 $spacing-xs;
 }
 
 // color
@@ -48,4 +75,4 @@ a.button.s{
   &:hover {
     background-color: $black-a-lightest;
   }
-}
+} 

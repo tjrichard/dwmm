@@ -44,7 +44,7 @@ const ContentCard = ({ content }) => {
     try {
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       // Get referrer and user agent
       const referrer = document.referrer || '';
       const userAgent = navigator.userAgent;
@@ -77,12 +77,9 @@ const ContentCard = ({ content }) => {
       className="content-card card"
       onClick={handleClick}
     >
-      <div className="card__image-container">
-        <img
-          src={getWebsitePreviewImage()}
-          alt={title}
-          className="card__image"
-        />
+      <div className="card__content">
+        <div className="card__meta">
+          <div className="card__category button s text active">{category}</div>
         <div className="card__arrow">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -98,6 +95,14 @@ const ContentCard = ({ content }) => {
             <path d="M7 17l9.2-9.2M17 17V7H7" />
           </svg>
         </div>
+        </div>
+      </div>
+      <div className="card__image-container">
+        <img
+          src={getWebsitePreviewImage()}
+          alt={title}
+          className="card__image"
+        />
       </div>
       <div className="card__content">
         <div className="card__title-row">
@@ -111,10 +116,9 @@ const ContentCard = ({ content }) => {
           </div>
         </div>
         <div className="card__meta">
-          <div className="card__category">{category}</div>
           <div className="card__tags">
             {tags.map((tag, index) => (
-              <span key={index} className="tag">
+              <span key={index} className="tag button s text selected">
                 {tag}
               </span>
             ))}

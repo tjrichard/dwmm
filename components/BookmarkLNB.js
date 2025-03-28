@@ -1,7 +1,7 @@
 import React from "react";
 import SearchBar from "./SearchBar";
 
-const Hero = ({
+const BookmarkLNB = ({
   categories,
   tags,
   selectedCategory,
@@ -11,12 +11,15 @@ const Hero = ({
   onSearch
 }) => {
   return (
-    <div className="hero-section">
-      <div className="hero-content">
-        <h1>Design Resources for B2B Product Designers</h1>
-        <p className="hero-subtitle">
-          Discover curated tools, articles, and inspiration to elevate your B2B
-          SaaS product design
+    <div className="LNB-section">
+      <div className="LNB-content">
+        <h1>
+          USE<br />
+          READ<br />
+          SHARE
+        </h1>
+        <p className="LNB-subtitle">
+        Design Resources for B2B Product Designers
         </p>
 
         <SearchBar
@@ -33,4 +36,4 @@ const Hero = ({
   );
 };
 
-export default Hero;
+export default BookmarkLNB;

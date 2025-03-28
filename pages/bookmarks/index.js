@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import Meta from "../../components/Meta.js";
-import Hero from "../../components/Hero";
+import LNB from "../../components/BookmarkLNB.js";
 import ContentGrid from "../../components/ContentGrid";
 import ContentCard from "../../components/ContentCard";
 import FloatingCTA from "../../components/FloatingCTA";
@@ -210,7 +210,8 @@ export default function Bookmarks({
   return (
     <div className="container">
       <Meta title={title} description={description} />
-      <Hero 
+      <div className="bookmarks-main-container">
+      <LNB 
         categories={initialCategories}
         tags={initialTags}
         selectedCategory={selectedCategory}
@@ -237,6 +238,7 @@ export default function Bookmarks({
           No more bookmarks to load
         </div>
       )}
+      </div>
 
       <FloatingCTA />
       <SubscribeForm />
