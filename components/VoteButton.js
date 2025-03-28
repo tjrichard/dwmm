@@ -61,17 +61,30 @@ const VoteButton = ({
   };
 
   return (
-    <div className="vote-button-container">
-      <button
-        className={`vote-button ${isVoted ? "voted" : ""} ${isLoading ? "loading" : ""}`}
-        onClick={handleVote}
-        disabled={isLoading}
-        aria-label={isVoted ? "Remove vote" : "Vote for this content"}
+    <button
+      className={`vote-button ${isVoted ? "voted" : ""} ${isLoading ? "loading" : ""}`}
+      onClick={handleVote}
+      disabled={isLoading}
+      aria-label={isVoted ? "Remove vote" : "Vote for this content"}
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
       >
-        <span className="vote-icon">{isVoted ? "★" : "☆"}</span>
-        <span className="vote-count">{voteCount}</span>
-      </button>
-    </div>
+        <path
+          d="M10 1L13 7L19 8L14.5 13L15.5 19L10 16L4.5 19L5.5 13L1 8L7 7L10 1Z"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill={isVoted ? "currentColor" : "none"}
+        />
+      </svg>
+      <span>{voteCount.toLocaleString()}</span>
+    </button>
   );
 };
 

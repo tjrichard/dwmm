@@ -1,36 +1,41 @@
 import React from "react";
 import SearchBar from "./SearchBar";
 
-const Hero = ({
-  categories,
-  tags,
-  selectedCategory,
-  selectedTags,
+export default function Hero({
+  categories = [],
+  tags = [],
+  selectedCategory = "",
+  selectedTags = [],
+  onSearch,
   onCategorySelect,
-  onTagSelect,
-  onSearch
-}) => {
+  onTagSelect
+}) {
   return (
-    <div className="hero-section">
+    <section className="hero">
       <div className="hero-content">
-        <h1>Design Resources for B2B Product Designers</h1>
-        <p className="hero-subtitle">
-          Discover curated tools, articles, and inspiration to elevate your B2B
-          SaaS product design
-        </p>
+        <div className="hero-text">
+          <h1 className="hero-title">
+            B2B SaaS 디자이너를 위한
+            <br />
+            큐레이션 북마크
+          </h1>
+          <p className="hero-description">
+            B2B SaaS 제품을 디자인하는 데 도움이 되는 리소스들을 모았습니다.
+            <br />
+            유용한 리소스를 발견하셨다면 투표해주세요.
+          </p>
+        </div>
 
         <SearchBar
           categories={categories}
           tags={tags}
           selectedCategory={selectedCategory}
           selectedTags={selectedTags}
+          onSearch={onSearch}
           onCategorySelect={onCategorySelect}
           onTagSelect={onTagSelect}
-          onSearch={onSearch}
         />
       </div>
-    </div>
+    </section>
   );
-};
-
-export default Hero;
+}

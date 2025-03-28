@@ -53,63 +53,31 @@ function SearchBar({ onSearch, categories = [], tags = [] }) {
   }
 
   return (
-    <div className="search-container">
-      <form onSubmit={handleSearch} className="search-form">
-        <div className="search-input-container">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search for design resources..."
-            className="search-input"
+    <form onSubmit={handleSearch} className="search-bar">
+      <input
+        type="text"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        placeholder="Search..."
+      />
+      <button type="submit">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M19 19L14.65 14.65M17 9C17 13.4183 13.4183 17 9 17C4.58172 17 1 13.4183 1 9C1 4.58172 4.58172 1 9 1C13.4183 1 17 4.58172 17 9Z"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
-          <button type="submit" className="button primary search-button">
-            Search
-          </button>
-        </div>
-
-        <div className="filter-container">
-          <div className="category-filter">
-            <h4>Categories</h4>
-            <div className="category-options">
-              <button
-                type="button"
-                className={`filter-button ${selectedCategory === "" ? "active" : ""}`}
-                onClick={() => setSelectedCategory("")}
-              >
-                All
-              </button>
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  type="button"
-                  className={`filter-button ${selectedCategory === category ? "active" : ""}`}
-                  onClick={() => setSelectedCategory(category)}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="tag-filter">
-            <h4>Tags</h4>
-            <div className="tag-options">
-              {tags.map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  className={`tag-button ${selectedTags.includes(tag) ? "active" : ""}`}
-                  onClick={() => handleTagToggle(tag)}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </form>
-    </div>
+        </svg>
+      </button>
+    </form>
   )
 }
 

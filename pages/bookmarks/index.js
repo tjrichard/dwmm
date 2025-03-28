@@ -2,10 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import Meta from "../../components/Meta.js";
 import Hero from "../../components/Hero";
 import ContentGrid from "../../components/ContentGrid";
-import ContentCard from "../../components/ContentCard";
 import FloatingCTA from "../../components/FloatingCTA";
-import SearchBar from "../../components/SearchBar";
-// import SubscribeForm from "../../components/SubscribeForm";
 import { supabase } from "../../lib/supabase";
 import { getUserVotedWebsites } from "../../lib/voteUtils";
 import SubscribeForm from "../../components/SubscribeForm.js";
@@ -45,14 +42,15 @@ export async function getStaticProps() {
           initialBookmarks: [],
           initialTags: [],
           initialCategories: [],
+          error: null
         },
-        revalidate: 3600,
+        revalidate: 3600
       };
     }
 
     // 태그와 카테고리 추출
     const allTags = [...new Set(bookmarks.flatMap(item => item.tags || []))];
-    const allCategories = [...new Set(bookmarks.map(item => item.category || ''))];
+    const allCategories = [...new Set(bookmarks.map(item => item.category || '').filter(Boolean))];
 
     // 추가 태그 및 카테고리 추출
     const { data: tags } = await supabase.from("bookmarks_tags").select("tag");
@@ -61,15 +59,15 @@ export async function getStaticProps() {
     const additionalTags = tags?.map(tag => tag.tag) || [];
     const additionalCategories = categories?.map(category => category.category) || [];
 
-    allTags.push(...additionalTags);
-    allCategories.push(...additionalCategories);
+    // 모든 태그와 카테고리 병합 및 중복 제거
+    const finalTags = [...new Set([...allTags, ...additionalTags])].filter(Boolean);
+    const finalCategories = [...new Set([...allCategories, ...additionalCategories])].filter(Boolean);
 
-    console.log('Initial Categories:', [...new Set(allCategories)].filter(Boolean));
-    console.log('Initial Tags:', [...new Set(allTags)].filter(Boolean));
-
-    const processedBookmarks = bookmarks.map(item => ({
+    const processedBookmarks = bookmarks.map((item, index) => ({
       ...item,
-      url: item.original_link // original_link를 url로 매핑
+      url: item.original_link,
+      image: `/images/bookmark-${(index % 8) + 1}.jpg`,
+      vote_count: item.vote_count || 0
     }));
 
     return {
@@ -77,12 +75,14 @@ export async function getStaticProps() {
         title: "DWMM | Bookmarks",
         description: "Curated design resources for B2B SaaS product designers",
         initialBookmarks: processedBookmarks,
-        initialTags: [...new Set(allTags)].filter(Boolean),
-        initialCategories: [...new Set(allCategories)].filter(Boolean),
+        initialTags: finalTags,
+        initialCategories: finalCategories,
+        error: null
       },
-      revalidate: 3600,
+      revalidate: 3600
     };
   } catch (error) {
+    console.error("Error in getStaticProps:", error);
     return {
       props: {
         title: "DWMM | Bookmarks",
@@ -90,19 +90,20 @@ export async function getStaticProps() {
         initialBookmarks: [],
         initialTags: [],
         initialCategories: [],
-        error: "Failed to load bookmarks",
+        error: "Failed to load bookmarks"
       },
-      revalidate: 3600,
+      revalidate: 3600
     };
   }
 }
 
 export default function Bookmarks({
-  title,
-  description,
-  initialBookmarks,
-  initialTags,
-  initialCategories,
+  title = "DWMM | Bookmarks",
+  description = "Curated design resources for B2B SaaS product designers",
+  initialBookmarks = [],
+  initialTags = [],
+  initialCategories = [],
+  error
 }) {
   const [bookmarks, setBookmarks] = useState(initialBookmarks);
   const [loading, setLoading] = useState(false);
@@ -111,8 +112,18 @@ export default function Bookmarks({
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [userVotedWebsites, setUserVotedWebsites] = useState([]);
   const observer = useRef();
   const loadingRef = useRef(null);
+
+  // 컴포넌트 마운트 시 사용자 투표 정보 가져오기
+  useEffect(() => {
+    const fetchUserVotes = async () => {
+      const votedWebsites = await getUserVotedWebsites();
+      setUserVotedWebsites(votedWebsites);
+    };
+    fetchUserVotes();
+  }, []);
 
   const fetchBookmarks = async (pageNumber) => {
     setLoading(true);
@@ -147,14 +158,21 @@ export default function Bookmarks({
 
       if (error) throw error;
 
+      const processedData = data.map((item, index) => ({
+        ...item,
+        url: item.original_link,
+        image: `/images/bookmark-${(index % 8) + 1}.jpg`,
+        user_has_voted: userVotedWebsites.includes(item.id)
+      }));
+
       if (data.length < ITEMS_PER_PAGE) {
         setHasMore(false);
       }
 
       if (pageNumber === 1) {
-        setBookmarks(data);
+        setBookmarks(processedData);
       } else {
-        setBookmarks(prev => [...prev, ...data]);
+        setBookmarks(prev => [...prev, ...processedData]);
       }
     } catch (error) {
       console.error("Error fetching bookmarks:", error);
@@ -207,6 +225,15 @@ export default function Bookmarks({
     setSelectedTags(params.tags || []);
   };
 
+  if (error) {
+    return (
+      <div className="error-container">
+        <h2>데이터를 불러오는데 실패했습니다</h2>
+        <p>{error}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="container">
       <Meta title={title} description={description} />
@@ -220,23 +247,25 @@ export default function Bookmarks({
         onSearch={handleSearch}
       />
       
-      <ContentGrid
-        contents={bookmarks}
-        isSearching={loading}
-        lastBookmarkRef={lastBookmarkRef}
-      />
+      <main className="main-content">
+        <ContentGrid
+          contents={bookmarks}
+          isSearching={loading}
+          lastBookmarkRef={lastBookmarkRef}
+        />
 
-      {loading && (
-        <div className="loading-spinner">
-          Loading more bookmarks...
-        </div>
-      )}
+        {loading && (
+          <div className="loading-spinner">
+            Loading more bookmarks...
+          </div>
+        )}
 
-      {!hasMore && bookmarks.length > 0 && (
-        <div className="no-more-content">
-          No more bookmarks to load
-        </div>
-      )}
+        {!hasMore && bookmarks.length > 0 && (
+          <div className="no-more-content">
+            No more bookmarks to load
+          </div>
+        )}
+      </main>
 
       <FloatingCTA />
       <SubscribeForm />

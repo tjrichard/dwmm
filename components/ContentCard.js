@@ -1,71 +1,41 @@
-import React from "react";
+import React, { useState } from "react";
+import Image from "next/image";
 import VoteButton from "./VoteButton";
 import { supabase } from "../lib/supabase";
 
-const ContentCard = ({ content }) => {
-  const {
-    id,
-    title,
-    description,
-    category,
-    tags,
-    original_link,
-    vote_count = 0,
-    user_has_voted = false,
-  } = content;
+export default function ContentCard({ content }) {
+  const [isHovered, setIsHovered] = useState(false);
 
   const getUtmLink = () => {
-    const baseUrl = original_link;
     const utmParams = new URLSearchParams({
       utm_source: "dwmm",
-      utm_medium: "link-share",
-      utm_content: "b2b-designers",
+      utm_medium: "bookmark",
+      utm_campaign: "design_resources"
     });
 
-    return `${baseUrl}${baseUrl.includes("?") ? "&" : "?"}${utmParams.toString()}`;
-  };
-
-  // Generate a website preview image using the domain
-  const getWebsitePreviewImage = () => {
     try {
-      const domain = new URL(original_link).hostname;
-      return `https://api.dicebear.com/7.x/identicon/svg?seed=${domain}&backgroundColor=f5f8ff`;
+      const url = new URL(content.url);
+      url.search = url.search ? `${url.search}&${utmParams}` : `?${utmParams}`;
+      return url.toString();
     } catch (e) {
-      return `https://api.dicebear.com/7.x/identicon/svg?seed=default&backgroundColor=f5f8ff`;
+      console.error("Invalid URL:", content.url);
+      return content.url;
     }
   };
 
-  const handleVoteClick = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-  }
-
-  const handleClick = async (e) => {
+  const handleClick = async () => {
     try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      // Get referrer and user agent
-      const referrer = document.referrer || '';
-      const userAgent = navigator.userAgent;
-
-      // Insert click tracking data
+      // 클릭 수 증가
       const { error } = await supabase
-        .from('click_tracking')
-        .insert([
-          {
-            bookmark_id: id,
-            user_id: user?.id || null,
-            referrer: referrer,
-            user_agent: userAgent
-          }
-        ]);
+        .from("bookmarks_public")
+        .update({ click_count: (content.click_count || 0) + 1 })
+        .eq("id", content.id);
 
       if (error) {
-        console.error('Error tracking click:', error);
+        throw error;
       }
     } catch (error) {
-      console.error('Error in click tracking:', error);
+      console.error("Error updating click count:", error);
     }
   };
 
@@ -74,55 +44,51 @@ const ContentCard = ({ content }) => {
       href={getUtmLink()}
       target="_blank"
       rel="noopener noreferrer"
-      className="content-card card"
+      className="content-card"
       onClick={handleClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="card__image-container">
-        <img
-          src={getWebsitePreviewImage()}
-          alt={title}
-          className="card__image"
-        />
-        <div className="card__arrow">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M7 17l9.2-9.2M17 17V7H7" />
-          </svg>
-        </div>
+      <div className="card-image">
+        {content.image && (
+          <Image
+            src={content.image}
+            alt={content.title}
+            width={400}
+            height={300}
+            className="rounded-lg object-cover"
+          />
+        )}
       </div>
-      <div className="card__content">
-        <div className="card__title-row">
-          <h3 className="card__title">{title}</h3>
-          <div onClick={handleVoteClick}>
-            <VoteButton
-              contentId={id}
-              initialVoteCount={vote_count}
-              userHasVoted={user_has_voted}
-            />
-          </div>
+      
+      <div className="card-content">
+        <div className="card-header">
+          <h3 className="card-title">{content.title}</h3>
+          {content.category && (
+            <span className="card-category">{content.category}</span>
+          )}
         </div>
-        <div className="card__meta">
-          <div className="card__category">{category}</div>
-          <div className="card__tags">
-            {tags.map((tag, index) => (
-              <span key={index} className="tag">
+        
+        <p className="card-description">{content.description}</p>
+        
+        <div className="card-footer">
+          <div className="card-tags">
+            {content.tags?.map((tag) => (
+              <span key={tag} className="tag">
                 {tag}
               </span>
             ))}
+          </div>
+          
+          <div className="card-actions">
+            <VoteButton
+              contentId={content.id}
+              initialVoteCount={content.vote_count}
+              userHasVoted={content.user_has_voted}
+            />
           </div>
         </div>
       </div>
     </a>
   );
-};
-
-export default ContentCard;
+}
