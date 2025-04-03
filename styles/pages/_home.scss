@@ -3,5 +3,50 @@
     @include flex-center;
     height: 100vh;
     background-color: lighten($black-lighter, 40%);
+    padding: 2rem;
+  }
+  
+  h2 {
+    margin-bottom: 1rem;
+  }
+  
+  .ascii-showcase {
+    margin-top: 3rem;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: #fafafa;
+    
+    h3 {
+      font-size: 1.5rem;
+      padding: 1rem;
+      background-color: #333;
+      color: #fff;
+      margin: 0;
+    }
+    
+    .ascii-info {
+      background-color: #333;
+      color: #ddd;
+      padding: 0.75rem 1rem;
+      margin: 0;
+      text-align: center;
+      font-size: 0.85rem;
+      font-style: italic;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .home {
+      padding: 1rem;
+    }
+    
+    .ascii-showcase {
+      margin-top: 2rem;
+      
+      h3 {
+        font-size: 1.2rem;
+      }
+    }
   }
   
