@@ -2,7 +2,7 @@ import React from "react";
 import ContentCard from "./ContentCard";
 import EmptyResults from "./EmptyResults";
 
-const ContentGrid = ({ contents = [], isSearching = false, lastBookmarkRef = null }) => {
+const ContentGrid = ({ contents = [], isSearching = false, lastBookmarkRef = null, onCategoryClick, onTagClick }) => {
   if (isSearching && contents.length === 0) {
     return <EmptyResults />;
   }
@@ -13,11 +13,22 @@ const ContentGrid = ({ contents = [], isSearching = false, lastBookmarkRef = nul
         if (contents.length === index + 1) {
           return (
             <div ref={lastBookmarkRef} key={content.id}>
-              <ContentCard content={content} />
+              <ContentCard 
+                content={content} 
+                onCategoryClick={onCategoryClick}
+                onTagClick={onTagClick}
+              />
             </div>
           );
         } else {
-          return <ContentCard key={content.id} content={content} />;
+          return (
+            <ContentCard 
+              key={content.id} 
+              content={content} 
+              onCategoryClick={onCategoryClick}
+              onTagClick={onTagClick}
+            />
+          );
         }
       })}
     </div>

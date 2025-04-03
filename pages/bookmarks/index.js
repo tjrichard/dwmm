@@ -9,7 +9,8 @@ import SearchBar from "../../components/SearchBar";
 import { supabase } from "../../lib/supabase";
 import { getUserVotedWebsites } from "../../lib/voteUtils";
 import SubscribeForm from "../../components/SubscribeForm.js";
-import WebsiteRequestForm from '../../components/website-request-form'
+import WebsiteRequestForm from '../../components/WebsiteRequestForm'
+import BookmarkHeader from '../../components/BookmarkHeader';
 
 // Number of items per page
 const ITEMS_PER_PAGE = 9;
@@ -52,14 +53,14 @@ export async function getStaticProps() {
     }
 
     // 태그와 카테고리 추출
-    const allTags = [...new Set(bookmarks.flatMap(item => item.tags || []))];
+    const allTags = [...new Set(bookmarks.flatMap(item => item.tags?.map(tag => tag.toLowerCase()) || []))];
     const allCategories = [...new Set(bookmarks.map(item => item.category || ''))];
 
     // 추가 태그 및 카테고리 추출
     const { data: tags } = await supabase.from("bookmarks_tags").select("tag");
     const { data: categories } = await supabase.from("bookmarks_categories").select("category");
 
-    const additionalTags = tags?.map(tag => tag.tag) || [];
+    const additionalTags = tags?.map(tag => tag.tag?.toLowerCase()) || [];
     const additionalCategories = categories?.map(category => category.category) || [];
 
     allTags.push(...additionalTags);
@@ -135,10 +136,19 @@ export default function Bookmarks({
 
       // Apply filters
       if (selectedCategory) {
-        query = query.eq("category", selectedCategory);
+        // initialCategories에서 대소문자 구분 없이 일치하는 카테고리 찾기
+        const exactCategory = initialCategories.find(
+          cat => cat.toLowerCase() === selectedCategory.toLowerCase()
+        );
+        
+        if (exactCategory) {
+          query = query.eq("category", exactCategory);
+        }
       }
       if (selectedTags.length > 0) {
-        query = query.contains("tags", selectedTags);
+        selectedTags.forEach(tag => {
+          query = query.contains('tags', [tag]);
+        });
       }
       if (searchQuery) {
         query = query.ilike("title", `%${searchQuery}%`);
@@ -189,17 +199,44 @@ export default function Bookmarks({
     setHasMore(true);
     setBookmarks([]);
   }, [selectedCategory, selectedTags, searchQuery]);
-
-  const handleTagSelect = (tag) => {
-    setSelectedTags(prev =>
-      prev.includes(tag)
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
-    );
-  };
+  
+  // 유저가 투표한 웹사이트 정보 가져오기
+  useEffect(() => {
+    async function fetchUserVotes() {
+      try {
+        const votedWebsiteIds = await getUserVotedWebsites();
+        if (votedWebsiteIds.length > 0) {
+          setBookmarks(prev => 
+            prev.map(bookmark => ({
+              ...bookmark,
+              user_has_voted: votedWebsiteIds.includes(bookmark.id)
+            }))
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching user votes:", error);
+      }
+    }
+    
+    fetchUserVotes();
+  }, []);
 
   const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
+    // 대소문자 구분 없는 카테고리 선택 - 검색용으로는 소문자 버전 저장
+    const categoryStr = category ? String(category) : "";
+    setSelectedCategory(categoryStr.toLowerCase());
+  };
+
+  const handleTagSelect = (tag) => {
+    // 대소문자 구분 없는 태그 선택
+    // tag가 문자열인지 확인하고 문자열이 아니면 변환
+    const tagStr = String(tag || '');
+    const tagLower = tagStr.toLowerCase();
+    setSelectedTags(prev =>
+      prev.includes(tagLower)
+        ? prev.filter(t => t !== tagLower)
+        : [...prev, tagLower]
+    );
   };
 
   const handleSearch = (params) => {
@@ -208,43 +245,73 @@ export default function Bookmarks({
     setSelectedTags(params.tags || []);
   };
 
+  const handleCategoryClick = (category) => {
+    // 이미 선택된 카테고리면 필터 해제 (소문자 기준 비교)
+    if (selectedCategory === String(category || '').toLowerCase()) {
+      handleCategorySelect("");
+    } else {
+      handleCategorySelect(category);
+    }
+    
+    // 페이지 상단으로 스크롤
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleTagClick = (tag) => {
+    const tagLower = String(tag || '').toLowerCase();
+    
+    // 이미 선택된 태그면 필터 해제, 아니면 추가
+    if (selectedTags.includes(tagLower)) {
+      setSelectedTags(prev => prev.filter(t => t !== tagLower));
+    } else {
+      setSelectedTags(prev => [...prev, tagLower]);
+    }
+    
+    // 페이지 상단으로 스크롤
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
-    <div className="container">
-      <Meta title={title} description={description} />
-      <div className="bookmarks-main-container">
-      <LNB 
-        categories={initialCategories}
-        tags={initialTags}
-        selectedCategory={selectedCategory}
-        selectedTags={selectedTags}
-        onCategorySelect={handleCategorySelect}
-        onTagSelect={handleTagSelect}
-        onSearch={handleSearch}
-      />
-      
-      {bookmarks.length === 0 && (searchQuery || selectedCategory || selectedTags.length > 0) ? (
-        <div className="no-results-container">
-          <div className="no-results-message">
-            <h3>검색 결과가 없습니다</h3>
-            <p>다른 검색어나 필터를 사용해보세요.</p>
-            <p className="no-results-divider">또는</p>
+    <>
+      <BookmarkHeader />
+      <div className="container">
+        <Meta title={title} description={description} />
+        <div className="bookmarks-main-container">
+          <LNB 
+            categories={initialCategories}
+            tags={initialTags}
+            selectedCategory={selectedCategory}
+            selectedTags={selectedTags}
+            onCategorySelect={handleCategorySelect}
+            onTagSelect={handleTagSelect}
+            onSearch={handleSearch}
+          />
+          
+          {bookmarks.length === 0 && (searchQuery || selectedCategory || selectedTags.length > 0) ? (
+            <div className="no-results-container">
+              <div className="no-results-message">
+                <h3>검색 결과가 없습니다</h3>
+                <p>다른 검색어나 필터를 사용해보세요.</p>
+                <p className="no-results-divider">또는</p>
+                <WebsiteRequestForm />
+              </div>
+            </div>
+          ) : bookmarks.length === 0 ? (
             <WebsiteRequestForm />
-          </div>
+          ) : (
+            <ContentGrid
+              contents={bookmarks}
+              isSearching={loading}
+              lastBookmarkRef={lastBookmarkRef}
+              onCategoryClick={handleCategoryClick}
+              onTagClick={handleTagClick}
+            />
+          )}
         </div>
-      ) : bookmarks.length === 0 ? (
-        <WebsiteRequestForm />
-      ) : (
-        <ContentGrid
-          contents={bookmarks}
-          isSearching={loading}
-          lastBookmarkRef={lastBookmarkRef}
-        />
-      )}
 
+        <FloatingCTA />
+        <SubscribeForm />
       </div>
-
-      <FloatingCTA />
-      <SubscribeForm />
-    </div>
+    </>
   );
 }

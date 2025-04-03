@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useContext } from "react";
 import VoteButton from "./VoteButton";
 import { supabase } from "../lib/supabase";
 
-const ContentCard = ({ content }) => {
+const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
   const {
     id,
     title,
@@ -13,6 +13,8 @@ const ContentCard = ({ content }) => {
     vote_count = 0,
     user_has_voted = false,
   } = content;
+  
+  console.log(`Content ${id}: ${title} - user_has_voted: ${user_has_voted}`);
 
   const getUtmLink = () => {
     const baseUrl = original_link;
@@ -36,9 +38,25 @@ const ContentCard = ({ content }) => {
   };
 
   const handleVoteClick = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-  }
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleCategoryClick = (e, categoryValue) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onCategoryClick) {
+      onCategoryClick(categoryValue);
+    }
+  };
+
+  const handleTagClick = (e, tagValue) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onTagClick) {
+      onTagClick(tagValue);
+    }
+  };
 
   const handleClick = async (e) => {
     try {
@@ -79,7 +97,12 @@ const ContentCard = ({ content }) => {
     >
       <div className="card__top-row">
         <div className="card__meta">
-          <div className="card__category button s text active">{category}</div>
+          <div 
+            className="card__category button xs text active" 
+            onClick={(e) => handleCategoryClick(e, category)}
+          >
+            {category ? String(category).toUpperCase() : ''}
+          </div>
         <div className="card__arrow">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -117,9 +140,13 @@ const ContentCard = ({ content }) => {
         </div>
         <div className="card__meta">
           <div className="card__tags">
-            {tags.map((tag, index) => (
-              <span key={index} className="tag button s text selected">
-                {tag}
+            {tags && tags.map((tag, index) => (
+              <span 
+                key={index} 
+                className="tag button xs text selected"
+                onClick={(e) => handleTagClick(e, tag)}
+              >
+                {tag ? String(tag).toUpperCase() : ''}
               </span>
             ))}
           </div>

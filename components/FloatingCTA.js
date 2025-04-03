@@ -60,7 +60,7 @@ const FloatingCTA = () => {
         <div
           className={`floating-form-container ${isClosing ? "animate-fade-out" : "animate-fade-in"}`}
         >
-          <button className="close-button" onClick={toggleForm}>
+          <button className="button s tertiary close-button" onClick={toggleForm}>
             &times;
           </button>
           <WebsiteRequestForm onSubmit={handleSubmit} />
@@ -70,7 +70,7 @@ const FloatingCTA = () => {
       <button
         className="floating-cta-button"
         onClick={toggleForm}
-        aria-label="Suggest a resource"
+        aria-label="사이트 제안하기"
       >
         {isOpen ? "×" : "+"}
       </button>

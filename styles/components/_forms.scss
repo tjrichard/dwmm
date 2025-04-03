@@ -4,11 +4,13 @@
   border-radius: $radius-m;
   max-width: 600px;
   margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 
   h3 {
     margin-bottom: $spacing-m;
     font-weight: 600;
-    color: $black-a-darkest;
+    color: $black-darkest;
     text-align: left;
     font-size: 1.25rem;
   }
@@ -28,7 +30,9 @@
   }
 
   .form-group {
-    margin-bottom: $spacing-m;
+    width: 100%;
+    margin-bottom: $spacing-s;
+    box-sizing: border-box;
 
     label {
       display: block;
@@ -39,9 +43,12 @@
       font-size: 0.875rem;
     }
 
-    input,
-    select {
+    input[type="url"],
+    input[type="email"],
+    input[type="text"],
+    textarea {
       width: 100%;
+      box-sizing: border-box;
       padding: $spacing-sm;
       border: none;
       border-radius: $radius-s;
@@ -72,8 +79,8 @@
     margin-bottom: $spacing-m;
 
     input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
       margin: 0;
       accent-color: $primary-normal;
     }
@@ -130,9 +137,10 @@
 
   button[type="submit"] {
     width: 100%;
-    height: 40px;
     max-width: 100%;
-    background: $black-a-darkest;
+    box-sizing: border-box;
+    height: 40px;
+    background: $primary-a-normal;
     color: $white-a-pure;
     border: none;
     border-radius: $radius-s;
@@ -142,7 +150,7 @@
     transition: all 0.2s ease;
 
     &:hover {
-      background: $black-a-darker;
+      background: $primary-a-dark;
     }
 
     &:disabled {
@@ -161,6 +169,8 @@
   flex-direction: column;
   align-items: center;
   gap: $spacing-m;
+  width: 100%;
+  box-sizing: border-box;
 
   .thank-you-icon {
     width: 48px;
@@ -199,6 +209,8 @@
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
+    width: 100%;
+    box-sizing: border-box;
 
     &:hover {
       background: $black-a-darker;

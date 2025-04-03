@@ -57,17 +57,17 @@
   
     .close-button {
       position: absolute;
-      top: $spacing-xs;
-      right: $spacing-xs;
+      top: $spacing-s;
+      right: $spacing-s;
       background: none;
       border: none;
       font-size: 1.5rem;
+      width: 32px;
+      height: 32px;
       cursor: pointer;
-      color: $black-a-darker;
-  
-      &:hover {
-        color: $black-a-darkest;
-      }
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   
     .website-request-form {

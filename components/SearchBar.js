@@ -53,20 +53,26 @@ function SearchBar({
   }
 
   const handleCategorySelect = (category) => {
-    const newCategory = localSelectedCategory === category ? "" : category
-    setLocalSelectedCategory(newCategory)
+    // 문자열 변환 후 소문자로 처리
+    const categoryStr = String(category || '');
+    const categoryLower = categoryStr.toLowerCase();
+    const newCategory = localSelectedCategory === categoryLower ? "" : categoryLower;
+    setLocalSelectedCategory(newCategory);
     if (onCategorySelect) {
-      onCategorySelect(newCategory)
+      onCategorySelect(newCategory);
     }
   }
 
   const handleTagToggle = (tag) => {
-    const newTags = localSelectedTags.includes(tag)
-      ? localSelectedTags.filter((t) => t !== tag)
-      : [...localSelectedTags, tag]
-    setLocalSelectedTags(newTags)
+    // 문자열 변환 후 소문자로 처리
+    const tagStr = String(tag || '');
+    const tagLower = tagStr.toLowerCase();
+    const newTags = localSelectedTags.includes(tagLower)
+      ? localSelectedTags.filter((t) => t !== tagLower)
+      : [...localSelectedTags, tagLower];
+    setLocalSelectedTags(newTags);
     if (onTagSelect) {
-      onTagSelect(newTags)
+      onTagSelect(newTags);
     }
   }
 
@@ -89,7 +95,7 @@ function SearchBar({
             <div className="filter-badges">
               <button
                 type="button"
-                className={`button s text ${!localSelectedCategory ? "active" : "inactive"}`}
+                className={`button xs text ${!localSelectedCategory ? "active" : "inactive"}`}
                 onClick={() => handleCategorySelect("")}
               >
                 전체
@@ -98,12 +104,12 @@ function SearchBar({
                 <button
                   key={category}
                   type="button"
-                  className={`button s text ${
-                    localSelectedCategory === category ? "active" : "inactive"
+                  className={`button xs text ${
+                    localSelectedCategory === String(category || '').toLowerCase() ? "active" : "inactive"
                   }`}
                   onClick={() => handleCategorySelect(category)}
                 >
-                  {category}
+                  {String(category || '').toUpperCase()}
                 </button>
               ))}
             </div>
@@ -118,12 +124,12 @@ function SearchBar({
                 <button
                   key={tag}
                   type="button"
-                  className={`button s text ${
-                    localSelectedTags.includes(tag) ? "selected" : "inactive"
+                  className={`button xs text ${
+                    localSelectedTags.includes(String(tag || '').toLowerCase()) ? "selected" : "inactive"
                   }`}
                   onClick={() => handleTagToggle(tag)}
                 >
-                  {tag}
+                  {String(tag || '').toUpperCase()}
                 </button>
               ))}
             </div>

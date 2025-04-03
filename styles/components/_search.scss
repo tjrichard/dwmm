@@ -21,11 +21,12 @@
 
 form .search-input-container {
     width: 100%;
-    padding: $spacing-xs;
+    display: flex;
+    align-items: center;
     border: none;
     border-radius: $radius-s;
     font-size: 1rem;
-    height: 40px;
+    height: 28px;
     background: $black-a-lightest;
     transition: all 0.2s ease;
 
@@ -35,7 +36,8 @@ form .search-input-container {
 
     .search-input {
         flex: 1;
-        padding: $spacing-sm $spacing-m;
+        height: 100%;
+        padding: 0 $spacing-m;
         border: none;
         background: none;
         font-size: 1rem;
@@ -129,6 +131,40 @@ form .search-input-container {
       p {
         color: $black-a-darker;
       }
+  
+      .no-results-divider {
+        position: relative;
+        margin: $spacing-l 0;
+        color: $black-a-darker;
+        font-size: 0.875rem;
+  
+        &::before,
+        &::after {
+          content: "";
+          position: absolute;
+          top: 50%;
+          width: 100px;
+          height: 1px;
+          background-color: $black-a-lighter;
+        }
+  
+        &::before {
+          right: calc(50% + $spacing-m);
+        }
+  
+        &::after {
+          left: calc(50% + $spacing-m);
+        }
+      }
     }
-  }
+  }  
+
+.thank-you-container {
+    h3 {
+        font-weight: 600;
+    }
+    p {
+        margin-bottom: 0;
+    }
+}
   

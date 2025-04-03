@@ -1,0 +1,36 @@
+.bookmark-header-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+.bookmark-header {
+  padding: $spacing-sm;
+  display: flex;
+  align-items: center;
+  gap: $spacing-m;
+  justify-content: space-between;
+  border-bottom: 2px solid $black-darkest;
+  width: 100%;
+  margin: 0 auto;
+  background-color: $white-a-pure;
+}
+
+.bookmark-buttons {
+  display: flex;
+  gap: $spacing-m;
+  align-items: center;
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  
+  &:hover .dwmm-logo {
+    transform: scale(1.1);
+  }
+}
