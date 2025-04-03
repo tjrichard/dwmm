@@ -77,7 +77,7 @@ const ContentCard = ({ content }) => {
       className="content-card card"
       onClick={handleClick}
     >
-      <div className="card__content">
+      <div className="card__top-row">
         <div className="card__meta">
           <div className="card__category button s text active">{category}</div>
         <div className="card__arrow">

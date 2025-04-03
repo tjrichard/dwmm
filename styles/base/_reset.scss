@@ -50,8 +50,7 @@ table {
   border-collapse: collapse;
   border-spacing: 0;
 }
-input {
+input[type=text] {
   all: unset;
   text-align: left;
-  transition-duration: 0s;
 }

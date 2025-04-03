@@ -57,10 +57,8 @@
     // transform: translateY(-8px);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
 
-    .card__image-container {
-      .card__image {
-        transform: scale(1.05);
-      }
+    .card__image {
+      transform: scale(1.05);
     }
     .card__arrow {
       opacity: 1;
@@ -80,7 +78,7 @@
     height: 100%;
     aspect-ratio: 16/9;
     object-fit: cover;
-    transition: transform 0.5s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   &__arrow {
@@ -96,9 +94,20 @@
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transition: all 0.3s ease;
+    transform: translateY(0);
+    transition: opacity 0.2s ease, transform 0.2s ease;
     z-index: 2;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &__top-row {
+    display: flex;
+    flex-direction: column;
+    padding: $spacing-m;
+    height: auto;
+    overflow: visible;
+    background: $white-a-pure;
+    border-bottom: 2px solid $black-darkest;
   }
 
   &__content {
@@ -179,8 +188,7 @@
   border: none;
   border-radius: $radius-s;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.15s ease;
 
   &:hover {
     background-color: $black-a-lightest;
@@ -282,3 +290,53 @@
     }
   }
 }
+
+.no-results-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl;
+  width: 100%;
+  text-align: center;
+
+  .no-results-message {
+    margin-bottom: $spacing-l;
+    
+    h3 {
+      color: $black-darkest;
+      margin-bottom: $spacing-s;
+    }
+
+    p {
+      color: $black-a-darker;
+      margin-bottom: $spacing-m;
+    }
+
+    .no-results-divider {
+      position: relative;
+      margin: $spacing-l 0;
+      color: $black-a-darker;
+      font-size: 0.875rem;
+
+      &::before,
+      &::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 100px;
+        height: 1px;
+        background-color: $black-a-lighter;
+      }
+
+      &::before {
+        right: calc(50% + $spacing-m);
+      }
+
+      &::after {
+        left: calc(50% + $spacing-m);
+      }
+    }
+  }
+}
+

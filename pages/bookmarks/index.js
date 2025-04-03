@@ -9,6 +9,7 @@ import SearchBar from "../../components/SearchBar";
 import { supabase } from "../../lib/supabase";
 import { getUserVotedWebsites } from "../../lib/voteUtils";
 import SubscribeForm from "../../components/SubscribeForm.js";
+import WebsiteRequestForm from '../../components/website-request-form'
 
 // Number of items per page
 const ITEMS_PER_PAGE = 9;
@@ -221,23 +222,25 @@ export default function Bookmarks({
         onSearch={handleSearch}
       />
       
-      <ContentGrid
-        contents={bookmarks}
-        isSearching={loading}
-        lastBookmarkRef={lastBookmarkRef}
-      />
-
-      {loading && (
-        <div className="loading-spinner">
-          Loading more bookmarks...
+      {bookmarks.length === 0 && (searchQuery || selectedCategory || selectedTags.length > 0) ? (
+        <div className="no-results-container">
+          <div className="no-results-message">
+            <h3>검색 결과가 없습니다</h3>
+            <p>다른 검색어나 필터를 사용해보세요.</p>
+            <p className="no-results-divider">또는</p>
+            <WebsiteRequestForm />
+          </div>
         </div>
+      ) : bookmarks.length === 0 ? (
+        <WebsiteRequestForm />
+      ) : (
+        <ContentGrid
+          contents={bookmarks}
+          isSearching={loading}
+          lastBookmarkRef={lastBookmarkRef}
+        />
       )}
 
-      {!hasMore && bookmarks.length > 0 && (
-        <div className="no-more-content">
-          No more bookmarks to load
-        </div>
-      )}
       </div>
 
       <FloatingCTA />

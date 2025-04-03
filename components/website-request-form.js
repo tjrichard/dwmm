@@ -168,11 +168,11 @@ function WebsiteRequestForm() {
 
   return (
     <div className="website-request-form">
-      <h3>Suggest a Resource</h3>
+      <h3>사이트 추가 제안하기</h3>
       {message && <div className={`message ${isSuccess ? 'success' : 'error'}`}>{message}</div>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="url">Resource URL *</label>
+          <label htmlFor="url">URL *</label>
           <input
             type="url"
             id="url"
@@ -183,7 +183,7 @@ function WebsiteRequestForm() {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="email">Your Email</label>
+          <label htmlFor="email">이메일</label>
           <input
             type="email"
             id="email"
@@ -200,7 +200,7 @@ function WebsiteRequestForm() {
             onChange={e => setSubscribeConsent(e.target.checked)}
           />
           <label htmlFor="subscribeConsent">
-            I agree to receive updates about new design resources
+            업데이트 소식이 있을 때 알림을 받고 싶습니다.
           </label>
         </div>
         <button type="submit" className="button primary" disabled={isSubmitting}>

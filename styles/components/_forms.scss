@@ -52,7 +52,9 @@
 
       &:focus {
         outline: none;
-        background: $white-a-pure;
+        background: $black-a-lighter;
+        outline: 1px solid $black-a-light;
+        outline-offset: -1px;
       }
 
       &::placeholder {
