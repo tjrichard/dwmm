@@ -53,14 +53,16 @@ export async function getStaticProps() {
     }
 
     // 태그와 카테고리 추출
-    const allTags = [...new Set(bookmarks.flatMap(item => item.tags?.map(tag => tag.toLowerCase()) || []))];
+    // .toLowerCase() 제거하여 원본 대소문자 유지
+    const allTags = [...new Set(bookmarks.flatMap(item => item.tags || []))];
     const allCategories = [...new Set(bookmarks.map(item => item.category || ''))];
 
     // 추가 태그 및 카테고리 추출
     const { data: tags } = await supabase.from("bookmarks_tags").select("tag");
     const { data: categories } = await supabase.from("bookmarks_categories").select("category");
 
-    const additionalTags = tags?.map(tag => tag.tag?.toLowerCase()) || [];
+    // .toLowerCase() 제거
+    const additionalTags = tags?.map(tag => tag.tag) || [];
     const additionalCategories = categories?.map(category => category.category) || [];
 
     allTags.push(...additionalTags);
@@ -146,6 +148,7 @@ export default function Bookmarks({
         }
       }
       if (selectedTags.length > 0) {
+        // 원본 대소문자 태그로 쿼리
         selectedTags.forEach(tag => {
           query = query.contains('tags', [tag]);
         });
@@ -193,13 +196,6 @@ export default function Bookmarks({
     fetchBookmarks(page);
   }, [page, selectedCategory, selectedTags, searchQuery]);
 
-  // Reset pagination when filters change
-  useEffect(() => {
-    setPage(1);
-    setHasMore(true);
-    setBookmarks([]);
-  }, [selectedCategory, selectedTags, searchQuery]);
-  
   // 유저가 투표한 웹사이트 정보 가져오기
   useEffect(() => {
     async function fetchUserVotes() {
@@ -240,32 +236,38 @@ export default function Bookmarks({
   };
 
   const handleSearch = (params) => {
+    console.log("handleSearch triggered with:", params);
     setSearchQuery(params.query || '');
     setSelectedCategory(params.category || '');
     setSelectedTags(params.tags || []);
+    setPage(1); // 검색 조건 변경 시 페이지 1로 리셋
   };
 
   const handleCategoryClick = (category) => {
+    const categoryLower = String(category || '').toLowerCase();
     // 이미 선택된 카테고리면 필터 해제 (소문자 기준 비교)
-    if (selectedCategory === String(category || '').toLowerCase()) {
+    if (selectedCategory === categoryLower) {
       handleCategorySelect("");
     } else {
       handleCategorySelect(category);
     }
+    setPage(1); // 페이지 번호 리셋
     
     // 페이지 상단으로 스크롤
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleTagClick = (tag) => {
-    const tagLower = String(tag || '').toLowerCase();
+    // 원본 대소문자 태그로 상태 업데이트
+    const tagStr = String(tag || '');
     
-    // 이미 선택된 태그면 필터 해제, 아니면 추가
-    if (selectedTags.includes(tagLower)) {
-      setSelectedTags(prev => prev.filter(t => t !== tagLower));
+    // .toLowerCase() 제거
+    if (selectedTags.includes(tagStr)) {
+      setSelectedTags(prev => prev.filter(t => t !== tagStr));
     } else {
-      setSelectedTags(prev => [...prev, tagLower]);
+      setSelectedTags(prev => [...prev, tagStr]);
     }
+    setPage(1); // 페이지 번호 리셋
     
     // 페이지 상단으로 스크롤
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -282,8 +284,6 @@ export default function Bookmarks({
             tags={initialTags}
             selectedCategory={selectedCategory}
             selectedTags={selectedTags}
-            onCategorySelect={handleCategorySelect}
-            onTagSelect={handleTagSelect}
             onSearch={handleSearch}
           />
           

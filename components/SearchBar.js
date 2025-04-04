@@ -8,12 +8,21 @@ function SearchBar({
   tags = [],
   selectedCategory = "",
   selectedTags = [],
-  onCategorySelect,
-  onTagSelect
+  // onCategorySelect,
+  // onTagSelect
 }) {
   const [searchQuery, setSearchQuery] = useState("")
   const [localSelectedCategory, setLocalSelectedCategory] = useState(selectedCategory)
   const [localSelectedTags, setLocalSelectedTags] = useState(selectedTags)
+
+  // 외부에서 selectedCategory나 selectedTags가 변경될 때 로컬 상태 업데이트
+  useEffect(() => {
+    setLocalSelectedCategory(selectedCategory);
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    setLocalSelectedTags(selectedTags);
+  }, [selectedTags]);
 
   // Debounce helper
   const debounce = (func, delay) => {
@@ -39,12 +48,13 @@ function SearchBar({
       category: localSelectedCategory,
       tags: localSelectedTags
     }
+    // 검색어가 변경되거나, 카테고리/태그 선택 시 디바운스된 검색 실행
     debouncedSearch(searchParams)
   }, [searchQuery, localSelectedCategory, localSelectedTags, debouncedSearch])
 
   const handleSearch = (e) => {
     if (e) e.preventDefault()
-    // Immediate search on form submit
+    // Immediate search on form submit (Enter key)
     onSearch({
       query: searchQuery,
       category: localSelectedCategory,
@@ -58,22 +68,21 @@ function SearchBar({
     const categoryLower = categoryStr.toLowerCase();
     const newCategory = localSelectedCategory === categoryLower ? "" : categoryLower;
     setLocalSelectedCategory(newCategory);
-    if (onCategorySelect) {
-      onCategorySelect(newCategory);
-    }
+    // if (onCategorySelect) {
+    //   onCategorySelect(newCategory);
+    // }
   }
 
   const handleTagToggle = (tag) => {
-    // 문자열 변환 후 소문자로 처리
+    // 문자열 변환 후 원본 대소문자 유지
     const tagStr = String(tag || '');
-    const tagLower = tagStr.toLowerCase();
-    const newTags = localSelectedTags.includes(tagLower)
-      ? localSelectedTags.filter((t) => t !== tagLower)
-      : [...localSelectedTags, tagLower];
+    const newTags = localSelectedTags.includes(tagStr)
+      ? localSelectedTags.filter((t) => t !== tagStr)
+      : [...localSelectedTags, tagStr];
     setLocalSelectedTags(newTags);
-    if (onTagSelect) {
-      onTagSelect(newTags);
-    }
+    // if (onTagSelect) {
+    //   onTagSelect(newTags);
+    // }
   }
 
   return (
@@ -125,11 +134,11 @@ function SearchBar({
                   key={tag}
                   type="button"
                   className={`button xs text ${
-                    localSelectedTags.includes(String(tag || '').toLowerCase()) ? "selected" : "inactive"
+                    localSelectedTags.includes(String(tag || '')) ? "selected" : "inactive"
                   }`}
                   onClick={() => handleTagToggle(tag)}
                 >
-                  {String(tag || '').toUpperCase()}
+                  {String(tag || '')}
                 </button>
               ))}
             </div>

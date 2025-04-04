@@ -14,7 +14,7 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
     user_has_voted = false,
   } = content;
   
-  console.log(`Content ${id}: ${title} - user_has_voted: ${user_has_voted}`);
+  console.log(`Bookmark ${id}: ${title} - user_has_voted: ${user_has_voted}`);
 
   const getUtmLink = () => {
     const baseUrl = original_link;
@@ -31,9 +31,9 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
   const getWebsitePreviewImage = () => {
     try {
       const domain = new URL(original_link).hostname;
-      return `https://api.dicebear.com/7.x/identicon/svg?seed=${domain}&backgroundColor=f5f8ff`;
+      return `https://api.dicebear.com/7.x/identicon/svg?seed=${domain}`;
     } catch (e) {
-      return `https://api.dicebear.com/7.x/identicon/svg?seed=default&backgroundColor=f5f8ff`;
+      return `https://api.dicebear.com/7.x/identicon/svg?seed=default`;
     }
   };
 
@@ -45,6 +45,7 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
   const handleCategoryClick = (e, categoryValue) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log('카테고리 클릭:', categoryValue);
     if (onCategoryClick) {
       onCategoryClick(categoryValue);
     }
@@ -53,8 +54,9 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
   const handleTagClick = (e, tagValue) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log('태그 클릭:', tagValue);
     if (onTagClick) {
-      onTagClick(tagValue);
+      onTagClick(String(tagValue || ''));
     }
   };
 
@@ -146,7 +148,7 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
                 className="tag button xs text selected"
                 onClick={(e) => handleTagClick(e, tag)}
               >
-                {tag ? String(tag).toUpperCase() : ''}
+                {String(tag || '')}
               </span>
             ))}
           </div>

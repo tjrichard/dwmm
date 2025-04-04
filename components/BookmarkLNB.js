@@ -6,8 +6,6 @@ const BookmarkLNB = ({
   tags,
   selectedCategory,
   selectedTags,
-  onCategorySelect,
-  onTagSelect,
   onSearch
 }) => {
   return (
@@ -27,8 +25,6 @@ const BookmarkLNB = ({
           tags={tags}
           selectedCategory={selectedCategory}
           selectedTags={selectedTags}
-          onCategorySelect={onCategorySelect}
-          onTagSelect={onTagSelect}
           onSearch={onSearch}
         />
       </div>

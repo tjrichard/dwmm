@@ -21,36 +21,20 @@
 
 form .search-input-container {
     width: 100%;
-    display: flex;
-    align-items: center;
+    box-sizing: border-box;
+    padding: $spacing-xs;
     border: none;
     border-radius: $radius-s;
     font-size: 1rem;
-    height: 28px;
+    height: 40px;
     background: $black-a-lightest;
     transition: all 0.2s ease;
 
     &:focus {
         outline: 1px solid $black-a-lighter;
     }
-
-    .search-input {
-        flex: 1;
-        height: 100%;
-        padding: 0 $spacing-m;
-        border: none;
-        background: none;
-        font-size: 1rem;
-        color: $black-a-darkest;
-
-        &:focus {
-            outline: none;
-        }
-
-        &::placeholder {
-            color: $black-a-darker;
-            opacity: 0.5;
-        }
+    &::placeholder {
+        color: $black-a-dark;
     }
 }
 
