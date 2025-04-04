@@ -14,8 +14,6 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
     user_has_voted = false,
   } = content;
   
-  console.log(`Bookmark ${id}: ${title} - user_has_voted: ${user_has_voted}`);
-
   const getUtmLink = () => {
     const baseUrl = original_link;
     const utmParams = new URLSearchParams({
@@ -45,7 +43,6 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
   const handleCategoryClick = (e, categoryValue) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('카테고리 클릭:', categoryValue);
     if (onCategoryClick) {
       onCategoryClick(categoryValue);
     }
@@ -54,7 +51,6 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
   const handleTagClick = (e, tagValue) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('태그 클릭:', tagValue);
     if (onTagClick) {
       onTagClick(String(tagValue || ''));
     }

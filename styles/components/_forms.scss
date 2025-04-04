@@ -42,48 +42,14 @@
       text-align: left;
       font-size: 0.875rem;
     }
-
-    input[type="url"],
-    input[type="email"],
-    input[type="text"],
-    textarea {
-      width: 100%;
-      box-sizing: border-box;
-      padding: $spacing-sm;
-      border: none;
-      border-radius: $radius-s;
-      font-size: 1rem;
-      height: 40px;
-      background: $black-a-lightest;
-      transition: all 0.2s ease;
-
-      &:focus {
-        outline: none;
-        background: $black-a-lighter;
-        outline: 1px solid $black-a-light;
-        outline-offset: -1px;
-      }
-
-      &::placeholder {
-        color: $black-a-darker;
-        opacity: 0.5;
-      }
-    }
   }
 
   .checkbox-group {
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
     gap: $spacing-xs;
     margin-bottom: $spacing-m;
-
-    input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
-      margin: 0;
-      accent-color: $primary-normal;
-    }
 
     label {
       margin-bottom: 0;

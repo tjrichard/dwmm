@@ -19,25 +19,6 @@
     border-radius: $radius-s;
 }
 
-form .search-input-container {
-    width: 100%;
-    box-sizing: border-box;
-    padding: $spacing-xs;
-    border: none;
-    border-radius: $radius-s;
-    font-size: 1rem;
-    height: 40px;
-    background: $black-a-lightest;
-    transition: all 0.2s ease;
-
-    &:focus {
-        outline: 1px solid $black-a-lighter;
-    }
-    &::placeholder {
-        color: $black-a-dark;
-    }
-}
-
 .filter-container {
     display: flex;
     flex-wrap: wrap;
@@ -54,7 +35,7 @@ form .search-input-container {
     .filter-badges{
         display: flex;
         flex-wrap: wrap;
-        gap: $spacing-xs;
+        gap: 2px;
     }
     .category-filter,
     .tag-filter {

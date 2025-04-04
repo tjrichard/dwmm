@@ -138,17 +138,14 @@ export default function Bookmarks({
 
       // Apply filters
       if (selectedCategory) {
-        // initialCategories에서 대소문자 구분 없이 일치하는 카테고리 찾기
         const exactCategory = initialCategories.find(
           cat => cat.toLowerCase() === selectedCategory.toLowerCase()
         );
-        
         if (exactCategory) {
           query = query.eq("category", exactCategory);
         }
       }
       if (selectedTags.length > 0) {
-        // 원본 대소문자 태그로 쿼리
         selectedTags.forEach(tag => {
           query = query.contains('tags', [tag]);
         });
@@ -191,11 +188,11 @@ export default function Bookmarks({
     if (node) observer.current.observe(node);
   }, [loading, hasMore]);
 
-  // Fetch bookmarks when page changes
+  // Fetch bookmarks when page changes or filters change
   useEffect(() => {
     fetchBookmarks(page);
   }, [page, selectedCategory, selectedTags, searchQuery]);
-
+  
   // 유저가 투표한 웹사이트 정보 가져오기
   useEffect(() => {
     async function fetchUserVotes() {
@@ -215,17 +212,14 @@ export default function Bookmarks({
     }
     
     fetchUserVotes();
-  }, []);
+  }, []); // 최초 1회만 실행
 
   const handleCategorySelect = (category) => {
-    // 대소문자 구분 없는 카테고리 선택 - 검색용으로는 소문자 버전 저장
     const categoryStr = category ? String(category) : "";
     setSelectedCategory(categoryStr.toLowerCase());
   };
 
   const handleTagSelect = (tag) => {
-    // 대소문자 구분 없는 태그 선택
-    // tag가 문자열인지 확인하고 문자열이 아니면 변환
     const tagStr = String(tag || '');
     const tagLower = tagStr.toLowerCase();
     setSelectedTags(prev =>
@@ -236,65 +230,55 @@ export default function Bookmarks({
   };
 
   const handleSearch = (params) => {
-    console.log("handleSearch triggered with:", params);
     setSearchQuery(params.query || '');
     setSelectedCategory(params.category || '');
     setSelectedTags(params.tags || []);
-    setPage(1); // 검색 조건 변경 시 페이지 1로 리셋
+    setPage(1); 
   };
 
   const handleCategoryClick = (category) => {
     const categoryLower = String(category || '').toLowerCase();
-    // 이미 선택된 카테고리면 필터 해제 (소문자 기준 비교)
     if (selectedCategory === categoryLower) {
       handleCategorySelect("");
     } else {
       handleCategorySelect(category);
     }
-    setPage(1); // 페이지 번호 리셋
-    
-    // 페이지 상단으로 스크롤
+    setPage(1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleTagClick = (tag) => {
-    // 원본 대소문자 태그로 상태 업데이트
     const tagStr = String(tag || '');
-    
-    // .toLowerCase() 제거
     if (selectedTags.includes(tagStr)) {
       setSelectedTags(prev => prev.filter(t => t !== tagStr));
     } else {
       setSelectedTags(prev => [...prev, tagStr]);
     }
-    setPage(1); // 페이지 번호 리셋
-    
-    // 페이지 상단으로 스크롤
+    setPage(1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <>
+    <div className="bookmarks-page-wrapper">
       <BookmarkHeader />
-      <div className="container">
-        <Meta title={title} description={description} />
-        <div className="bookmarks-main-container">
-          <LNB 
-            categories={initialCategories}
-            tags={initialTags}
-            selectedCategory={selectedCategory}
-            selectedTags={selectedTags}
-            onSearch={handleSearch}
-          />
-          
+      <Meta title={title} description={description} />
+      <div 
+        className="bookmarks-layout-container"
+      >
+        <LNB 
+          categories={initialCategories}
+          tags={initialTags}
+          selectedCategory={selectedCategory}
+          selectedTags={selectedTags}
+          onSearch={handleSearch}
+        />
+        <div className="content-scroll-wrapper">
           {bookmarks.length === 0 && (searchQuery || selectedCategory || selectedTags.length > 0) ? (
             <div className="no-results-container">
-              <div className="no-results-message">
-                <h3>검색 결과가 없습니다</h3>
-                <p>다른 검색어나 필터를 사용해보세요.</p>
-                <p className="no-results-divider">또는</p>
-                <WebsiteRequestForm />
-              </div>
+              <h3>검색 결과가 없습니다</h3>
+              <p>다른 검색어나 필터를 사용해보세요.</p>
+              <p className="no-results-divider">또는</p>
+              <WebsiteRequestForm />
             </div>
           ) : bookmarks.length === 0 ? (
             <WebsiteRequestForm />
@@ -307,11 +291,10 @@ export default function Bookmarks({
               onTagClick={handleTagClick}
             />
           )}
+          <FloatingCTA />
+          <SubscribeForm />
         </div>
-
-        <FloatingCTA />
-        <SubscribeForm />
       </div>
-    </>
+    </div>
   );
 }

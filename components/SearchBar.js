@@ -33,45 +33,51 @@ function SearchBar({
     }
   }
 
-  // Create debounced search callback
-  const debouncedSearch = useCallback(
-    debounce((params) => {
-      onSearch(params)
+  // Create debounced search callback for query input
+  const debouncedQuerySearch = useCallback(
+    debounce((query) => {
+      onSearch({
+        query: query.trim(),
+        category: localSelectedCategory,
+        tags: localSelectedTags
+      });
     }, 500),
-    [onSearch]
-  )
+    [onSearch, localSelectedCategory, localSelectedTags] // category/tags 변경 시에도 debounce 콜백 재생성
+  );
 
-  // Trigger search on any filter change
+  // Trigger debounced search only when searchQuery changes
   useEffect(() => {
-    const searchParams = {
-      query: searchQuery.trim(),
-      category: localSelectedCategory,
-      tags: localSelectedTags
-    }
-    // 검색어가 변경되거나, 카테고리/태그 선택 시 디바운스된 검색 실행
-    debouncedSearch(searchParams)
-  }, [searchQuery, localSelectedCategory, localSelectedTags, debouncedSearch])
+    debouncedQuerySearch(searchQuery);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery]); // searchQuery만 의존성으로 가짐
 
   const handleSearch = (e) => {
     if (e) e.preventDefault()
     // Immediate search on form submit (Enter key)
+    // console.log(...)
+    // 디바운스 취소 및 즉시 검색
+    // clearTimeout(debouncedQuerySearch); // debounce HOF 구조상 clearTimeout 직접 호출 불가
     onSearch({
       query: searchQuery,
       category: localSelectedCategory,
       tags: localSelectedTags,
-    })
-  }
+    });
+  };
 
   const handleCategorySelect = (category) => {
     // 문자열 변환 후 소문자로 처리
     const categoryStr = String(category || '');
     const categoryLower = categoryStr.toLowerCase();
     const newCategory = localSelectedCategory === categoryLower ? "" : categoryLower;
+    // console.log(...)
     setLocalSelectedCategory(newCategory);
-    // if (onCategorySelect) {
-    //   onCategorySelect(newCategory);
-    // }
-  }
+    // 카테고리 변경 시 즉시 onSearch 호출
+    onSearch({
+      query: searchQuery,
+      category: newCategory,
+      tags: localSelectedTags
+    });
+  };
 
   const handleTagToggle = (tag) => {
     // 문자열 변환 후 원본 대소문자 유지
@@ -79,11 +85,15 @@ function SearchBar({
     const newTags = localSelectedTags.includes(tagStr)
       ? localSelectedTags.filter((t) => t !== tagStr)
       : [...localSelectedTags, tagStr];
+    // console.log(...)
     setLocalSelectedTags(newTags);
-    // if (onTagSelect) {
-    //   onTagSelect(newTags);
-    // }
-  }
+    // 태그 변경 시 즉시 onSearch 호출
+    onSearch({
+      query: searchQuery,
+      category: localSelectedCategory,
+      tags: newTags
+    });
+  };
 
   return (
     <div className="search-container">

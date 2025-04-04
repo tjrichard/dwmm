@@ -31,7 +31,7 @@ function MyApp({ Component, pageProps }) {
     <>
       {!isBookmarksPage && <Header />}
       <Component {...pageProps} />
-      <Footer />
+      {!isBookmarksPage && <Footer />}
     </>
   );
 }

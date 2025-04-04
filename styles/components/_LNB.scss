@@ -1,12 +1,13 @@
 .LNB-section {
   color: $black-a-darkest;
-  padding: calc($spacing-xl * 3) 0 calc($spacing-xl * 2);
   text-align: center;
-  position: relative;
-  overflow: hidden;
-  margin-bottom: $spacing-xl;
+  height: 100%;
+  overflow-y: auto;
   max-width: 360px;
   padding: $spacing-ml;
+  box-sizing: border-box;
+  border-right: 1px solid $black-lighter;
+  width: 360px;
 
   .LNB-content {
     max-width: 360px;
@@ -19,9 +20,9 @@
 
   h1 {
     font-size: 3.5rem;
-    font-weight: 700;
+    font-weight: 1000;
     margin-bottom: $spacing-m;
-    line-height: 1.2;
+    line-height: 1;
     text-align: left;
     color: $black-a-pure;
 
@@ -39,6 +40,16 @@
     @media (max-width: 768px) {
       font-size: 1.25rem;
     }
+  }
+
+  @media (max-width: 768px) {
+    width: auto;
+    max-width: none;
+    height: auto;
+    overflow: visible;
+    border-right: none;
+    border-bottom: 2px solid $black-darkest;
+    padding: $spacing-ml $spacing-ml $spacing-l;
   }
 }
   
