@@ -1,3 +1,12 @@
+.ascii-showcase {
+  width: 1920px;
+  height: 1080px;
+  overflow: scroll;
+  white-space: pre;
+  user-select: none;
+  max-height: 100%;
+}
+
 .ascii-art {
   font-family: monospace;
   line-height: 1;

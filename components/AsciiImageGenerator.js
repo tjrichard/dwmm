@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import { useMotionValue, useSpring } from 'framer-motion';
+import { useEffect, useRef, useState, useMemo, useCallback, memo } from 'react';
 
 // ASCII 문자 관련 상수
 const ASCII_CONSTANTS = {
@@ -10,24 +9,7 @@ const ASCII_CONSTANTS = {
   MAX_BRIGHTNESS: 1
 };
 
-// 미리 정의된 캐릭터 세트 (기본값)
-const DEFAULT_CHARACTER_SETS = {
-  blocks: '█▓▒░ ',
-  detailed: '$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^`\'.',
-  standard: '@%#*+=-:.',
-  binary: '01',
-  hex: '0123456789ABCDEF'
-};
-
 // 유틸리티 함수들
-const mapRange = (value, fromLow, fromHigh, toLow, toHigh) => {
-  if (fromLow === fromHigh) {
-    return toLow;
-  }
-  const percentage = (value - fromLow) / (fromHigh - fromLow);
-  return toLow + percentage * (toHigh - toLow);
-};
-
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
 // 캔버스 크기 계산 함수
@@ -118,89 +100,8 @@ const measureFontAspectRatio = (font) => {
   const width = temp.offsetWidth;
   const height = temp.offsetHeight;
   document.body.removeChild(temp);
-  return width / height;
-};
-
-// 커서 위치 추적 훅
-const useFollowCursor = (smoothing = 0, containerRef) => {
-  const movementTransition = {
-    damping: 100,
-    stiffness: mapRange(smoothing, 0, 100, 2000, 50)
-  };
-  
-  const hasSpring = smoothing !== 0;
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const springX = useSpring(mouseX, movementTransition);
-  const springY = useSpring(mouseY, movementTransition);
-  
-  const previousScrollXRef = useRef(0);
-  const previousScrollYRef = useRef(0);
-  const [initialized, setInitialized] = useState(false);
-  const isInitializedRef = useRef(false);
-  
-  useEffect(() => {
-    const handleMouseMove = event => {
-      if (!containerRef.current) return;
-      
-      const rect = containerRef.current.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-      
-      // 백분율로 변환
-      const xPercent = rect.width === 0 ? 0 : x / rect.width;
-      const yPercent = rect.height === 0 ? 0 : y / rect.height;
-      
-      mouseX.set(xPercent);
-      mouseY.set(yPercent);
-      
-      if (!isInitializedRef.current) {
-        springX.jump(xPercent);
-        springY.jump(yPercent);
-        isInitializedRef.current = true;
-        setInitialized(true);
-      }
-    };
-    
-    const handleScroll = () => {
-      if (!containerRef.current || !isInitializedRef.current) return;
-      
-      const rect = containerRef.current.getBoundingClientRect();
-      const scrollX = window.scrollX || window.pageXOffset || document.documentElement.scrollLeft;
-      const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
-      
-      // 스크롤 변화량 계산
-      const deltaX = scrollX - previousScrollXRef.current;
-      const deltaY = scrollY - previousScrollYRef.current;
-      
-      // 이전 스크롤 위치 업데이트
-      previousScrollXRef.current = scrollX;
-      previousScrollYRef.current = scrollY;
-      
-      // 스크롤 변화량을 백분율로 변환
-      const deltaXPercent = rect.width === 0 ? 0 : deltaX / rect.width;
-      const deltaYPercent = rect.height === 0 ? 0 : deltaY / rect.height;
-      
-      // 스크롤 변화량으로 위치 업데이트
-      mouseX.set(mouseX.get() + deltaXPercent);
-      mouseY.set(mouseY.get() + deltaYPercent);
-    };
-    
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('scroll', handleScroll);
-    
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [containerRef, mouseX, mouseY, springX, springY]);
-  
-  return {
-    initialized,
-    initializedRef: isInitializedRef,
-    x: hasSpring ? springX : mouseX,
-    y: hasSpring ? springY : mouseY
-  };
+  // 높이가 0인 경우 에러 방지
+  return height === 0 ? ASCII_CONSTANTS.DEFAULT_CHAR_ASPECT_RATIO : width / height;
 };
 
 // ASCII 변환 유틸리티 함수들
@@ -554,556 +455,512 @@ const generateASCII = (img, props, canvas, ctx, cursorX, cursorY, cursorInitiali
 };
 
 /**
- * AsciiImageGenerator 컴포넌트
- * 이미지를 ASCII 아트로 변환하고 다양한 효과와 스타일을 적용합니다.
+ * 이미지에서 픽셀 데이터를 추출하는 함수 (jitter 효과 반영)
+ * @param {HTMLImageElement} img - 원본 이미지 요소
+ * @param {object} props - 컴포넌트 속성
+ * @param {HTMLCanvasElement} canvas - 오프스크린 캔버스
+ * @param {CanvasRenderingContext2D} ctx - 캔버스 컨텍스트
+ * @param {number} seed - Jitter 효과를 위한 랜덤 시드
+ * @returns {object} - { pixelData: [{r, g, b, brightness}], asciiWidth, asciiHeight }
  */
-const AsciiImageGenerator = ({
+const extractPixelData = (img, props, canvas, ctx, seed) => {
+  const {
+    outputWidth,
+    brightness: brightVal = 0,
+    contrast: contrastVal = 0,
+    blur: blurValue = 0,
+    invertColors: invertEnabled = false,
+    font = {},
+    enableJitter = false,
+  } = props;
+
+  const contrastFactor = 259 * (contrastVal + 255) / (255 * (259 - contrastVal));
+  const fontAspectRatio = measureFontAspectRatio(font);
+  const asciiWidth = outputWidth > 0 ? outputWidth : 100;
+  const asciiHeight = Math.max(1, Math.round(img.height / img.width * asciiWidth * fontAspectRatio));
+
+  canvas.width = Math.max(1, asciiWidth);
+  canvas.height = Math.max(1, asciiHeight);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.filter = blurValue > 0 ? `blur(${blurValue}px)` : 'none';
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+  const pixelData = [];
+  const rng = new SeededRandom(seed);
+
+  for (let i = 0; i < data.length; i += 4) {
+    let r = data[i];
+    let g = data[i + 1];
+    let b = data[i + 2];
+
+    if (invertEnabled) {
+        r = 255 - r;
+        g = 255 - g;
+        b = 255 - b;
+    }
+
+    r = clamp(contrastFactor * (r - 128) + 128 + brightVal, 0, 255);
+    g = clamp(contrastFactor * (g - 128) + 128 + brightVal, 0, 255);
+    b = clamp(contrastFactor * (b - 128) + 128 + brightVal, 0, 255);
+
+    let brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+    if (enableJitter) {
+      const noise = (rng.next() - 0.5) * 0.1;
+      brightness = clamp(brightness + noise, 0, 1);
+    }
+
+    pixelData.push({ r, g, b, brightness });
+  }
+
+  return { pixelData, asciiWidth: canvas.width, asciiHeight: canvas.height };
+};
+
+/**
+ * 픽셀 데이터를 기반으로 ASCII 문자 데이터 배열 생성
+ * @param {Array} pixelData - 픽셀 데이터 배열 [{r, g, b, brightness}]
+ * @param {number} asciiWidth - ASCII 아트 너비
+ * @param {number} asciiHeight - ASCII 아트 높이
+ * @param {object} props - 컴포넌트 속성
+ * @returns {Array} - [{ char, color, x, y, key }] 형태의 문자 데이터 배열
+ */
+const generateAsciiData = (pixelData, asciiWidth, asciiHeight, props) => {
+  const {
+    characterSet = 'detailed',
+    customCharacterSet,
+    characterSets,
+  } = props;
+
+  const effectiveCharacterSets = characterSets && typeof characterSets === 'object' ? characterSets : DEFAULT_CHARACTER_SETS;
+  let gradient;
+
+  if (characterSet === 'custom') {
+    gradient = typeof customCharacterSet === 'string' && customCharacterSet.length > 0 ? customCharacterSet : ' ';
+  } else {
+    gradient = effectiveCharacterSets[characterSet] || DEFAULT_CHARACTER_SETS.detailed;
+  }
+
+  if (typeof gradient !== 'string' || gradient.length === 0) {
+    console.warn(`[ASCII] Invalid gradient for charset "${characterSet}", falling back to detailed.`);
+    gradient = DEFAULT_CHARACTER_SETS.detailed;
+  }
+
+  const nLevels = gradient.length;
+  const asciiData = [];
+
+  for (let y = 0; y < asciiHeight; y++) {
+    for (let x = 0; x < asciiWidth; x++) {
+      const index = y * asciiWidth + x;
+      if (index >= pixelData.length) continue;
+
+      const pixel = pixelData[index];
+
+      const clampedBrightness = clamp(pixel.brightness, 0, 1);
+      let charIndex = Math.round(clampedBrightness * (nLevels - 1));
+      charIndex = clamp(charIndex, 0, nLevels - 1);
+
+      const char = gradient.charAt(charIndex);
+
+      const color = `rgb(${Math.round(pixel.r)}, ${Math.round(pixel.g)}, ${Math.round(pixel.b)})`;
+
+      asciiData.push({ char, color, x, y, key: `${x}-${y}` });
+    }
+  }
+
+  return asciiData;
+};
+
+/**
+ * AsciiImageGenerator 컴포넌트 (Web Worker 및 Canvas 렌더링 적용)
+ */
+const AsciiImageGeneratorComponent = ({
   imageUrl,
   alt = '',
   characterSet = 'detailed',
   customCharacterSet = '',
-  color1 = '#000000',
-  color2 = '#FFFFFF',
-  ditheringMode = 'none',
-  whiteMode = 'ignore',
   invertColors = false,
   blur = 0,
   brightness = 0,
   contrast = 0,
-  enableTransparency = false,
-  transparencyThreshold = 0.9,
-  invertTransparency = false,
   width = '100%',
   height = 'auto',
-  extractColors = false,
   outputWidth = 100,
-  cursor = null,
-  staticEffect = null,
-  characterSets = null,
+  characterSets = null, // Worker로 전달됨
   font = {
-    fontFamily: 'monospace',
+    fontFamily: '"Fragment Mono", monospace',
     fontSize: '10px',
-    lineHeight: 1
-  }
+    lineHeight: 1,
+    fontWeight: 'normal',
+    letterSpacing: 'normal'
+  },
+  enableJitter = false,
+  jitterInterval = 100
 }) => {
-  const canvasRef = useRef(null);
-  const maskCanvasRef = useRef(null);
   const containerRef = useRef(null);
-  const asciiRef = useRef(null);
-  const extractColorsRef = useRef(extractColors);
-  const ctxRef = useRef(null);
-  const maskCtxRef = useRef(null);
-  const staticIntervalRef = useRef(null);
+  const canvasRef = useRef(null); // 화면에 표시될 Canvas
+  const offscreenCanvasRef = useRef(null); // 이미지 처리를 위한 오프스크린 Canvas
+  const workerRef = useRef(null);
   const rngSeedRef = useRef(Math.random());
-  
-  const [ascii, setAscii] = useState('');
-  const [grayValues, setGrayValues] = useState([]);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [error, setError] = useState(null);
-  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const [extractedColors, setExtractedColors] = useState({ color1, color2 });
-  const [colorCounts, setColorCounts] = useState({});
+  const jitterIntervalRef = useRef(null);
+  const lastDrawnDataRef = useRef(null); // 마지막으로 그린 데이터 참조
+  const fontLoadInitiatedRef = useRef(false); // 폰트 로드 시작 여부
+
   const [img, setImg] = useState(null);
-  const [cursorImg, setCursorImg] = useState(null);
-  
-  // 커서 효과를 위한 상태
-  const { x: cursorX, y: cursorY, initialized: cursorInitialized, initializedRef: cursorInitializedRef } = 
-    useFollowCursor(cursor?.smoothing || 0, asciiRef);
-  
-  // 마지막 처리된 값 추적
-  const lastValuesRef = useRef({
-    cursorX: 0,
-    cursorY: 0,
-    cursorInitialized,
-    outputWidth,
-    characterSet,
-    customCharacterSet,
-    characterSets,
-    ditheringMode,
-    invertColors,
-    whiteMode,
-    blur,
-    brightness,
-    contrast,
-    cursorStyle: cursor?.style,
-    cursorInvert: cursor?.invert,
-    cursorWidth: cursor?.width,
-    font
-  });
-  
-  // extractColors prop이 변경되면 ref 업데이트
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [isFontReady, setIsFontReady] = useState(false); // 폰트 로딩 상태
+  const [workerError, setWorkerError] = useState(null);
+  const [statusMessage, setStatusMessage] = useState('이미지 로딩 중...'); // 상태 메시지
+  const [asciiResult, setAsciiResult] = useState({ data: [], width: 0, height: 0 }); // Worker 결과 저장
+
+  // 1. 폰트 로딩 상태 확인
   useEffect(() => {
-    extractColorsRef.current = extractColors;
-  }, [extractColors]);
-  
-  // 이미지 로드
+    if (!font.fontFamily || fontLoadInitiatedRef.current) return;
+
+    fontLoadInitiatedRef.current = true;
+    setStatusMessage('폰트 로딩 중...');
+    document.fonts.load(`1em ${font.fontFamily}`).then(() => {
+      // console.log('Font loaded:', font.fontFamily);
+      setIsFontReady(true);
+      setStatusMessage('폰트 로드 완료');
+    }).catch(err => {
+      console.error('Font loading error:', err);
+      // 폰트 로딩 실패 시 대체 폰트 사용 또는 에러 처리
+      setIsFontReady(true); // 일단 진행하도록 설정 (기본 폰트 사용)
+      setStatusMessage('폰트 로딩 실패, 기본 폰트로 진행');
+    });
+  }, [font.fontFamily]);
+
+  // 2. 이미지 로딩
   useEffect(() => {
+    setImageLoaded(false);
+    setAsciiResult({ data: [], width: 0, height: 0 }); // 이미지 변경 시 초기화
+    setWorkerError(null);
+    setStatusMessage('이미지 URL 분석 중...');
+
     if (imageUrl) {
+      setStatusMessage('이미지 로딩 중...');
       const image = new Image();
       image.crossOrigin = 'anonymous';
       image.onload = () => {
         setImg(image);
         setImageLoaded(true);
-        setError(null);
+        setStatusMessage('이미지 로드 완료');
       };
-      image.onerror = () => {
-        setError('이미지를 로드할 수 없습니다.');
+      image.onerror = (err) => {
+        console.error("Image loading error:", err);
+        setWorkerError('이미지를 로드할 수 없습니다.');
+        setStatusMessage('이미지 로드 실패');
+        setImg(null);
         setImageLoaded(false);
       };
       image.src = imageUrl;
-      
+
       return () => {
         image.onload = null;
         image.onerror = null;
       };
     } else {
+      setStatusMessage('이미지 URL이 제공되지 않았습니다.');
+      setWorkerError(null);
+      setImg(null);
       setImageLoaded(false);
-      setError('이미지 URL이 제공되지 않았습니다.');
     }
   }, [imageUrl]);
-  
-  // 커서 이미지 로드 (필요한 경우)
+
+  // 3. Web Worker 초기화 및 메시지 핸들러 설정
   useEffect(() => {
-    if (cursor?.style === 'image' && cursor?.image?.src) {
-      const image = new Image();
-      image.crossOrigin = 'anonymous';
-      image.onload = () => {
-        setCursorImg(image);
-      };
-      image.src = cursor.image.src;
-      
-      return () => {
-        image.onload = null;
-      };
-    } else {
-      setCursorImg(null);
-    }
-  }, [cursor?.style, cursor?.image]);
-  
-  // 캔버스 및 컨텍스트 초기화
-  useEffect(() => {
-    // 캔버스 초기화
-    if (!canvasRef.current) {
-      canvasRef.current = document.createElement('canvas');
-      ctxRef.current = canvasRef.current.getContext('2d', { willReadFrequently: true });
-    }
-    
-    if (!maskCanvasRef.current) {
-      maskCanvasRef.current = document.createElement('canvas');
-      maskCtxRef.current = maskCanvasRef.current.getContext('2d', { willReadFrequently: true });
-    }
-    
-    return () => {
-      if (canvasRef.current) {
-        canvasRef.current.remove();
-      }
-      
-      if (maskCanvasRef.current) {
-        maskCanvasRef.current.remove();
-      }
-      
-      if (staticIntervalRef.current) {
-        clearInterval(staticIntervalRef.current);
-        staticIntervalRef.current = null;
-      }
-    };
-  }, []);
-  
-  // 처리할 속성 업데이트
-  useEffect(() => {
-    lastValuesRef.current = {
-      ...lastValuesRef.current,
-      outputWidth,
-      characterSet,
-      customCharacterSet,
-      characterSets,
-      ditheringMode,
-      invertColors,
-      whiteMode,
-      blur,
-      brightness,
-      contrast,
-      font,
-      cursorStyle: cursor?.style,
-      cursorInvert: cursor?.invert,
-      cursorWidth: cursor?.width
-    };
-  }, [
-    outputWidth, characterSet, customCharacterSet, characterSets, ditheringMode, 
-    invertColors, whiteMode, blur, brightness, contrast, font,
-    cursor?.style, cursor?.invert, cursor?.width
-  ]);
-  
-  // 메인 이미지 처리 로직
-  useEffect(() => {
-    if (img && ctxRef.current && maskCtxRef.current) {
-      const loadImage = async () => {
-        try {
-          const { ascii: asciiText, grayValues: grayVals } = generateASCII(
-            img,
-            lastValuesRef.current,
-            canvasRef.current,
-            ctxRef.current,
-            cursorX,
-            cursorY,
-            cursorInitializedRef,
-            asciiRef,
-            cursorImg,
-            rngSeedRef
-          );
-          
-          setAscii(asciiText);
-          setGrayValues(grayVals);
-          
-          // 그라디언트 색상으로 마스크 업데이트
-          const { outputWidth: asciiWidth } = lastValuesRef.current;
-          const fontAspectRatio = measureFontAspectRatio(font);
-          const asciiHeight = Math.round(img.height / img.width * asciiWidth * fontAspectRatio);
-          
-          maskCanvasRef.current.width = asciiWidth;
-          maskCanvasRef.current.height = asciiHeight;
-          
-          const imageData = maskCtxRef.current.getImageData(0, 0, asciiWidth, asciiHeight);
-          const data = imageData.data;
-          
-          for (let i = 0; i < grayVals.length; i++) {
-            const gray = grayVals[i];
-            const percent = gray / 255;
-            
-            // 선형 보간으로 색상 계산
-            const r1 = parseInt(color1.slice(1, 3), 16);
-            const g1 = parseInt(color1.slice(3, 5), 16);
-            const b1 = parseInt(color1.slice(5, 7), 16);
-            
-            const r2 = parseInt(color2.slice(1, 3), 16);
-            const g2 = parseInt(color2.slice(3, 5), 16);
-            const b2 = parseInt(color2.slice(5, 7), 16);
-            
-            const r = Math.round(r1 + (r2 - r1) * percent);
-            const g = Math.round(g1 + (g2 - g1) * percent);
-            const b = Math.round(b1 + (b2 - b1) * percent);
-            
-            const idx = i * 4;
-            data[idx] = r;
-            data[idx + 1] = g;
-            data[idx + 2] = b;
-            data[idx + 3] = 255;
-          }
-          
-          maskCtxRef.current.putImageData(imageData, 0, 0);
-          
-          // 컨테이너 크기 설정
-          setContainerSize({ width: asciiWidth, height: asciiHeight });
-          
-          // 색상 추출 (옵션)
-          if (extractColorsRef.current) {
-            const imageData = ctxRef.current.getImageData(0, 0, asciiWidth, asciiHeight);
-            const colors = extractMainColors(imageData, asciiWidth, asciiHeight);
-            setExtractedColors(colors);
-          }
-        } catch (error) {
-          console.error('Error generating ASCII:', error);
-        }
-      };
-      
-      let needsUpdate = false;
-      
-      // 모션 값 변경 구독
-      const unsubscribeX = cursorX.on('change', () => {
-        needsUpdate = true;
-      });
-      
-      const unsubscribeY = cursorY.on('change', () => {
-        needsUpdate = true;
-      });
-      
-      // 변경 사항을 확인하기 위한 인터벌 설정
-      const intervalId = setInterval(() => {
-        if (needsUpdate) {
-          const currentValues = {
-            ...lastValuesRef.current,
-            cursorInitialized: cursorInitializedRef.current,
-            cursorX: cursorX.get(),
-            cursorY: cursorY.get()
-          };
-          
-          // 값이 변경되었는지 확인
-          const hasChanged = Object.entries(currentValues).some(
-            ([key, value]) => lastValuesRef.current[key] !== value
-          );
-          
-          if (hasChanged) {
-            loadImage();
-            lastValuesRef.current = currentValues;
-          }
-          
-          needsUpdate = false;
-        }
-      }, 24);
-      
-      // 정적 효과 인터벌 설정 (활성화된 경우)
-      if (staticEffect && staticEffect.interval > 0) {
-        // 기존 인터벌 정리
-        if (staticIntervalRef.current) {
-          clearInterval(staticIntervalRef.current);
-        }
-        
-        // 정적 효과용 새 인터벌 생성
-        staticIntervalRef.current = setInterval(() => {
-          rngSeedRef.current = Math.random();
-          loadImage();
-        }, staticEffect.interval * 1000);
-      } else if (staticIntervalRef.current) {
-        // 정적 효과가 비활성화된 경우 인터벌 정리
-        clearInterval(staticIntervalRef.current);
-        staticIntervalRef.current = null;
-      }
-      
-      // 초기 로드
-      loadImage();
-      
-      return () => {
-        clearInterval(intervalId);
-        if (staticIntervalRef.current) {
-          clearInterval(staticIntervalRef.current);
-          staticIntervalRef.current = null;
-        }
-        unsubscribeX();
-        unsubscribeY();
-      };
-    }
-  }, [img, cursorX, cursorY, cursorImg, staticEffect, color1, color2, font, characterSets, characterSet]);
-  
-  // 이미지에서 주요 색상을 추출하는 함수 (기존과 동일)
-  const extractMainColors = (imgData, imgWidth, imgHeight) => {
-    const pixels = imgData.data;
-    let newColorCounts = {};
-    let dominantColors = [];
-    
-    // 모든 픽셀을 스캔하고 색상 빈도 계산
-    for (let i = 0; i < pixels.length; i += 4) {
-      const r = pixels[i];
-      const g = pixels[i + 1];
-      const b = pixels[i + 2];
-      const a = pixels[i + 3];
-      
-      // 투명 픽셀은 건너뜀
-      if (a < 128) continue;
-      
-      // 유사한 색상을 그룹화하기 위해 색상값을 양자화
-      const quantizedR = Math.round(r / 10) * 10;
-      const quantizedG = Math.round(g / 10) * 10;
-      const quantizedB = Math.round(b / 10) * 10;
-      
-      const key = `${quantizedR},${quantizedG},${quantizedB}`;
-      if (!newColorCounts[key]) {
-        newColorCounts[key] = {
-          count: 0,
-          r: quantizedR,
-          g: quantizedG,
-          b: quantizedB,
-          originalPixels: []
-        };
-      }
-      
-      // 원본 색상 샘플 저장 (최대 10개)
-      if (newColorCounts[key].originalPixels.length < 10) {
-        newColorCounts[key].originalPixels.push({ r, g, b });
-      }
-      
-      newColorCounts[key].count++;
-    }
-    
-    // colorCounts 상태 업데이트
-    setColorCounts(newColorCounts);
-    
-    // 색상 빈도순으로 정렬
-    const sortedColors = Object.values(newColorCounts).sort((a, b) => b.count - a.count);
-    
-    // 상위 10개 색상 선택
-    const topColors = sortedColors.slice(0, 10);
-    
-    // 색상을 RGB에서 HEX로 변환하는 함수
-    const rgbToHex = (r, g, b) => {
-      return '#' + [r, g, b].map(x => {
-        const hex = x.toString(16);
-        return hex.length === 1 ? '0' + hex : hex;
-      }).join('');
-    };
-    
-    // 가장 지배적인 색상과 가장 밝은 색상 찾기
-    let dominantColor = { r: 0, g: 0, b: 0 };
-    let brightestColor = { r: 255, g: 255, b: 255 };
-    let accentColor = { r: 0, g: 0, b: 255 }; // 강조색 (기본 파란색)
-    
-    if (topColors.length > 0) {
-      // 지배적인 색상 (가장 빈도가 높은 색상)
-      const mainColor = topColors[0];
-      
-      // 원본 픽셀의 평균을 계산하여 더 정확한 색상 얻기
-      if (mainColor.originalPixels.length > 0) {
-        const sumR = mainColor.originalPixels.reduce((sum, p) => sum + p.r, 0);
-        const sumG = mainColor.originalPixels.reduce((sum, p) => sum + p.g, 0);
-        const sumB = mainColor.originalPixels.reduce((sum, p) => sum + p.b, 0);
-        
-        dominantColor = {
-          r: Math.round(sumR / mainColor.originalPixels.length),
-          g: Math.round(sumG / mainColor.originalPixels.length),
-          b: Math.round(sumB / mainColor.originalPixels.length)
-        };
+    workerRef.current = new Worker('/ascii.worker.js');
+    setStatusMessage('Worker 초기화 중...');
+
+    workerRef.current.onmessage = (event) => {
+      if (event.data.error) {
+        console.error('[Worker Error]', event.data.error);
+        setWorkerError(event.data.error);
+        setStatusMessage('ASCII 생성 오류');
+        setAsciiResult({ data: [], width: 0, height: 0 }); // 에러 시 결과 초기화
       } else {
-        dominantColor = { r: mainColor.r, g: mainColor.g, b: mainColor.b };
+        const { asciiData, asciiWidth, asciiHeight } = event.data;
+        setAsciiResult({ data: asciiData, width: asciiWidth, height: asciiHeight });
+        setWorkerError(null);
+        // 상태 메시지는 Canvas 그리기 단계에서 업데이트
       }
-      
-      // 흰색이 지배적인 경우, 두 번째 색상을 메인으로 사용
-      const isDominantWhite = dominantColor.r > 200 && dominantColor.g > 200 && dominantColor.b > 200;
-      if (isDominantWhite && topColors.length > 1) {
-        const secondColor = topColors[1];
-        dominantColor = { r: secondColor.r, g: secondColor.g, b: secondColor.b };
-      }
-      
-      // 강조색 찾기 (가장 채도가 높은 색상, 주로 파란색)
-      for (const color of topColors) {
-        const r = color.r;
-        const g = color.g;
-        const b = color.b;
-        
-        // 파란색 감지
-        if (b > Math.max(r, g) * 1.2 && b > 100) {
-          accentColor = { r, g, b };
-          break;
-        }
-      }
-    }
-    
-    // 결과 색상 설정: accentColor를 주 색상으로, 흰색을 보조 색상으로
-    const colors = {
-      color1: rgbToHex(accentColor.r, accentColor.g, accentColor.b),
-      color2: '#FFFFFF'
     };
-    
-    return colors;
-  };
 
-  // 컨테이너에 맞게 스케일링
-  useEffect(() => {
-    if (containerRef.current && asciiRef.current && ascii) {
-      const updateScale = () => {
-        const containerWidth = containerRef.current?.offsetWidth;
-        const containerHeight = containerRef.current?.offsetHeight;
-        const textWidth = asciiRef.current?.scrollWidth;
-        const textHeight = asciiRef.current?.scrollHeight;
-        
-        if (textWidth && textHeight) {
-          let scale = 1;
-          let displayWidth = width || 'auto';
-          let displayHeight = height || 'auto';
-          
-          // 크기 모드에 따른 스케일링
-          if (width === '100%' && height === 'auto') {
-            // 너비에 맞추고 높이는 자동 조정
-            scale = containerWidth / textWidth;
-            displayHeight = `${textHeight * scale}px`;
-          } else if (typeof width === 'number' && height === 'auto') {
-            // 고정된 너비, 자동 높이
-            scale = width / textWidth;
-            displayHeight = `${textHeight * scale}px`;
-          } else if (width === '100%' && typeof height === 'number') {
-            // 가득 찬 너비, 고정된 높이
-            const widthScale = containerWidth / textWidth;
-            const heightScale = height / textHeight;
-            scale = Math.min(widthScale, heightScale);
-          } else if (typeof width === 'number' && typeof height === 'number') {
-            // 고정된 크기
-            const widthScale = width / textWidth;
-            const heightScale = height / textHeight;
-            scale = Math.min(widthScale, heightScale);
-          }
-          
-          // 스케일 적용
-          asciiRef.current.style.transform = `scale(${scale})`;
-          asciiRef.current.style.transformOrigin = 'top left';
-          
-          // 컨테이너 크기 조정
-          if (width === '100%') {
-            containerRef.current.style.width = '100%';
-          } else {
-            containerRef.current.style.width = displayWidth;
-          }
-          
-          containerRef.current.style.height = displayHeight;
+    workerRef.current.onerror = (errorEvent) => {
+      // ErrorEvent 객체의 상세 정보 로깅
+      console.error('Unhandled Worker Error Event:', errorEvent);
+      console.error(`Error Message: ${errorEvent.message}`);
+      console.error(`Error Filename: ${errorEvent.filename}`);
+      console.error(`Error Lineno: ${errorEvent.lineno}`);
+      // errorEvent.error 속성에 실제 오류 객체가 포함될 수 있음 (브라우저마다 다름)
+      if (errorEvent.error) {
+          console.error('Actual Error Object (if available):', errorEvent.error);
+          console.error('Actual Error Stack:', errorEvent.error?.stack);
+      }
+
+      setWorkerError(`Worker 오류 발생: ${errorEvent.message || '알 수 없는 오류'}`);
+      setStatusMessage('Worker 오류');
+      setAsciiResult({ data: [], width: 0, height: 0 });
+    };
+
+    setStatusMessage('Worker 준비 완료');
+
+    // 컴포넌트 언마운트 시 Worker 종료
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.terminate();
+        workerRef.current = null;
+        // console.log('Worker terminated');
+      }
+    };
+  }, []); // 마운트 시 한 번만 실행
+
+  // 4. 이미지/폰트 로드 완료 및 설정 변경 시 Worker 작업 요청
+  const triggerAsciiGeneration = useCallback((showStatus = true) => {
+    if (img && imageLoaded && isFontReady && workerRef.current) {
+      // 상태 메시지 표시 여부 확인
+      if (showStatus) {
+        setStatusMessage('ASCII 생성 준비 중...');
+      }
+      try {
+        // 오프스크린 Canvas 준비
+        if (!offscreenCanvasRef.current) {
+          offscreenCanvasRef.current = document.createElement('canvas');
         }
-      };
-      
-      // ResizeObserver로 크기 변경 추적
-      const resizeObserver = new ResizeObserver(updateScale);
-      resizeObserver.observe(containerRef.current);
-      resizeObserver.observe(asciiRef.current);
-      
-      // 초기 스케일링
-      updateScale();
-      
-      return () => {
-        resizeObserver.disconnect();
-      };
-    }
-  }, [ascii, width, height]);
+        const offscreenCanvas = offscreenCanvasRef.current;
+        // 컨텍스트 가져오기 전에 canvas 존재 여부 확인
+        if (!offscreenCanvas) {
+            throw new Error('오프스크린 Canvas 요소를 찾을 수 없습니다.');
+        }
+        const offscreenCtx = offscreenCanvas.getContext('2d', { willReadFrequently: true });
 
-  // 출력 마크업 생성
-  const textStyle = {
-    fontFamily: font.fontFamily || 'monospace',
-    fontSize: font.fontSize || '10px',
-    lineHeight: font.lineHeight || 1,
-    whiteSpace: 'pre',
-    color: 'transparent',
-    backgroundImage: maskCanvasRef.current ? `url(${maskCanvasRef.current.toDataURL()})` : 'none',
-    backgroundRepeat: 'no-repeat',
-    backgroundSize: '100% 100%',
-    imageRendering: 'pixelated',
-    backgroundClip: 'text',
-    WebkitBackgroundClip: 'text',
-    userSelect: 'none'
-  };
+        if (!offscreenCtx) {
+          throw new Error('오프스크린 Canvas 컨텍스트를 가져올 수 없습니다.');
+        }
 
-  // characterSets prop 유효성 검사
-  useEffect(() => {
-    if (characterSets !== null) {
-      if (typeof characterSets !== 'object') {
-        console.error('[ASCII] characterSets prop must be an object or null');
-      } else if (Object.keys(characterSets).length === 0) {
-        console.warn('[ASCII] characterSets prop is empty object');
+        // 폰트 종횡비 계산
+        const fontAspectRatio = measureFontAspectRatio(font);
+        const targetAsciiWidth = outputWidth > 0 ? outputWidth : 100;
+        const targetAsciiHeight = Math.max(1, Math.round(img.height / img.width * targetAsciiWidth * fontAspectRatio));
+
+        // 오프스크린 Canvas 크기 설정 및 이미지 그리기
+        offscreenCanvas.width = targetAsciiWidth;
+        offscreenCanvas.height = targetAsciiHeight;
+        offscreenCtx.clearRect(0, 0, targetAsciiWidth, targetAsciiHeight);
+        // 블러 효과는 오프스크린 Canvas에 적용해야 Worker에 전달됨
+        offscreenCtx.filter = blur > 0 ? `blur(${blur}px)` : 'none';
+        offscreenCtx.drawImage(img, 0, 0, targetAsciiWidth, targetAsciiHeight);
+
+        const imageData = offscreenCtx.getImageData(0, 0, targetAsciiWidth, targetAsciiHeight);
+
+        // Worker에 전달할 props 객체 생성
+        const workerProps = {
+          brightness,
+          contrast,
+          invertColors,
+          enableJitter, // enableJitter는 Worker 내부에서도 사용될 수 있음
+          characterSet,
+          customCharacterSet,
+          characterSets
+        };
+        const currentSeed = enableJitter ? rngSeedRef.current : Date.now();
+
+        // 상태 메시지 표시 여부 확인
+        if (showStatus) {
+          setStatusMessage('ASCII 생성 중... (Worker)');
+        }
+
+        // Worker에 데이터 전송
+        workerRef.current.postMessage(
+          { imageData, props: workerProps, seed: currentSeed, fontAspectRatio },
+          [imageData.data.buffer]
+        );
+
+      } catch (e) {
+        console.error("Error preparing data for worker:", e);
+        // 에러 발생 시 상태 메시지 업데이트
+        setWorkerError("Worker 작업 요청 준비 중 오류 발생: " + e.message);
+        setStatusMessage('오류 발생 (Worker 준비)');
       }
     }
-  }, [characterSets]);
+  }, [
+    img, imageLoaded, isFontReady,
+    outputWidth, brightness, contrast, blur, invertColors, font,
+    enableJitter, characterSet, customCharacterSet, characterSets
+    // 의존성 배열에 status 업데이트 함수는 포함하지 않음
+  ]);
 
+  // 주요 의존성 변경 시 ASCII 생성 트리거 (상태 메시지 표시)
+  useEffect(() => {
+    if (imageLoaded && isFontReady) {
+      // 첫 로드 또는 prop 변경 시에는 상태 메시지 표시 (기본값 true 사용)
+      triggerAsciiGeneration();
+    }
+    // triggerAsciiGeneration 함수 자체가 의존성으로 포함됨
+  }, [imageLoaded, isFontReady, triggerAsciiGeneration]);
+
+  // 5. Jitter 효과 처리
+  useEffect(() => {
+    if (jitterIntervalRef.current) {
+      clearInterval(jitterIntervalRef.current);
+      jitterIntervalRef.current = null;
+    }
+
+    if (enableJitter && jitterInterval > 0 && imageLoaded && isFontReady) {
+      jitterIntervalRef.current = setInterval(() => {
+        rngSeedRef.current = Math.random();
+        // Jitter 업데이트 시에는 상태 메시지 표시 안 함 (false 전달)
+        triggerAsciiGeneration(false);
+      }, jitterInterval);
+    }
+
+    return () => {
+      if (jitterIntervalRef.current) {
+        clearInterval(jitterIntervalRef.current);
+        jitterIntervalRef.current = null;
+      }
+    };
+    // triggerAsciiGeneration 함수 자체가 의존성으로 포함됨
+  }, [enableJitter, jitterInterval, imageLoaded, isFontReady, triggerAsciiGeneration]);
+
+  // 6. Canvas 렌더링
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    const { data: asciiData, width: asciiWidth, height: asciiHeight } = asciiResult;
+
+    // 그리기 조건 확인
+    if (!canvas || !container || !asciiData || asciiData.length === 0 || !asciiWidth || !asciiHeight || !isFontReady) {
+        // 그릴 준비가 안 됐거나 데이터가 없으면 클리어 또는 상태 메시지 표시
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                // 컨테이너 크기에 맞춰 캔버스 크기 조정 (스타일과 별개)
+                canvas.width = container.offsetWidth;
+                canvas.height = container.offsetHeight;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+        // console.log('Canvas rendering skipped: Not ready or no data.');
+        return;
+    }
+
+    // 마지막으로 그린 데이터와 동일하면 다시 그리지 않음 (최적화)
+    if (lastDrawnDataRef.current === asciiData) {
+        // console.log('Canvas rendering skipped: Data unchanged.');
+        return;
+    }
+
+    setStatusMessage('Canvas 렌더링 중...');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('Failed to get 2D context for rendering canvas.');
+      setStatusMessage('Canvas 컨텍스트 오류');
+      return;
+    }
+
+    // 폰트 속성 설정
+    ctx.font = `${font.fontWeight || 'normal'} ${font.fontSize || '10px'} ${font.fontFamily || 'monospace'}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // 문자 크기 및 간격 계산
+    const fontSizePx = parseFloat(font.fontSize || '10px');
+    const fontAspectRatio = measureFontAspectRatio(font);
+    const charWidth = fontSizePx * fontAspectRatio;
+    // lineHeight 적용 방법: 각 줄의 y 위치 계산 시 사용하거나, 
+    // textBaseline='top'으로 하고 y 위치를 조정할 수 있음.
+    // 여기서는 lineHeight를 직접 높이 계산에 사용 (가장 간단한 접근)
+    const charHeight = fontSizePx * parseFloat(font.lineHeight || 1);
+
+    // 총 ASCII 아트 크기 (스케일링 전)
+    const totalWidth = asciiWidth * charWidth;
+    const totalHeight = asciiHeight * charHeight;
+
+    if (totalWidth <= 0 || totalHeight <= 0) {
+        console.warn('Calculated zero dimensions for ASCII art.');
+        return; // 그릴 수 없음
+    }
+
+    // 컨테이너 크기에 맞춰 Canvas 크기 설정 및 스케일 계산
+    const containerWidth = container.offsetWidth;
+    const containerHeight = container.offsetHeight;
+    canvas.width = containerWidth;
+    canvas.height = containerHeight;
+
+    let scale = 1;
+    if (containerWidth > 0 && containerHeight > 0) {
+      const scaleX = containerWidth / totalWidth;
+      const scaleY = containerHeight / totalHeight;
+      scale = Math.min(scaleX, scaleY); // Fit 모드
+    }
+
+    // Canvas 클리어 및 변환 설정 (중앙 정렬 및 스케일링)
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save(); // 현재 상태 저장
+
+    // 스케일링된 컨텐츠가 중앙에 오도록 이동
+    const scaledWidth = totalWidth * scale;
+    const scaledHeight = totalHeight * scale;
+    const translateX = (containerWidth - scaledWidth) / 2;
+    const translateY = (containerHeight - scaledHeight) / 2;
+
+    ctx.translate(translateX, translateY);
+    ctx.scale(scale, scale); // 스케일 적용
+
+    // pixelated 렌더링 힌트 (선명하게 보일 수 있도록)
+    ctx.imageSmoothingEnabled = false;
+
+    // ASCII 데이터 순회하며 문자 그리기
+    asciiData.forEach(item => {
+      ctx.fillStyle = item.color;
+      // 각 문자의 중심 좌표 계산 (스케일링 전 기준)
+      const xPos = (item.x + 0.5) * charWidth;
+      const yPos = (item.y + 0.5) * charHeight; // lineHeight 고려
+      ctx.fillText(item.char, xPos, yPos);
+    });
+
+    ctx.restore(); // 이전 상태 복원 (변환 해제)
+    lastDrawnDataRef.current = asciiData; // 마지막 그린 데이터 업데이트
+    setStatusMessage('렌더링 완료');
+
+  // asciiResult가 변경되거나, 컨테이너 크기가 변경되거나, 폰트 준비 상태가 변경될 때 재렌더링
+  }, [asciiResult, font, isFontReady, containerRef.current?.offsetWidth, containerRef.current?.offsetHeight]);
+
+  // 최종 렌더링
   return (
-    <div 
+    <div
       ref={containerRef}
-      style={{ 
-        width: width, 
-        height: height,
-        overflow: 'hidden',
-        position: 'relative',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}
+      style={{ width, height, overflow: 'hidden', position: 'relative', background: 'transparent' }}
       aria-label={alt || '이미지의 ASCII 아트 표현'}
+      role="img"
     >
-      {error ? (
-        <div className="ascii-error">{error}</div>
-      ) : (
-        <div
-          ref={asciiRef}
-          className="ascii-art"
-          style={textStyle}
-          aria-label={alt}
-        >
-          {ascii}
-        </div>
+      <canvas
+        ref={canvasRef}
+        style={{ display: 'block', width: '100%', height: '100%' }} // 부모 div에 맞게 채움
+        aria-hidden="true" // 실제 내용은 alt로 제공되므로 숨김
+      />
+      {/* 상태 메시지 또는 에러 메시지 표시 (선택적) */}
+      {(workerError || statusMessage !== '렌더링 완료') && (
+          <div style={{
+              position: 'absolute',
+              top: 0, left: 0,
+              padding: '5px',
+              background: 'rgba(0, 0, 0, 0.5)',
+              color: workerError ? 'red' : 'white',
+              fontSize: '12px',
+              zIndex: 10
+          }}>
+              {workerError || statusMessage}
+          </div>
       )}
     </div>
   );
 };
+
+// memo 적용 유지
+const AsciiImageGenerator = memo(AsciiImageGeneratorComponent);
 
 export default AsciiImageGenerator; 

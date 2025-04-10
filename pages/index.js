@@ -6,7 +6,9 @@ export async function getStaticProps() {
   // 여기에 필요한 데이터를 서버에서 가져오거나 정의합니다.
   const pageProps = {
     title: "DWMM",
-    content: "Design What Matters Mosst | 장승환"
+    // description prop은 Home 컴포넌트에서 받지만 Meta 컴포넌트에는 전달되지 않음.
+    // content prop은 사용되지 않음.
+    // description: "Design What Matters Most | 장승환"
   };
 
   // 이 객체가 MyApp 컴포넌트로 전달됩니다.
@@ -15,44 +17,49 @@ export async function getStaticProps() {
   };
 }
 
+// AsciiImageGenerator 컴포넌트로 전달될 문자 세트 객체
 const CUSTOM_CHARACTER_SETS = {
+  myCustomSet: '※☆★○●◎◇◆□■△▲▽▼→←↑↓↔↕◁▷◀▶♤♠♡♥♧♣⊙◈▣◐◑▒▤▥▨▧▦▩♨☏☎☜☞♂♀☎✂«»¶†‡↕↗↙↖↘♬®©™&@#$', // 사용 예시로 남겨둘 수 있음
+  simple: '.:-=+*#%@',
+  blocks: '█▓▒░ ',
   detailed: '$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^`\'.',
   standard: '@%#*+=-:.',
-  blocks: '█▓▒░ ',
-  myCustomSet: '※☆★○●◎◇◆□■△▲▽▼→←↑↓↔↕◁▷◀▶♤♠♡♥♧♣⊙◈▣◐◑▒▤▥▨▧▦▩♨☏☎☜☞♂♀☎✂«»¶†‡↕↗↙↖↘♬®©™&@#$',
-  simple: '.:-=+*#%@',
-  // 다른 커스텀 문자 세트들 추가 가능
+  binary: '01',
+  hex: '0123456789ABCDEF',
+  b2b: 'b2design'
 };
 
-function Home({ title, description }) {
+// Home 컴포넌트는 title prop만 받음 (getStaticProps에서 description 제거)
+function Home({ title }) {
   return (
     <div>
-      <Meta title={title} description={description} />
+      {/* Meta 컴포넌트에는 description prop이 없으므로 전달 제거 */}
+      <Meta title={title} />
       <main>
-        <section className="home">          
+        <section className="home">
           <div className="ascii-showcase">
-            <h3>ASCII 아트 생성기</h3>
-            <AsciiImageGenerator 
-              imageUrl="https://lqrkuvemtnnnjgvptnlo.supabase.co/storage/v1/object/public/assets/blog/8-things-keep-in-mind-as-b2b-product-designer-2/header_img.png" 
+            <AsciiImageGenerator
+              imageUrl="https://cdn3d.iconscout.com/3d/premium/preview/file-folder-3d-icon-download-in-png-blend-fbx-gltf-formats--document-directory-archive-business-pack-management-icons-7651483.png"
               alt="샘플 이미지의 ASCII 아트"
-              width="100%" 
-              height={400}
-              color1="#2962ff"
-              color2="#FFFFFF"
+              width="100%" // 컨테이너 너비에 맞춤
+              height="100%"
               enableJitter={true}
-              jitterInterval={120}
-              enableGlow={true}
-              glowRadius={8}
-              glowColor="#4fc3f7"
-              enableTransparency={true}
+              jitterInterval={120} // ms 단위
               contrast={1.4}
               brightness={1.2}
-              extractColors={true}
-              transparencyThreshold={0.75}
-              invertTransparency={false}
-              characterSets="blocks"
+              characterSets={CUSTOM_CHARACTER_SETS}
+              characterSet="b2b"
+              outputWidth={100}
+              font={{
+                fontFamily: 'source-code-pro, monospace',
+                fontSize: '12px',
+                lineHeight: 1,
+                fontWeight: 'normal',
+                letterSpacing: 'normal'
+              }}
+              blur={0}
+              invertColors={false}
             />
-            <p className="ascii-info">마우스를 위 영역에 올려보세요!</p>
           </div>
         </section>
       </main>
