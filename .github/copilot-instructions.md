@@ -43,8 +43,7 @@
     - Use functional components.
     - Use declarative JSX.
     - Use function, not const, for components.
-    - Use Shadcn UI, Radix, and Tailwind CSS for components and styling.
-    - Implement responsive design with Tailwind CSS.
+    - Use and reference styles folder for variables, responsive designs, design component creation and updates.
     - Use mobile-first approach for responsive design.
     - Place static content and interfaces at file end.
     - Use content variables for static content outside render functions.

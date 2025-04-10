@@ -19,6 +19,7 @@
 .env.development.local
 .env.test.local
 .env.production.local
+.github
 .cursor
 
 # IDE files (if using specific IDEs)a

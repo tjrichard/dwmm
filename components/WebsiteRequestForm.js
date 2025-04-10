@@ -65,10 +65,35 @@ function WebsiteRequestForm({ onComplete, onSubmit }) {
   const [message, setMessage] = useState('')
   const [isSuccess, setIsSuccess] = useState(false)
   const [showThankYou, setShowThankYou] = useState(false)
-  
+
   // 로딩 단계 상태 추가
   const [loadingStep, setLoadingStep] = useState(-1)
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false)
+
+  const [file, setFile] = useState(null) // 이미지 파일 상태 추가
+  const [preview, setPreview] = useState(null) // 이미지 미리보기 상태 추가
+
+  // 파일 선택 핸들러
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0]
+    setFile(selectedFile)
+    setPreview(URL.createObjectURL(selectedFile))
+  }
+
+  // 파일 선택 트리거
+  const triggerFileInput = () => {
+    const fileInput = document.createElement('input')
+    fileInput.type = 'file'
+    fileInput.accept = 'image/*'
+    fileInput.onchange = handleFileChange
+    fileInput.click()
+  }
+
+  // 파일 삭제 핸들러
+  const handleFileRemove = () => {
+    setFile(null)
+    setPreview(null)
+  }
 
   // Extract domain name from URL for title suggestion
   const extractDomainName = (url) => {
@@ -92,7 +117,7 @@ function WebsiteRequestForm({ onComplete, onSubmit }) {
     setShowThankYou(false)
     setLoadingStep(-1)
     setShowLoadingOverlay(false)
-    
+
     // 모달을 닫는 콜백 호출
     if (onComplete) {
       onComplete();
@@ -102,17 +127,17 @@ function WebsiteRequestForm({ onComplete, onSubmit }) {
   // 로딩 단계를 일정 시간 간격으로 자동 진행하는 효과
   useEffect(() => {
     if (!showLoadingOverlay) return;
-    
+
     // 전체 과정이 약 12초 정도 걸린다고 가정하고 각 단계별로 시간 분배
     const stepTimes = [1000, 2000, 2000, 2000, 2000, 2000];
     let timer;
-    
+
     if (loadingStep < 5) {
       timer = setTimeout(() => {
         setLoadingStep(prev => prev + 1);
       }, stepTimes[loadingStep + 1]);
     }
-    
+
     return () => clearTimeout(timer);
   }, [loadingStep, showLoadingOverlay]);
 
@@ -139,18 +164,15 @@ function WebsiteRequestForm({ onComplete, onSubmit }) {
         },
       })
 
-      let edgeFunctionData
-      let systemInstruction
-
-      if (edgeResponse.ok) {
-        edgeFunctionData = await edgeResponse.json()
-        console.log('Edge Function response:', edgeFunctionData)
-        systemInstruction = successSystemInstruction
-      } else {
-        console.error('Edge Function error, falling back to Gemini')
-        edgeFunctionData = { url }
-        systemInstruction = errorSystemInstruction
+      if (!edgeResponse.ok) {
+        console.error('Edge Function error:', edgeResponse.status, edgeResponse.statusText)
+        throw new Error('Failed to fetch data from the server. Please check the URL or try again later.')
       }
+
+      const edgeFunctionData = await edgeResponse.json()
+      console.log('Edge Function response:', edgeFunctionData)
+
+      let systemInstruction = successSystemInstruction
 
       // 웹사이트 내용 확인 단계는 자동으로 진행됨 (useEffect에서 처리)
 
@@ -197,9 +219,10 @@ function WebsiteRequestForm({ onComplete, onSubmit }) {
         category: category || "Website",
         tags: tags || ["User Submitted"],
         original_link,
-        user_email: email || null,
-        user_id: userId,
-        public: false // Requests start as non-public until approved
+        // user_email: email || null,
+        // user_id: userId,
+        public: false, // Requests start as non-public until approved
+        thumbnail: null // 초기값은 null
       }
 
       console.log('Supabase request:', newRequest)
@@ -212,8 +235,41 @@ function WebsiteRequestForm({ onComplete, onSubmit }) {
 
       if (error) throw error
 
+      const bookmarkId = data[0]?.id
+
+      // 이미지 파일 업로드 처리
+      if (file && bookmarkId) {
+        const ext = file.name.split('.').pop().toLowerCase()
+        const path = `bookmarks/${bookmarkId}/thumbnail.${ext}`
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('assets')
+          .upload(path, file, {
+            upsert: true,
+            contentType: file.type || 'application/octet-stream', // 기본 contentType 설정
+          })
+
+        if (uploadError) {
+          console.error('Upload failed:', uploadError.message)
+          setMessage('Failed to upload the thumbnail. Please try again.')
+          return
+        } else {
+          const {
+            data: { publicUrl }
+          } = supabase.storage.from('assets').getPublicUrl(path)
+
+          console.log('Thumbnail URL:', publicUrl)
+
+          // DB 업데이트로 thumbnail URL 저장
+          await supabase
+            .from('bookmarks')
+            .update({ thumbnail: publicUrl })
+            .eq('id', bookmarkId)
+        }
+      }
+
       if (onSubmit && data) {
-        onSubmit(data[0] || newRequest);
+        onSubmit(data[0] || newRequest)
       }
 
       // 로딩 오버레이가 모든 단계를 보여준 후 성공 화면으로 전환
@@ -226,19 +282,21 @@ function WebsiteRequestForm({ onComplete, onSubmit }) {
     } catch (error) {
       console.error('Error:', error)
       setShowLoadingOverlay(false)
-      let errorMessage = "Error submitting your request. ";
+      let errorMessage = "Error submitting your request. "
 
-      if (error.code === "23505") {
-        errorMessage += "This resource has already been submitted.";
+      if (error.message.includes('Failed to fetch')) {
+        errorMessage += "Network error: Unable to reach the server. Please check your internet connection."
+      } else if (error.code === "23505") {
+        errorMessage += "This resource has already been submitted."
       } else if (error.code === "23502") {
-        errorMessage += "Missing required fields.";
+        errorMessage += "Missing required fields."
       } else if (error.message) {
-        errorMessage += error.message;
+        errorMessage += error.message
       } else {
-        errorMessage += "Please try again.";
+        errorMessage += "Please try again."
       }
 
-      setMessage(errorMessage);
+      setMessage(errorMessage)
     } finally {
       setIsSubmitting(false)
     }
@@ -247,64 +305,110 @@ function WebsiteRequestForm({ onComplete, onSubmit }) {
   if (showThankYou) return <ThankYouComponent onAddNew={resetForm} />
 
   return (
-    <div className="website-request-form">
+    <div className="website-request-form space-y-6">
       {showLoadingOverlay && (
-        <LoadingOverlay 
-          currentStep={loadingStep} 
+        <LoadingOverlay
+          currentStep={loadingStep}
           animationDurations={animationDurations}
         />
       )}
       <h3>사이트 제안하기</h3>
-      {message && <div className={`message ${isSuccess ? 'success' : 'error'}`}>{message}</div>}
-      <form onSubmit={handleSubmit}>
+      {message && (
+        <div
+          className={`message ${isSuccess ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            } p-4 rounded-md`}
+        >
+          {message}
+        </div>
+      )}
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div className="form-group">
-          <label htmlFor="url">URL *</label>
+          <label htmlFor="url">
+            URL *
+          </label>
           <input
             type="url"
             id="url"
             value={url}
-            onChange={e => setUrl(e.target.value)}
+            onChange={(e) => setUrl(e.target.value)}
             placeholder="https://example.com"
             required
           />
         </div>
         <div className="form-group">
-          <label htmlFor="email">이메일</label>
+          <label>
+            썸네일 이미지
+          </label>
+          <div className="image-upload">
+            {preview && (
+                <img
+                  src={preview}
+                  alt="Preview"
+                />
+            )}
+            <div className="button-container">
+              <button
+                type="button"
+                onClick={triggerFileInput}
+                className="button xs text active"
+              >
+                파일 선택
+              </button>
+              {preview && (
+                <button
+                  type="button"
+                  onClick={handleFileRemove}
+                  aria-label="파일 삭제"
+                  className="button xs tertiary"
+                >
+                  파일 삭제
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="form-group">
+          <label htmlFor="email">
+            이메일
+          </label>
           <input
             type="email"
             id="email"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="your@email.com"
           />
         </div>
-        <div className="form-group checkbox-group">
-          <input
-            type="checkbox"
-            id="subscribeConsent"
-            checked={subscribeConsent}
-            onChange={e => setSubscribeConsent(e.target.checked)}
-          />
-          <label htmlFor="subscribeConsent">
-            업데이트 소식이 있을 때 알림을 받고 싶습니다.
-          </label>
+        <div className="form-group">
+          <div className="checkbox-group">
+            <input
+              type="checkbox"
+              id="subscribeConsent"
+              checked={subscribeConsent}
+              onChange={(e) => setSubscribeConsent(e.target.checked)}
+            />
+            <label
+              htmlFor="subscribeConsent"
+            >
+              업데이트 소식이 있을 때 알림을 받고 싶습니다.
+            </label>
+          </div>
         </div>
         <button
           type="submit"
-          className="button primary"
           disabled={isSubmitting}
         >
           {isSubmitting ? "제출 중..." : "제출하기"}
         </button>
       </form>
     </div>
-  );
+  )
 }
 
 // props 기본값 설정
 WebsiteRequestForm.defaultProps = {
-  onComplete: () => {},
-  onSubmit: () => {}
+  onComplete: () => { },
+  onSubmit: () => { }
 };
 
 export default WebsiteRequestForm
