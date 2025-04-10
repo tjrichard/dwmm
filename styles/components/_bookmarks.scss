@@ -48,28 +48,30 @@
   transition: all 0.15s ease;
   text-decoration: none;
   color: inherit;
-  outline: 2px solid $black-darkest;
+  // outline: 2px solid $black-darkest;
   position: relative;
   overflow: hidden;
-  background: $white-a-pure;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  // background: $white-a-pure;
+  // box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 
   &:hover {
     // transform: translateY(-8px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    // box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
 
     .card__image {
       transform: scale(1.05);
     }
     .card__arrow {
       opacity: 1;
-      transform: translateY($spacing-s);
+      transform: translateX($spacing-s);
     }
   }
 
   &__image-container {
     position: relative;
-    height: 200px;
+    height: auto;
+    border-radius: $radius-m;
+    border: 1px solid $black-a-lighter;
     overflow: hidden;
     background: $black-a-lightest;
   }
@@ -77,15 +79,16 @@
   &__image {
     width: 100%;
     height: 100%;
-    aspect-ratio: 16/9;
+    aspect-ratio: 5/6;
     object-fit: cover;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   &__arrow {
     position: absolute;
-    top: 0;
-    right: $spacing-s;
+    top: calc(50% - 20px);
+    left: calc(50% - 20px);
+    transform: translateX(-20px) translateY(20px);
     background-color: $primary-normal;
     color: $white-a-pure;
     width: 40px;
@@ -95,7 +98,6 @@
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transform: translateY(0);
     transition: opacity 0.2s ease, transform 0.2s ease;
     z-index: 2;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -104,21 +106,21 @@
   &__top-row {
     display: flex;
     flex-direction: column;
-    padding: $spacing-m;
+    padding: $spacing-sm $spacing-xs;
     height: auto;
     overflow: visible;
-    background: $white-a-pure;
-    border-bottom: 2px solid $black-darkest;
+    // background: $white-a-pure;
+    // border-bottom: 2px solid $black-darkest;
   }
 
   &__content {
     display: flex;
     flex-direction: column;
     flex: 1;
-    padding: $spacing-m;
+    padding: $spacing-sm $spacing-xs;
     height: auto;
     overflow: visible;
-    background: $white-a-pure;
+    // background: $white-a-pure;
   }
 
   &__title-row {
@@ -161,7 +163,7 @@
     gap: $spacing-xxs;
 
     .tag {
-      background-color: $grey-03;
+      // background-color: $grey-03;
       color: $grey-11;
       padding: $spacing-xxs $spacing-xs;
       border-radius: $radius-round;
@@ -312,21 +314,6 @@
   display: flex;
   flex-direction: row;
   overflow: hidden;
-}
-
-.LNB-section {
-  width: 360px;
-  height: 100%;
-  overflow-y: auto;
-  padding: $spacing-ml;
-  box-sizing: border-box;
-  border-right: 1px solid $black-lighter;
-  color: $black-a-darkest;
-  text-align: center;
-
-  .LNB-content {
-    // 기존 스타일 유지
-  }
 }
 
 // Media Query for Mobile

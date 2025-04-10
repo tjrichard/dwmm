@@ -11,7 +11,7 @@ const BookmarkLNB = ({
   return (
     <div className="LNB-section">
       <div className="LNB-content">
-        <h1>
+        <h1 className="instrument-serif-regular">
           USE<br />
           READ<br />
           SHARE

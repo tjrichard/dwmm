@@ -1,12 +1,12 @@
 .LNB-section {
-  color: $black-a-darkest;
+  color: $black-darkest;
   text-align: center;
   height: 100%;
   overflow-y: auto;
   max-width: 360px;
   padding: $spacing-ml;
   box-sizing: border-box;
-  border-right: 1px solid $black-lighter;
+  // border-right: 1px solid $black-lighter;
   width: 360px;
 
   .LNB-content {
@@ -49,7 +49,7 @@
     height: auto;
     overflow: visible;
     border-right: none;
-    border-bottom: 2px solid $black-darkest;
+    // border-bottom: 2px solid $black-darkest;
     padding: $spacing-ml $spacing-ml $spacing-l;
   }
 }

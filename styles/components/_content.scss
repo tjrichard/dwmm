@@ -2,7 +2,7 @@
   padding: $spacing-l;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: $spacing-l 0;
+  gap: $spacing-ml;
   align-items: stretch;
   width: 100%;
   height: fit-content;
