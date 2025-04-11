@@ -52,7 +52,7 @@ const generationConfig = {
   }
 }
 
-function WebsiteRequestForm({ onComplete, onSubmit }) {
+function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
   // 각 단계별 랜덤 애니메이션 시간 생성 (2초~4초 사이)
   const animationDurations = useMemo(() => {
     return Array.from({ length: 6 }, () => 2 + Math.random() * 2);
@@ -107,6 +107,26 @@ function WebsiteRequestForm({ onComplete, onSubmit }) {
       return "";
     }
   };
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const droppedFile = e.dataTransfer.files[0]
+    if (droppedFile) {
+      setFile(droppedFile)
+      setPreview(URL.createObjectURL(droppedFile))
+    }
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleDragLeave = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
 
   const resetForm = () => {
     setUrl('')
@@ -305,7 +325,7 @@ function WebsiteRequestForm({ onComplete, onSubmit }) {
   if (showThankYou) return <ThankYouComponent onAddNew={resetForm} />
 
   return (
-    <div className="website-request-form space-y-6">
+    <div className="website-request-form">
       {showLoadingOverlay && (
         <LoadingOverlay
           currentStep={loadingStep}
@@ -339,32 +359,38 @@ function WebsiteRequestForm({ onComplete, onSubmit }) {
           <label>
             썸네일 이미지
           </label>
-          <div className="image-upload">
-            {preview && (
-                <img
-                  src={preview}
-                  alt="Preview"
-                />
-            )}
-            <div className="button-container">
-              <button
-                type="button"
-                onClick={triggerFileInput}
-                className="button xs text active"
-              >
-                파일 선택
-              </button>
-              {preview && (
+          <div
+            className={`file-upload-placeholder ${
+              preview ? 'file-uploaded' : ''
+            }`}
+            onClick={!preview ? triggerFileInput : undefined}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !preview) triggerFileInput()
+            }}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            role="button"
+            tabIndex={0}
+          >
+            {preview ? (
+              <div className="file-preview">
+                <img src={preview} alt="Preview" />
                 <button
                   type="button"
                   onClick={handleFileRemove}
                   aria-label="파일 삭제"
-                  className="button xs tertiary"
+                  className="button xs text active remove-file-button"
                 >
-                  파일 삭제
+                  삭제
                 </button>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="placeholder-content">
+                <div className="icon desktop-body-feature">📁</div>
+                <p>이미지를 여기에 드래그하거나 클릭하여 업로드하세요</p>
+              </div>
+            )}
           </div>
         </div>
         <div className="form-group">
@@ -387,28 +413,19 @@ function WebsiteRequestForm({ onComplete, onSubmit }) {
               checked={subscribeConsent}
               onChange={(e) => setSubscribeConsent(e.target.checked)}
             />
-            <label
-              htmlFor="subscribeConsent"
-            >
+            <label htmlFor="subscribeConsent">
               업데이트 소식이 있을 때 알림을 받고 싶습니다.
             </label>
           </div>
         </div>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "제출 중..." : "제출하기"}
-        </button>
-      </form>
-    </div>
-  )
-}
-
-// props 기본값 설정
-WebsiteRequestForm.defaultProps = {
-  onComplete: () => { },
-  onSubmit: () => { }
-};
-
+          <button
+            type="submit"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "제출 중..." : "제출하기"}
+          </button>
+        </form>
+      </div>
+    )
+  }
 export default WebsiteRequestForm

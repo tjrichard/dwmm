@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import "../styles/main.scss";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { ensureAuthenticated } from "../lib/auth";
+import { ensureAuthenticated, checkUserStatus } from "../lib/auth";
 import { useRouter } from "next/router";
 
 function MyApp({ Component, pageProps }) {
@@ -15,13 +15,10 @@ function MyApp({ Component, pageProps }) {
       TempoDevtools.init();
     }
 
-    // Ensure user is authenticated on app load
+    // Ensure user is authenticated and log user status
     const initAuth = async () => {
       await ensureAuthenticated();
-      const { user } = await import("../lib/auth").then((module) =>
-        module.getCurrentUser(),
-      );
-      console.log("Current Supabase User ID:", user?.id);
+      await checkUserStatus();
     };
 
     initAuth();
