@@ -1,12 +1,7 @@
 import React from "react";
 import ContentCard from "./ContentCard";
-import EmptyResults from "./EmptyResults";
 
 const ContentGrid = ({ contents = [], isSearching = false, lastBookmarkRef = null, onCategoryClick, onTagClick }) => {
-  if (isSearching && contents.length === 0) {
-    return <EmptyResults />;
-  }
-
   return (
     <div className="content-grid grid">
       {contents.map((content, index) => {
