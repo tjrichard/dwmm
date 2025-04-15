@@ -35,41 +35,38 @@ export async function getStaticProps() {
       `)
       .order("created_at", { ascending: false });
 
-    if (bookmarksError) {
-      throw bookmarksError;
-    }
+    if (bookmarksError) throw bookmarksError;
 
     if (!bookmarks || bookmarks.length === 0) {
       return {
         props: {
           title: "DWMM | Bookmarks",
           description: "Curated design resources for B2B SaaS product designers",
-          initialBookmarks: [],
-          initialTags: [],
-          initialCategories: [],
+          bookmarks: [],
+          tags: [],
+          categories: [],
         },
         revalidate: 3600,
       };
     }
 
-    // 태그와 카테고리 추출
-    // .toLowerCase() 제거하여 원본 대소문자 유지
-    const allTags = [...new Set(bookmarks.flatMap(item => item.tags || []))];
-    const allCategories = [...new Set(bookmarks.map(item => item.category || ''))];
+    // bookmark_categories와 bookmark_tags 테이블에서 데이터 가져오기
+    const { data: categories, error: categoriesError } = await supabase
+      .from("bookmark_categories")
+      .select("category");
 
-    // 추가 태그 및 카테고리 추출
-    const { data: tags } = await supabase.from("bookmarks_tags").select("tag");
-    const { data: categories } = await supabase.from("bookmarks_categories").select("category");
+    const { data: tags, error: tagsError } = await supabase
+      .from("bookmark_tags")
+      .select("tag");
 
-    // .toLowerCase() 제거
-    const additionalTags = tags?.map(tag => tag.tag) || [];
-    const additionalCategories = categories?.map(category => category.category) || [];
+    if (categoriesError) throw categoriesError;
+    if (tagsError) throw tagsError;
 
-    allTags.push(...additionalTags);
-    allCategories.push(...additionalCategories);
+    const allCategories = categories?.map(item => item.category) || [];
+    const allTags = tags?.map(item => item.tag) || [];
 
-    console.log('Initial Categories:', [...new Set(allCategories)].filter(Boolean));
-    console.log('Initial Tags:', [...new Set(allTags)].filter(Boolean));
+    console.log('All Categories:', allCategories);
+    console.log('All Tags:', allTags);
 
     const processedBookmarks = bookmarks.map(item => ({
       ...item,
@@ -80,9 +77,9 @@ export async function getStaticProps() {
       props: {
         title: "DWMM | Bookmarks",
         description: "Curated design resources for B2B SaaS product designers",
-        initialBookmarks: processedBookmarks,
-        initialTags: [...new Set(allTags)].filter(Boolean),
-        initialCategories: [...new Set(allCategories)].filter(Boolean),
+        bookmarks: processedBookmarks,
+        tags: allTags,
+        categories: allCategories,
       },
       revalidate: 3600,
     };
@@ -91,9 +88,9 @@ export async function getStaticProps() {
       props: {
         title: "DWMM | Bookmarks",
         description: "Curated design resources for B2B SaaS product designers",
-        initialBookmarks: [],
-        initialTags: [],
-        initialCategories: [],
+        bookmarks: [],
+        tags: [],
+        categories: [],
         error: "Failed to load bookmarks",
       },
       revalidate: 3600,
@@ -104,9 +101,9 @@ export async function getStaticProps() {
 export default function Bookmarks({
   title,
   description,
-  initialBookmarks,
-  initialTags,
-  initialCategories,
+  bookmarks: initialBookmarks,
+  tags: availableTags,
+  categories: availableCategories,
 }) {
   const [bookmarks, setBookmarks] = useState(initialBookmarks);
   const [loading, setLoading] = useState(false);
@@ -138,7 +135,7 @@ export default function Bookmarks({
 
       // Apply filters
       if (selectedCategory) {
-        const exactCategory = initialCategories.find(
+        const exactCategory = availableCategories.find(
           cat => cat.toLowerCase() === selectedCategory.toLowerCase()
         );
         if (exactCategory) {
@@ -266,8 +263,8 @@ export default function Bookmarks({
         className="bookmarks-layout-container"
       >
         <LNB 
-          categories={initialCategories}
-          tags={initialTags}
+          categories={availableCategories}
+          tags={availableTags}
           selectedCategory={selectedCategory}
           selectedTags={selectedTags}
           onSearch={handleSearch}
