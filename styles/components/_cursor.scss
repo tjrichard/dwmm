@@ -1,0 +1,10 @@
+.cursor {
+  position: absolute;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 9999; // Ensure it is above all other elements
+
+  svg {
+    display: block;
+  }
+}

@@ -9,8 +9,9 @@ import SearchBar from "../../components/SearchBar";
 import { supabase } from "../../lib/supabase";
 import { getUserVotedWebsites } from "../../lib/voteUtils";
 import SubscribeForm from "../../components/SubscribeForm.js";
-import WebsiteRequestForm from '../../components/WebsiteRequestForm'
+import WebsiteRequestForm from '../../components/WebsiteRequestForm';
 import BookmarkHeader from '../../components/BookmarkHeader';
+import { RealtimeCursors } from "../../components/realtime-cursors";
 
 // Number of items per page
 const ITEMS_PER_PAGE = 9;
@@ -257,11 +258,13 @@ export default function Bookmarks({
 
   return (
     <div className="bookmarks-page-wrapper">
+      <RealtimeCursors roomName="demo-room" username={`User-${Math.floor(Math.random() * 1000)}`} />
       <BookmarkHeader />
       <Meta title={title} description={description} />
       <div 
         className="bookmarks-layout-container"
       >
+
         <LNB 
           categories={availableCategories}
           tags={availableTags}
