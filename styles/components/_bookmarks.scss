@@ -36,6 +36,17 @@
   margin-top: 2rem;
 }
 
+@keyframes appear {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 .card {
   // background-color: $white-a-pure;
   // overflow: hidden;
@@ -53,6 +64,10 @@
   overflow: hidden;
   // background: $white-a-pure;
   // box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+
+  animation: appear linear;
+  animation-timeline: view();
+  animation-range: 0% cover 40%;
 
   &:hover {
     // transform: translateY(-8px);
