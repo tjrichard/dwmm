@@ -18,6 +18,7 @@ export function throttle(func: Function, limit: number) {
 }
 
 export function generateRandomColor(id: string) {
+  if (typeof id !== "string" || !id.length) id = "default"
   let hash = 0
   for (let i = 0; i < id.length; i++) {
     hash = id.charCodeAt(i) + ((hash << 5) - hash)
