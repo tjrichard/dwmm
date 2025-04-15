@@ -151,7 +151,7 @@ export default function Bookmarks({
         });
       }
       if (searchQuery) {
-        query = query.ilike("title", `%${searchQuery}%`);
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
       }
 
       const { data, error } = await query;
