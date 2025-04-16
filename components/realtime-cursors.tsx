@@ -64,22 +64,21 @@ export function RealtimeCursors({
     const x = e.clientX;
     const y = e.clientY;
 
-    // 부모 요소 중 "cursor-pointer" 클래스를 가진 요소가 있는지 확인
-    const isOnCard = (e.target as HTMLElement)?.closest(".cursor-ponter");
+    // 이벤트 위임 방식으로 "cursor-pointer" 클래스 확인
+    const isOnCard = (e.target as HTMLElement)?.closest(".cursor-pointer");
     const transform = isOnCard
       ? "translate(-100%, 0) rotate(90deg)"
       : "translate(0, 0) rotate(0deg)";
 
-    // 상태로 관리
     setLastMouse({ x, y, transform });
   }
 
   useEffect(() => {
-    // 마운트 시 mousemove 이벤트 리스너 추가
+    // 이벤트 위임을 위해 window에 리스너 추가
     window.addEventListener("mousemove", handleMouseMove);
 
     return () => {
-      // 언마운트 시 이벤트 리스너 제거
+      // 언마운트 시 리스너 제거
       window.removeEventListener("mousemove", handleMouseMove);
     };
   }, []);

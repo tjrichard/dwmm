@@ -100,7 +100,7 @@ function SearchBar({
       <form onSubmit={handleSearch} className="search-form">
         <input
           type="text"
-          className="search-input-container cursor-ponter"
+          className="search-input-container cursor-pointer"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="검색어를 입력하세요..."
@@ -114,7 +114,7 @@ function SearchBar({
             <div className="filter-badges">
               <button
                 type="button"
-                className={`cursor-ponter button xs text ${!localSelectedCategory ? "active" : "inactive"}`}
+                className={`cursor-pointer button xs text ${!localSelectedCategory ? "active" : "inactive"}`}
                 onClick={() => handleCategorySelect("")}
               >
                 전체
@@ -123,7 +123,7 @@ function SearchBar({
                 <button
                   key={category}
                   type="button"
-                  className={`cursor-ponter button xs text ${
+                  className={`cursor-pointer button xs text ${
                     localSelectedCategory === String(category || '').toLowerCase() ? "active" : "inactive"
                   }`}
                   onClick={() => handleCategorySelect(category)}
@@ -143,7 +143,7 @@ function SearchBar({
                 <button
                   key={tag}
                   type="button"
-                  className={`cursor-ponter button xs text ${
+                  className={`cursor-pointer button xs text ${
                     localSelectedTags.includes(String(tag || '')) ? "selected" : "inactive"
                   }`}
                   onClick={() => handleTagToggle(tag)}
