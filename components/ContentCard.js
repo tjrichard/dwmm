@@ -142,7 +142,7 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
             {tags && tags.map((tag, index) => (
               <span 
                 key={index} 
-                className="tag button xs text"
+                className="cursor-pointer tag button xs text"
                 onClick={(e) => handleTagClick(e, tag)}
               >
                 {String(tag || '')}

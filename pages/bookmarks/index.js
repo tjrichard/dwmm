@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import Meta from "../../components/Meta.js";
 import LNB from "../../components/BookmarkLNB.js";
+import BookmarkFooter from "../../components/BookmarkFooter.js";
 import ContentGrid from "../../components/ContentGrid";
 // import SubscribeForm from "../../components/SubscribeForm";
 import { supabase } from "../../lib/supabase";
@@ -113,7 +114,7 @@ export default function Bookmarks({
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortOrder, setSortOrder] = useState("최신순"); // 기본 정렬: 최신순
+  const [sortOrder, setSortOrder] = useState("최신 순"); // 기본 정렬: 최신 순
   const observer = useRef();
   const loadingRef = useRef(null);
   const [userId, setUserId] = useState(null);
@@ -147,9 +148,9 @@ export default function Bookmarks({
         `)
 
       // 정렬 기준 적용
-      if (sortOrder === "최신순") query = query.order("created_at", { ascending: false })
-      else if (sortOrder === "오래된순") query = query.order("created_at", { ascending: true })
-      else if (sortOrder === "추천순") query = query.order("vote_count", { ascending: false })
+      if (sortOrder === "최신 순") query = query.order("created_at", { ascending: false })
+      else if (sortOrder === "오래된 순") query = query.order("created_at", { ascending: true })
+      else if (sortOrder === "추천 순") query = query.order("vote_count", { ascending: false })
 
       query = query.range((pageNumber - 1) * ITEMS_PER_PAGE, pageNumber * ITEMS_PER_PAGE - 1)
 
@@ -241,7 +242,7 @@ export default function Bookmarks({
     setSearchQuery(params.query || "");
     setSelectedCategory(params.category || "");
     setSelectedTags(params.tags || []);
-    setSortOrder(params.sortOrder || "최신순"); // 정렬 기준 업데이트
+    setSortOrder(params.sortOrder || "최신 순"); // 정렬 기준 업데이트
     setPage(1); 
   };
 
@@ -310,6 +311,7 @@ export default function Bookmarks({
             />
           )}
           <SubscribeForm />
+          <BookmarkFooter />
         </div>
       </div>
     </div>

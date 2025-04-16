@@ -12,7 +12,7 @@ function SearchBar({
   const [searchQuery, setSearchQuery] = useState("")
   const [localSelectedCategory, setLocalSelectedCategory] = useState(selectedCategory)
   const [localSelectedTags, setLocalSelectedTags] = useState(selectedTags)
-  const [sortOrder, setSortOrder] = useState("최신순") // 기본 정렬: 최신순
+  const [sortOrder, setSortOrder] = useState("최신 순") // 기본 정렬: 최신 순
 
   // 외부에서 selectedCategory나 selectedTags가 변경될 때 로컬 상태 업데이트
   useEffect(() => {
@@ -119,7 +119,7 @@ function SearchBar({
         <div className="filter-group">
           <p className="filter-label">정렬</p>
           <div className="filter-badges">
-            {["최신순", "오래된순", "추천순"].map((order) => (
+            {["최신 순", "오래된 순", "추천 순"].map((order) => (
               <button
                 key={order}
                 type="button"

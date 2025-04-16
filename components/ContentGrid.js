@@ -7,7 +7,7 @@ function ContentGrid({ contents = [], isSearching = false, lastBookmarkRef = nul
       {contents.map((content, index) => {
         const isLastItem = contents.length === index + 1
         return isLastItem ? (
-          <div ref={lastBookmarkRef} key={content.id} className="fade-in">
+          <div ref={lastBookmarkRef} className="fade-in">
             <ContentCard 
               content={content} 
               onCategoryClick={onCategoryClick}
@@ -15,7 +15,7 @@ function ContentGrid({ contents = [], isSearching = false, lastBookmarkRef = nul
             />
           </div>
         ) : (
-          <div key={content.id} className="fade-in">
+          <div className="fade-in">
             <ContentCard 
               content={content} 
               onCategoryClick={onCategoryClick}
