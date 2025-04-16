@@ -90,13 +90,14 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
       href={getUtmLink()}
       target="_blank"
       rel="noopener noreferrer"
-      className="content-card card cursor-ponter"
+      className="content-card card cursor-pointer"
       onClick={handleClick}
     >
       <div className="card__top-row">
         <div className="card__meta">
           <div 
-            className="card__category button xs text active" 
+            className="cursor-pointer card__category button xs text active" 
+            role="button"
             onClick={(e) => handleCategoryClick(e, category)}
           >
             {category ? String(category).toUpperCase() : ''}

@@ -8,12 +8,11 @@ function SearchBar({
   tags = [],
   selectedCategory = "",
   selectedTags = [],
-  // onCategorySelect,
-  // onTagSelect
 }) {
   const [searchQuery, setSearchQuery] = useState("")
   const [localSelectedCategory, setLocalSelectedCategory] = useState(selectedCategory)
   const [localSelectedTags, setLocalSelectedTags] = useState(selectedTags)
+  const [sortOrder, setSortOrder] = useState("최신순") // 기본 정렬: 최신순
 
   // 외부에서 selectedCategory나 selectedTags가 변경될 때 로컬 상태 업데이트
   useEffect(() => {
@@ -39,10 +38,11 @@ function SearchBar({
       onSearch({
         query: query.trim(),
         category: localSelectedCategory,
-        tags: localSelectedTags
+        tags: localSelectedTags,
+        sortOrder: sortOrder, // 정렬 기준 추가
       });
     }, 500),
-    [onSearch, localSelectedCategory, localSelectedTags] // category/tags 변경 시에도 debounce 콜백 재생성
+    [onSearch, localSelectedCategory, localSelectedTags, sortOrder] // category/tags/sortOrder 변경 시에도 debounce 콜백 재생성
   );
 
   // Trigger debounced search only when searchQuery changes
@@ -54,13 +54,11 @@ function SearchBar({
   const handleSearch = (e) => {
     if (e) e.preventDefault()
     // Immediate search on form submit (Enter key)
-    // console.log(...)
-    // 디바운스 취소 및 즉시 검색
-    // clearTimeout(debouncedQuerySearch); // debounce HOF 구조상 clearTimeout 직접 호출 불가
     onSearch({
       query: searchQuery,
       category: localSelectedCategory,
       tags: localSelectedTags,
+      sortOrder: sortOrder, // 정렬 기준 추가
     });
   };
 
@@ -69,13 +67,13 @@ function SearchBar({
     const categoryStr = String(category || '');
     const categoryLower = categoryStr.toLowerCase();
     const newCategory = localSelectedCategory === categoryLower ? "" : categoryLower;
-    // console.log(...)
     setLocalSelectedCategory(newCategory);
     // 카테고리 변경 시 즉시 onSearch 호출
     onSearch({
       query: searchQuery,
       category: newCategory,
-      tags: localSelectedTags
+      tags: localSelectedTags,
+      sortOrder: sortOrder, // 정렬 기준 추가
     });
   };
 
@@ -85,15 +83,25 @@ function SearchBar({
     const newTags = localSelectedTags.includes(tagStr)
       ? localSelectedTags.filter((t) => t !== tagStr)
       : [...localSelectedTags, tagStr];
-    // console.log(...)
     setLocalSelectedTags(newTags);
     // 태그 변경 시 즉시 onSearch 호출
     onSearch({
       query: searchQuery,
       category: localSelectedCategory,
-      tags: newTags
+      tags: newTags,
+      sortOrder: sortOrder, // 정렬 기준 추가
     });
   };
+
+  const handleSortOrderChange = (order) => {
+    setSortOrder(order)
+    onSearch({
+      query: searchQuery,
+      category: localSelectedCategory,
+      tags: localSelectedTags,
+      sortOrder: order, // 정렬 기준 추가
+    })
+  }
 
   return (
     <div className="search-container">
@@ -108,6 +116,24 @@ function SearchBar({
       </form>
 
       <div className="filter-container">
+        <div className="filter-group">
+          <p className="filter-label">정렬</p>
+          <div className="filter-badges">
+            {["최신순", "오래된순", "추천순"].map((order) => (
+              <button
+                key={order}
+                type="button"
+                className={`cursor-pointer button xs text ${
+                  sortOrder === order ? "active" : "inactive"
+                }`}
+                onClick={() => handleSortOrderChange(order)}
+              >
+                {order}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {categories.length > 0 && (
           <div className="filter-group">
             <p className="filter-label">카테고리</p>

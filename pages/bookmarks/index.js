@@ -12,7 +12,9 @@ import { RealtimeCursors } from "../../components/realtime-cursors";
 import { ensureAuthenticated } from "../../lib/auth";
 
 // Number of items per page
-const ITEMS_PER_PAGE = 9;
+const ITEMS_PER_PAGE = 3;
+
+// 여기서부터 시작
 
 export async function getStaticProps() {
   try {
@@ -111,6 +113,7 @@ export default function Bookmarks({
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState("최신순"); // 기본 정렬: 최신순
   const observer = useRef();
   const loadingRef = useRef(null);
   const [userId, setUserId] = useState(null);
@@ -142,8 +145,13 @@ export default function Bookmarks({
           vote_count,
           created_at
         `)
-        .order("created_at", { ascending: false })
-        .range((pageNumber - 1) * ITEMS_PER_PAGE, pageNumber * ITEMS_PER_PAGE - 1)
+
+      // 정렬 기준 적용
+      if (sortOrder === "최신순") query = query.order("created_at", { ascending: false })
+      else if (sortOrder === "오래된순") query = query.order("created_at", { ascending: true })
+      else if (sortOrder === "추천순") query = query.order("vote_count", { ascending: false })
+
+      query = query.range((pageNumber - 1) * ITEMS_PER_PAGE, pageNumber * ITEMS_PER_PAGE - 1)
 
       if (selectedCategory) {
         const exactCategory = availableCategories.find(
@@ -173,7 +181,7 @@ export default function Bookmarks({
     } finally {
       setLoading(false)
     }
-  }, [selectedCategory, selectedTags, searchQuery, availableCategories])
+  }, [selectedCategory, selectedTags, searchQuery, availableCategories, sortOrder]) // sortOrder 추가
 
   useEffect(() => {
     fetchBookmarks(page)
@@ -230,9 +238,10 @@ export default function Bookmarks({
   };
 
   const handleSearch = (params) => {
-    setSearchQuery(params.query || '');
-    setSelectedCategory(params.category || '');
+    setSearchQuery(params.query || "");
+    setSelectedCategory(params.category || "");
     setSelectedTags(params.tags || []);
+    setSortOrder(params.sortOrder || "최신순"); // 정렬 기준 업데이트
     setPage(1); 
   };
 

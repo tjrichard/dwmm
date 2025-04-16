@@ -47,6 +47,17 @@
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .card {
   // background-color: $white-a-pure;
   // overflow: hidden;
@@ -68,6 +79,7 @@
   animation: appear linear;
   animation-timeline: view();
   animation-range: 0% cover 40%;
+  animation-fill-mode: both;
 
   &:hover {
     // transform: translateY(-8px);
@@ -233,6 +245,7 @@
   .vote-count {
     font-size: 0.875rem;
     font-weight: 500;
+    font-family: monospace;
   }
 }
 
@@ -329,6 +342,12 @@
   display: flex;
   flex-direction: row;
   overflow: hidden;
+}
+
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 0.4s ease-out forwards;
 }
 
 // Media Query for Mobile

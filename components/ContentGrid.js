@@ -1,33 +1,31 @@
-import React from "react";
-import ContentCard from "./ContentCard";
+import React from "react"
+import ContentCard from "./ContentCard"
 
-const ContentGrid = ({ contents = [], isSearching = false, lastBookmarkRef = null, onCategoryClick, onTagClick }) => {
+function ContentGrid({ contents = [], isSearching = false, lastBookmarkRef = null, onCategoryClick, onTagClick }) {
   return (
     <div className="content-grid grid">
       {contents.map((content, index) => {
-        if (contents.length === index + 1) {
-          return (
-            <div ref={lastBookmarkRef} key={content.id}>
-              <ContentCard 
-                content={content} 
-                onCategoryClick={onCategoryClick}
-                onTagClick={onTagClick}
-              />
-            </div>
-          );
-        } else {
-          return (
+        const isLastItem = contents.length === index + 1
+        return isLastItem ? (
+          <div ref={lastBookmarkRef} key={content.id} className="fade-in">
             <ContentCard 
-              key={content.id} 
               content={content} 
               onCategoryClick={onCategoryClick}
               onTagClick={onTagClick}
             />
-          );
-        }
+          </div>
+        ) : (
+          <div key={content.id} className="fade-in">
+            <ContentCard 
+              content={content} 
+              onCategoryClick={onCategoryClick}
+              onTagClick={onTagClick}
+            />
+          </div>
+        )
       })}
     </div>
-  );
-};
+  )
+}
 
-export default ContentGrid;
+export default React.memo(ContentGrid)
