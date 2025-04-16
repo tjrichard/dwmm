@@ -2,15 +2,14 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import Meta from "../../components/Meta.js";
 import LNB from "../../components/BookmarkLNB.js";
 import ContentGrid from "../../components/ContentGrid";
-import ContentCard from "../../components/ContentCard";
-import FloatingCTA from "../../components/FloatingCTA";
-import SearchBar from "../../components/SearchBar";
 // import SubscribeForm from "../../components/SubscribeForm";
 import { supabase } from "../../lib/supabase";
 import { getUserVotedWebsites } from "../../lib/voteUtils";
 import SubscribeForm from "../../components/SubscribeForm.js";
-import WebsiteRequestForm from '../../components/WebsiteRequestForm'
+import WebsiteRequestForm from '../../components/WebsiteRequestForm';
 import BookmarkHeader from '../../components/BookmarkHeader';
+import { RealtimeCursors } from "../../components/realtime-cursors";
+import { ensureAuthenticated } from "../../lib/auth";
 
 // Number of items per page
 const ITEMS_PER_PAGE = 9;
@@ -114,9 +113,22 @@ export default function Bookmarks({
   const [searchQuery, setSearchQuery] = useState("");
   const observer = useRef();
   const loadingRef = useRef(null);
+  const [userId, setUserId] = useState(null);
 
-  const fetchBookmarks = async (pageNumber) => {
-    setLoading(true);
+  useEffect(() => {
+    async function fetchUserId() {
+      const id = await ensureAuthenticated();
+      // 직접 supabase.auth.getUser()로도 확인
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log("ensureAuthenticated userId:", id);
+      console.log("supabase.auth.getUser() userId:", user?.id);
+      setUserId(id);
+    }
+    fetchUserId();
+  }, []);
+
+  const fetchBookmarks = useCallback(async (pageNumber) => {
+    setLoading(true)
     try {
       let query = supabase
         .from("bookmarks_public")
@@ -131,45 +143,41 @@ export default function Bookmarks({
           created_at
         `)
         .order("created_at", { ascending: false })
-        .range((pageNumber - 1) * ITEMS_PER_PAGE, pageNumber * ITEMS_PER_PAGE - 1);
+        .range((pageNumber - 1) * ITEMS_PER_PAGE, pageNumber * ITEMS_PER_PAGE - 1)
 
-      // Apply filters
       if (selectedCategory) {
         const exactCategory = availableCategories.find(
           cat => cat.toLowerCase() === selectedCategory.toLowerCase()
-        );
-        if (exactCategory) {
-          query = query.eq("category", exactCategory);
-        }
+        )
+        if (exactCategory) query = query.eq("category", exactCategory)
       }
       if (selectedTags.length > 0) {
         selectedTags.forEach(tag => {
-          query = query.contains('tags', [tag]);
-        });
+          query = query.contains('tags', [tag])
+        })
       }
       if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)
       }
 
-      const { data, error } = await query;
+      const { data, error } = await query
 
-      if (error) throw error;
+      if (error) throw error
 
-      if (data.length < ITEMS_PER_PAGE) {
-        setHasMore(false);
-      }
+      if (data.length < ITEMS_PER_PAGE) setHasMore(false)
 
-      if (pageNumber === 1) {
-        setBookmarks(data);
-      } else {
-        setBookmarks(prev => [...prev, ...data]);
-      }
+      if (pageNumber === 1) setBookmarks(data)
+      else setBookmarks(prev => [...prev, ...data])
     } catch (error) {
-      console.error("Error fetching bookmarks:", error);
+      console.error("Error fetching bookmarks:", error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }, [selectedCategory, selectedTags, searchQuery, availableCategories])
+
+  useEffect(() => {
+    fetchBookmarks(page)
+  }, [fetchBookmarks, page])
 
   // Intersection Observer callback
   const lastBookmarkRef = useCallback(node => {
@@ -185,11 +193,6 @@ export default function Bookmarks({
     if (node) observer.current.observe(node);
   }, [loading, hasMore]);
 
-  // Fetch bookmarks when page changes or filters change
-  useEffect(() => {
-    fetchBookmarks(page);
-  }, [page, selectedCategory, selectedTags, searchQuery]);
-  
   // 유저가 투표한 웹사이트 정보 가져오기
   useEffect(() => {
     async function fetchUserVotes() {
@@ -257,11 +260,20 @@ export default function Bookmarks({
 
   return (
     <div className="bookmarks-page-wrapper">
+      {/* userId가 준비된 경우에만 커서 렌더 */}
+      {userId && (
+        <RealtimeCursors
+          roomName="dwmm-bookmarks"
+          userId={userId}
+          username={""} // 필요시 닉네임 전달
+        />
+      )}
       <BookmarkHeader />
       <Meta title={title} description={description} />
       <div 
         className="bookmarks-layout-container"
       >
+
         <LNB 
           categories={availableCategories}
           tags={availableTags}
@@ -288,7 +300,6 @@ export default function Bookmarks({
               onTagClick={handleTagClick}
             />
           )}
-          <FloatingCTA />
           <SubscribeForm />
         </div>
       </div>

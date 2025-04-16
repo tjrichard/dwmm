@@ -341,7 +341,7 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
           {message}
         </div>
       )}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="cursor-pointer">
         <div className="form-group">
           <label htmlFor="url">
             URL *
@@ -362,7 +362,7 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
           <div
             className={`file-upload-placeholder ${
               preview ? 'file-uploaded' : ''
-            }`}
+            } cursor-pointer">`}
             onClick={!preview ? triggerFileInput : undefined}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !preview) triggerFileInput()
@@ -380,7 +380,7 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
                   type="button"
                   onClick={handleFileRemove}
                   aria-label="파일 삭제"
-                  className="button xs text active remove-file-button"
+                  className="button xs text active remove-file-button cursor-pointer"
                 >
                   삭제
                 </button>
@@ -401,6 +401,7 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
             type="email"
             id="email"
             value={email}
+            className='cursor-pointer'
             onChange={(e) => setEmail(e.target.value)}
             placeholder="your@email.com"
           />
@@ -410,6 +411,7 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
             <input
               type="checkbox"
               id="subscribeConsent"
+              className='cursor-pointer'
               checked={subscribeConsent}
               onChange={(e) => setSubscribeConsent(e.target.checked)}
             />
@@ -420,6 +422,7 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
         </div>
           <button
             type="submit"
+            className='button primary l cursor-pointer'
             disabled={isSubmitting}
           >
             {isSubmitting ? "제출 중..." : "제출하기"}
