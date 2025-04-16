@@ -36,9 +36,10 @@ export function RealtimeCursors({
   throttleMs = 5,
 }: RealtimeCursorsProps) {
   const [cursors, setCursors] = useState<Cursor[]>([]);
-  const [lastMouse, setLastMouse] = useState<{ x: number; y: number }>({
+  const [lastMouse, setLastMouse] = useState<{ x: number; y: number; transform: string }>({
     x: 100,
     y: 100,
+    transform: "translate(0, 0) rotate(0deg)",
   });
   const cursorRefs = useRef(new Map<string, HTMLDivElement>());
   const channelRef = useRef<any>(null);
@@ -62,25 +63,26 @@ export function RealtimeCursors({
   function handleMouseMove(e: MouseEvent) {
     const x = e.clientX;
     const y = e.clientY;
-    setLastMouse({ x, y });
-    // 내 커서 정보만 직접 업데이트, setCursors는 다른 유저의 presence sync에서만 호출
-    myCursorRef.current = {
-      ...myCursorRef.current,
-      x,
-      y,
-    };
-    throttledTrack({
-      ...myCursorRef.current,
-      x,
-      y,
-    });
-    // 내 커서만 직접 DOM 위치 이동 (최적화)
-    const el = cursorRefs.current.get(userId);
-    if (el) {
-      el.style.left = `${x}px`;
-      el.style.top = `${y}px`;
-    }
+
+    // 부모 요소 중 "cursor-pointer" 클래스를 가진 요소가 있는지 확인
+    const isOnCard = (e.target as HTMLElement)?.closest(".cursor-ponter");
+    const transform = isOnCard
+      ? "translate(-100%, 0) rotate(90deg)"
+      : "translate(0, 0) rotate(0deg)";
+
+    // 상태로 관리
+    setLastMouse({ x, y, transform });
   }
+
+  useEffect(() => {
+    // 마운트 시 mousemove 이벤트 리스너 추가
+    window.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      // 언마운트 시 이벤트 리스너 제거
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
 
   // presence sync 이벤트에서 커서 상태를 중복 없이 갱신 (내 커서는 직접 관리)
   function syncCursors() {
@@ -121,10 +123,7 @@ export function RealtimeCursors({
     channel.on("presence", { event: "sync" }, syncCursors);
     channel.on("presence", { event: "leave" }, removeCursor);
 
-    window.addEventListener("mousemove", handleMouseMove);
-
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
       channel.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -132,10 +131,21 @@ export function RealtimeCursors({
 
   // body 커서 숨김
   useEffect(() => {
-    document.body.style.cursor = "none";
+    const style = document.createElement("style")
+    style.innerHTML = `
+      body {
+        cursor: none !important;
+      }
+      button, a, input, [role="button"], [role="link"] {
+        cursor: none !important;
+      }
+    `
+    document.head.appendChild(style)
+
     return () => {
-      document.body.style.cursor = "default";
-    };
+      // 언마운트 시 스타일 제거
+      document.head.removeChild(style)
+    }
   }, []);
 
   // 최초 렌더링 시 내 커서만 먼저 표시
@@ -155,12 +165,10 @@ export function RealtimeCursors({
           }}
           className="cursor"
           style={{
-            left: cursor.x,
-            top: cursor.y,
-            position: "absolute",
-            willChange: "transform",
-            transition: cursor.id === userId ? "none" : "left 0.08s linear, top 0.08s linear",
-            zIndex: cursor.id === userId ? 10 : 1,
+            left: lastMouse.x,
+            top: lastMouse.y,
+            transform: lastMouse.transform,
+            transition: "transform 0.15s ease-in-out", // 부드러운 회전 애니메이션
           }}
         >
           <svg

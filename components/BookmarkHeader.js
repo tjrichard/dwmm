@@ -17,11 +17,11 @@ function BookmarkHeader() {
     <>
       <div className="bookmark-header-container">
         <div className="bookmark-header">
-          <Link href="/" className="logo-link">
+          <Link href="/" className="logo-link cursor-ponter">
             <img src="/logo.svg" className="dwmm-logo" alt="logo" />
           </Link>
           <div className="bookmark-buttons">
-            <button className="button s tertiary" onClick={openModal}>사이트 제안하기</button>
+            <button className="button s tertiary cursor-ponter" onClick={openModal}>사이트 제안하기</button>
           </div>
         </div>
       </div>

@@ -90,7 +90,7 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
       href={getUtmLink()}
       target="_blank"
       rel="noopener noreferrer"
-      className="content-card card"
+      className="content-card card cursor-ponter"
       onClick={handleClick}
     >
       <div className="card__top-row">

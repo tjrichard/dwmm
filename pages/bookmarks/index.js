@@ -2,9 +2,6 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import Meta from "../../components/Meta.js";
 import LNB from "../../components/BookmarkLNB.js";
 import ContentGrid from "../../components/ContentGrid";
-import ContentCard from "../../components/ContentCard";
-import FloatingCTA from "../../components/FloatingCTA";
-import SearchBar from "../../components/SearchBar";
 // import SubscribeForm from "../../components/SubscribeForm";
 import { supabase } from "../../lib/supabase";
 import { getUserVotedWebsites } from "../../lib/voteUtils";
@@ -303,7 +300,6 @@ export default function Bookmarks({
               onTagClick={handleTagClick}
             />
           )}
-          <FloatingCTA />
           <SubscribeForm />
         </div>
       </div>
