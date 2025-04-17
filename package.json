@@ -5,7 +5,6 @@
   "dependencies": {
     "@google/genai": "^0.6.0",
     "@google/generative-ai": "^0.24.0",
-    "@shadcn/ui": "^0.0.4",
     "@supabase/supabase-js": "^2.45.1",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
