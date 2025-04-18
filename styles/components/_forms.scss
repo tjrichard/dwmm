@@ -29,53 +29,62 @@
     }
   }
 
-  .form-group {
-    width: 100%;
-    margin-bottom: $spacing-s;
-    box-sizing: border-box;
+  .form-container {
+    cursor: none;
 
-    label {
-      display: block;
-      margin-bottom: $spacing-xs;
-      font-weight: 500;
-      color: $black-a-darkest;
-      text-align: left;
-      font-size: 0.875rem;
+    & label {
+      cursor: none;
     }
-    
-    & .image-upload {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
-      gap: $spacing-xs;
-      min-height: 200px;
-      padding-bottom: $spacing-m;
 
-      & img {
-        max-width: 100%;
-        max-height: 300px;
-        margin: auto;
-        border-radius: $radius-m;
-        aspect-ratio: 5/6;
-        object-fit: cover;
+    .form-group {
+      width: 100%;
+      margin-bottom: $spacing-s;
+      box-sizing: border-box;
+  
+      label {
+        display: block;
+        margin-bottom: $spacing-xs;
+        font-weight: 500;
+        color: $black-a-darkest;
+        text-align: left;
+        font-size: 0.875rem;
+      }
+  
+      & .image-upload {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        gap: $spacing-xs;
+        min-height: 200px;
+        padding-bottom: $spacing-m;
+  
+        & img {
+          max-width: 100%;
+          max-height: 300px;
+          margin: auto;
+          border-radius: $radius-m;
+          aspect-ratio: 5/6;
+          object-fit: cover;
+        }
+      }
+    }
+  
+    .checkbox-group {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: $spacing-xs;
+      margin-bottom: $spacing-m;
+  
+      label {
+        margin-bottom: 0;
+        display: inline;
+        font-size: 0.875rem;
       }
     }
   }
 
-  .checkbox-group {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: $spacing-xs;
-    margin-bottom: $spacing-m;
-
-    label {
-      margin-bottom: 0;
-      display: inline;
-      font-size: 0.875rem;
-    }
-  }
 
   .tags-container {
     display: flex;
@@ -136,9 +145,9 @@
     border-radius: $radius-s;
     font-size: 0.875rem;
     font-weight: 500;
-    cursor: pointer;
     transition: all 0.2s ease;
     padding: 0 $spacing-s;
+    margin-top: $spacing-s;
 
     &:hover {
       background: $primary-a-dark;

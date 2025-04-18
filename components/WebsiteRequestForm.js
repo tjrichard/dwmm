@@ -341,7 +341,7 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
           {message}
         </div>
       )}
-      <form onSubmit={handleSubmit} className="cursor-pointer">
+      <form onSubmit={handleSubmit} className="form-container">
         <div className="form-group">
           <label htmlFor="url">
             URL *
@@ -349,6 +349,7 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
           <input
             type="url"
             id="url"
+            className="cursor-pointer"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://example.com"
@@ -360,9 +361,9 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
             썸네일 이미지
           </label>
           <div
-            className={`file-upload-placeholder ${
+            className={`cursor-pointer file-upload-placeholder ${
               preview ? 'file-uploaded' : ''
-            } cursor-pointer">`}
+            }">`}
             onClick={!preview ? triggerFileInput : undefined}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !preview) triggerFileInput()
@@ -393,7 +394,7 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
             )}
           </div>
         </div>
-        <div className="form-group">
+        {/* <div className="form-group">
           <label htmlFor="email">
             이메일
           </label>
@@ -419,7 +420,7 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
               업데이트 소식이 있을 때 알림을 받고 싶습니다.
             </label>
           </div>
-        </div>
+        </div> */}
           <button
             type="submit"
             className='button primary l cursor-pointer'

@@ -1,19 +1,18 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import Meta from "../components/Meta.js";
-import LNB from "../components/BookmarkLNB.js";
-import BookmarkFooter from "../components/BookmarkFooter.js";
-import ContentGrid from "../components/ContentGrid.js";
-// import SubscribeForm from "../../components/SubscribeForm";
 import { supabase } from "../lib/supabase.js";
 import { getUserVotedWebsites } from "../lib/voteUtils.js";
-import SubscribeForm from "../components/SubscribeForm.js";
-import WebsiteRequestForm from '../components/WebsiteRequestForm.js';
-import BookmarkHeader from '../components/BookmarkHeader.js';
 import { RealtimeCursors } from "../components/realtime-cursors.tsx";
 import { ensureAuthenticated } from "../lib/auth.js";
+import LNB from "../components/BookmarkLNB.js";
+import BookmarkFooter from "../components/BookmarkFooter.js";
+import BookmarkHeader from '../components/BookmarkHeader.js';
+import WebsiteRequestForm from '../components/WebsiteRequestForm.js';
+import ContentGrid from "../components/ContentGrid.js";
+// import SubscribeForm from "../components/SubscribeForm.js";
 
 // Number of items per page
-const ITEMS_PER_PAGE = 3;
+const ITEMS_PER_PAGE = 9;
 
 // 여기서부터 시작
 
@@ -310,7 +309,7 @@ export default function Bookmarks({
               onTagClick={handleTagClick}
             />
           )}
-          <SubscribeForm />
+          {/* <SubscribeForm /> */}
           <BookmarkFooter />
         </div>
       </div>
