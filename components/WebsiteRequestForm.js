@@ -70,31 +70,6 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
   const [loadingStep, setLoadingStep] = useState(-1)
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false)
 
-  const [file, setFile] = useState(null) // 이미지 파일 상태 추가
-  const [preview, setPreview] = useState(null) // 이미지 미리보기 상태 추가
-
-  // 파일 선택 핸들러
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0]
-    setFile(selectedFile)
-    setPreview(URL.createObjectURL(selectedFile))
-  }
-
-  // 파일 선택 트리거
-  const triggerFileInput = () => {
-    const fileInput = document.createElement('input')
-    fileInput.type = 'file'
-    fileInput.accept = 'image/*'
-    fileInput.onchange = handleFileChange
-    fileInput.click()
-  }
-
-  // 파일 삭제 핸들러
-  const handleFileRemove = () => {
-    setFile(null)
-    setPreview(null)
-  }
-
   // Extract domain name from URL for title suggestion
   const extractDomainName = (url) => {
     try {
@@ -107,26 +82,6 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
       return "";
     }
   };
-
-  const handleDrop = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    const droppedFile = e.dataTransfer.files[0]
-    if (droppedFile) {
-      setFile(droppedFile)
-      setPreview(URL.createObjectURL(droppedFile))
-    }
-  }
-
-  const handleDragOver = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-  }
-
-  const handleDragLeave = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-  }
 
   const resetForm = () => {
     setUrl('')
@@ -147,17 +102,13 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
   // 로딩 단계를 일정 시간 간격으로 자동 진행하는 효과
   useEffect(() => {
     if (!showLoadingOverlay) return;
-
-    // 전체 과정이 약 12초 정도 걸린다고 가정하고 각 단계별로 시간 분배
     const stepTimes = [1000, 2000, 2000, 2000, 2000, 2000];
     let timer;
-
     if (loadingStep < 5) {
       timer = setTimeout(() => {
         setLoadingStep(prev => prev + 1);
       }, stepTimes[loadingStep + 1]);
     }
-
     return () => clearTimeout(timer);
   }, [loadingStep, showLoadingOverlay]);
 
@@ -167,155 +118,50 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
       setMessage('URL is required')
       return
     }
-
     setIsSubmitting(true)
     setMessage('')
     setShowLoadingOverlay(true)
-    setLoadingStep(0) // URL 확인 단계 시작
-
+    setLoadingStep(0)
     try {
-      // Fetch data from Supabase Edge Function
-      const edgeFunctionUrl = `https://lqrkuvemtnnnjgvptnlo.supabase.co/functions/v1/scrape-website?url=${encodeURIComponent(url)}`
+      // Edge Function에 POST 요청
+      const edgeFunctionUrl = `https://lqrkuvemtnnnjgvptnlo.supabase.co/functions/v1/scrape-website`
       const edgeResponse = await fetch(edgeFunctionUrl, {
-        method: 'GET',
+        method: 'POST',
         headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_KEY}`,
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ url }),
       })
-
       if (!edgeResponse.ok) {
         console.error('Edge Function error:', edgeResponse.status, edgeResponse.statusText)
-        throw new Error('Failed to fetch data from the server. Please check the URL or try again later.')
+        throw new Error('서버에서 데이터를 가져오지 못했습니다. URL을 확인하거나 잠시 후 다시 시도해주세요.')
       }
-
       const edgeFunctionData = await edgeResponse.json()
-      console.log('Edge Function response:', edgeFunctionData)
-
-      let systemInstruction = successSystemInstruction
-
-      // 웹사이트 내용 확인 단계는 자동으로 진행됨 (useEffect에서 처리)
-
-      // Send data to Gemini
-      const chatSession = genAI.getGenerativeModel({
-        model: 'gemini-2.5-pro-exp-03-25',
-        systemInstruction,
-      }).startChat({ generationConfig, history: [] })
-
-      const geminiResult = await chatSession.sendMessage(JSON.stringify({
-        ...edgeFunctionData,
-        url: url  // 명시적으로 URL 전달
-      }))
-      const geminiResponseText = geminiResult.response.candidates[0].content.parts[0].text
-      const geminiResponse = JSON.parse(geminiResponseText)
-      console.log('Gemini response:', geminiResponse)
-
-      // 제목, 카테고리, 태그 단계는 자동으로 진행됨 (useEffect에서 처리)
-
-      const { title, description, category, tags } = geminiResponse
-      const original_link = geminiResponse.original_link || url
-
-      let userId = null
-
-      if (email) {
-        const { data: { user }, error: getUserError } = await supabase.auth.getUser()
-        if (getUserError) throw getUserError
-
-        if (user && user.app_metadata?.provider === 'anonymous') {
-          const { error: updateError } = await supabase.auth.updateUser({ email })
-          if (updateError) throw updateError
-
-          if (subscribeConsent) {
-            await supabase.from('subscribers').insert([{ email, subscribed_at: new Date() }]).single()
-          }
-        }
-
-        userId = user?.id
+      // 성공 처리
+      if (onSubmit && edgeFunctionData) {
+        onSubmit(edgeFunctionData)
       }
-
-      const newRequest = {
-        title: title || extractDomainName(url) || "New Resource",
-        description: description || `A resource submitted by a user`,
-        category: category || "Website",
-        tags: tags || ["User Submitted"],
-        original_link,
-        // user_email: email || null,
-        // user_id: userId,
-        public: false, // Requests start as non-public until approved
-        thumbnail: null // 초기값은 null
-      }
-
-      console.log('Supabase request:', newRequest)
-
-      // 웹사이트 등록 단계 (자동으로 진행됨)
-      const { data, error } = await supabase
-        .from('bookmarks')
-        .insert([newRequest])
-        .select()
-
-      if (error) throw error
-
-      const bookmarkId = data[0]?.id
-
-      // 이미지 파일 업로드 처리
-      if (file && bookmarkId) {
-        const ext = file.name.split('.').pop().toLowerCase()
-        const path = `bookmarks/${bookmarkId}/thumbnail.${ext}`
-
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('assets')
-          .upload(path, file, {
-            upsert: true,
-            contentType: file.type || 'application/octet-stream', // 기본 contentType 설정
-          })
-
-        if (uploadError) {
-          console.error('Upload failed:', uploadError.message)
-          setMessage('Failed to upload the thumbnail. Please try again.')
-          return
-        } else {
-          const {
-            data: { publicUrl }
-          } = supabase.storage.from('assets').getPublicUrl(path)
-
-          console.log('Thumbnail URL:', publicUrl)
-
-          // DB 업데이트로 thumbnail URL 저장
-          await supabase
-            .from('bookmarks')
-            .update({ thumbnail: publicUrl })
-            .eq('id', bookmarkId)
-        }
-      }
-
-      if (onSubmit && data) {
-        onSubmit(data[0] || newRequest)
-      }
-
-      // 로딩 오버레이가 모든 단계를 보여준 후 성공 화면으로 전환
       setTimeout(() => {
         setShowLoadingOverlay(false)
         setIsSuccess(true)
-        setMessage('Thank you for your submission!')
+        setMessage('제안해주셔서 감사합니다!')
         setShowThankYou(true)
       }, 1000);
     } catch (error) {
       console.error('Error:', error)
       setShowLoadingOverlay(false)
-      let errorMessage = "Error submitting your request. "
-
+      let errorMessage = '요청 처리 중 오류가 발생했습니다. '
       if (error.message.includes('Failed to fetch')) {
-        errorMessage += "Network error: Unable to reach the server. Please check your internet connection."
-      } else if (error.code === "23505") {
-        errorMessage += "This resource has already been submitted."
-      } else if (error.code === "23502") {
-        errorMessage += "Missing required fields."
+        errorMessage += '네트워크 오류: 서버에 연결할 수 없습니다.'
+      } else if (error.code === '23505') {
+        errorMessage += '이미 제출된 리소스입니다.'
+      } else if (error.code === '23502') {
+        errorMessage += '필수 입력값이 누락되었습니다.'
       } else if (error.message) {
         errorMessage += error.message
       } else {
-        errorMessage += "Please try again."
+        errorMessage += '다시 시도해주세요.'
       }
-
       setMessage(errorMessage)
     } finally {
       setIsSubmitting(false)
@@ -356,80 +202,16 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
             required
           />
         </div>
-        <div className="form-group">
-          <label>
-            썸네일 이미지
-          </label>
-          <div
-            className={`cursor-pointer file-upload-placeholder ${
-              preview ? 'file-uploaded' : ''
-            }">`}
-            onClick={!preview ? triggerFileInput : undefined}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !preview) triggerFileInput()
-            }}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            role="button"
-            tabIndex={0}
-          >
-            {preview ? (
-              <div className="file-preview">
-                <img src={preview} alt="Preview" />
-                <button
-                  type="button"
-                  onClick={handleFileRemove}
-                  aria-label="파일 삭제"
-                  className="button xs text active remove-file-button cursor-pointer"
-                >
-                  삭제
-                </button>
-              </div>
-            ) : (
-              <div className="placeholder-content">
-                <div className="icon desktop-body-feature">📁</div>
-                <p>이미지를 여기에 드래그하거나 클릭하여 업로드하세요</p>
-              </div>
-            )}
-          </div>
-        </div>
-        {/* <div className="form-group">
-          <label htmlFor="email">
-            이메일
-          </label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            className='cursor-pointer'
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="your@email.com"
-          />
-        </div>
-        <div className="form-group">
-          <div className="checkbox-group">
-            <input
-              type="checkbox"
-              id="subscribeConsent"
-              className='cursor-pointer'
-              checked={subscribeConsent}
-              onChange={(e) => setSubscribeConsent(e.target.checked)}
-            />
-            <label htmlFor="subscribeConsent">
-              업데이트 소식이 있을 때 알림을 받고 싶습니다.
-            </label>
-          </div>
-        </div> */}
-          <button
-            type="submit"
-            className='button primary l cursor-pointer'
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "제출 중..." : "제출하기"}
-          </button>
-        </form>
-      </div>
-    )
-  }
+        {/* 이메일 및 구독 동의 관련 UI는 필요시 복구 가능 */}
+        <button
+          type="submit"
+          className='button primary l cursor-pointer'
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "제출 중..." : "제출하기"}
+        </button>
+      </form>
+    </div>
+  )
+}
 export default WebsiteRequestForm
