@@ -21,7 +21,7 @@ function BookmarkHeader() {
             <img src="/logo.svg" className="dwmm-logo" alt="logo" />
           </Link>
           <div className="bookmark-buttons">
-            <button className="button s tertiary cursor-pointer" onClick={openModal}>사이트 제안하기</button>
+            <button className="button s tertiary cursor-pointer" onClick={openModal}>Suggest</button>
           </div>
         </div>
       </div>

@@ -138,7 +138,7 @@
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    height: 40px;
+    // height: 40px;
     background: $primary-a-normal;
     color: $white-a-pure;
     border: none;
@@ -170,6 +170,8 @@
   align-items: center;
   gap: $spacing-m;
   width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
   box-sizing: border-box;
 
   .thank-you-icon {
@@ -299,4 +301,8 @@
       margin-bottom: $spacing-m;
     }
   }
+}
+
+.text-center {
+  text-align: center;
 }

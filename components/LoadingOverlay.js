@@ -7,19 +7,19 @@ const LoadingOverlay = ({ currentStep, animationDurations }) => {
   }, [animationDurations]);
 
   const steps = [
-    '🌳 URL 확인하는 중',
-    '🌳 웹사이트 내용 확인하는 중',
-    '🌳 제목 정하는 중',
-    '🌳 카테고리 정하는 중',
-    '🌳 태그 고르는 중',
-    '🌳 웹사이트 등록하는 중'
+    '🌳 Checking URL...',
+    '🌳 Checking website content...',
+    '🌳 Deciding title...',
+    '🌳 Deciding category...',
+    '🌳 Deciding tags...',
+    '🌳 Submitting website...'
   ];
 
   return (
     <div className="loading-overlay">
       <div className="loading-container">
         <div className="loading-spinner"></div>
-        <h3>웹사이트 분석 중</h3>
+        <h3>Analyzing website...</h3>
         <div className="loading-steps">
           {steps.map((step, index) => (
             <div 

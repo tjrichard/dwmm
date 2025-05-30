@@ -12,7 +12,7 @@ function SearchBar({
   const [searchQuery, setSearchQuery] = useState("")
   const [localSelectedCategory, setLocalSelectedCategory] = useState(selectedCategory)
   const [localSelectedTags, setLocalSelectedTags] = useState(selectedTags)
-  const [sortOrder, setSortOrder] = useState("최신 순") // 기본 정렬: 최신 순
+  const [sortOrder, setSortOrder] = useState("Newest") // 기본 정렬: 최신 순
 
   // 외부에서 selectedCategory나 selectedTags가 변경될 때 로컬 상태 업데이트
   useEffect(() => {
@@ -111,15 +111,15 @@ function SearchBar({
           className="search-input-container cursor-pointer"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="검색어를 입력하세요..."
+          placeholder="Search anything"
         />
       </form>
 
       <div className="filter-container">
         <div className="filter-group">
-          <p className="filter-label">정렬</p>
+          <p className="filter-label">Sort</p>
           <div className="filter-badges">
-            {["최신 순", "오래된 순", "추천 순"].map((order) => (
+            {["Newest", "Oldest", "Recommended"].map((order) => (
               <button
                 key={order}
                 type="button"
@@ -136,7 +136,7 @@ function SearchBar({
 
         {categories.length > 0 && (
           <div className="filter-group">
-            <p className="filter-label">카테고리</p>
+            <p className="filter-label">Category</p>
             <div className="filter-badges">
               <button
                 type="button"
@@ -163,7 +163,7 @@ function SearchBar({
 
         {tags.length > 0 && (
           <div className="filter-group">
-            <p className="filter-label">태그</p>
+            <p className="filter-label">Tags</p>
             <div className="filter-badges">
               {tags.map((tag) => (
                 <button

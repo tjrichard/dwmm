@@ -5,7 +5,10 @@ function BookmarkFooter() {
     <footer>
       <div className="footer-content desktop-subbody-caption">
         <a href="https://www.linkedin.com/in/tjrichatd/" className="cursor-pointer">Bio</a>
-        <p>Made with 🖤</p>{" "}
+        <div className="footer-made-with">
+          <p>Made with 🖤</p>{" "}
+          <p>...and Figma, Cursor, ChatGPT, Supabase</p>
+        </div>
         <p>
           by <a href="https://dwmm.site" className="cursor-pointer">DWMM</a>
         </p>

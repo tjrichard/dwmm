@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
-import { GoogleGenerativeAI } from '@google/generative-ai'
 import LoadingOverlay from './LoadingOverlay'
 
 const ThankYouComponent = ({ onAddNew }) => {
@@ -8,48 +7,14 @@ const ThankYouComponent = ({ onAddNew }) => {
     <div className="thank-you-container animate-fade-in">
       <div className="thank-you-icon">✓</div>
       <div>
-        <h3>💯 감사합니다!</h3>
-        <p>제출하신 사이트는 빠르게 확인하고 추가해드릴게요 😉 </p>
+        <h3>💯 Thank you!</h3>
+        <p>We will review and add your site soon 😉 </p>
       </div>
       <button onClick={onAddNew} className="button primary">
-        추가 제안하기
+        Suggest another
       </button>
     </div>
   )
-}
-
-const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
-
-const genAI = new GoogleGenerativeAI(geminiApiKey)
-
-const successSystemInstruction = 'Analyze the provided input and generate a structured output. Instructions: 1. Title: Use the given title directly unless it is too descriptive. If needed, infer a concise and noun-based title. 2. Description: Summarize the provided description and htmlContents to create a concise and informative description. Ensure clarity and relevance. Then add relevant meta keywords that would be useful for search. Provide keywords in both Korean and English, considering possible typos and include as many as possible. Separate each keyword with a comma. 3. Category: Determine the most suitable category from the following: "AI", "Collection", "Website", "Article", "Service", "Book". If the content curates multiple resources, classify it as "Collection". 4. Tags: Extract 3 to 5 relevant tags based on the provided keywords, description, and htmlContents. Ensure tags are useful for search and discovery. 5. Original_link: Always include the provided URL as the original_link value.'
-
-const errorSystemInstruction = 'Visit the provided link and return the structured output as a result. Important: Set output as "not available" when there is no resources to analyze. Instructions: 1. Title: Use the meta title or <h> tag from the website whenever possible. If the title is descriptive, infer a concise and noun-based title. 2. Description: Analyze the role, content, and purpose of the site to create a concise and informative description. Add relevant meta keywords in both Korean and English, considering possible typos. Separate each keyword with a comma. 3. Category: Select the most suitable category from the following: "AI", "Collection", "Website", "Article", "Service", "Book". If the content curates multiple resources, classify it as "Collection". 4. Tags: Generate 3 to 5 relevant tags based on the content and purpose of the site. 5. Original_link: Always include the provided URL as the original_link value.'
-
-const generationConfig = {
-  temperature: 1,
-  topP: 0.95,
-  topK: 40,
-  maxOutputTokens: 8192,
-  responseMimeType: 'application/json',
-  responseSchema: {
-    type: 'object',
-    properties: {
-      title: { type: 'string' },
-      description: { type: 'string' },
-      category: {
-        type: 'string',
-        enum: ['AI', 'Collection', 'Website', 'Article', 'Service', 'Book'],
-      },
-      tags: {
-        type: 'array',
-        items: { type: 'string' },
-      },
-      original_link: { type: 'string' },
-      created_at: { type: 'string' },
-    },
-    required: ['title', 'category', 'original_link'],
-  }
 }
 
 function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
@@ -63,7 +28,6 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
   const [subscribeConsent, setSubscribeConsent] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [message, setMessage] = useState('')
-  const [isSuccess, setIsSuccess] = useState(false)
   const [showThankYou, setShowThankYou] = useState(false)
 
   // 로딩 단계 상태 추가
@@ -88,7 +52,6 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
     setEmail('')
     setSubscribeConsent(false)
     setMessage('')
-    setIsSuccess(false)
     setShowThankYou(false)
     setLoadingStep(-1)
     setShowLoadingOverlay(false)
@@ -143,8 +106,6 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
       }
       setTimeout(() => {
         setShowLoadingOverlay(false)
-        setIsSuccess(true)
-        setMessage('제안해주셔서 감사합니다!')
         setShowThankYou(true)
       }, 1000);
     } catch (error) {
@@ -178,12 +139,9 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
           animationDurations={animationDurations}
         />
       )}
-      <h3>사이트 제안하기</h3>
+      <h3>Suggest a website</h3>
       {message && (
-        <div
-          className={`message ${isSuccess ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            } p-4 rounded-md`}
-        >
+        <div className="message bg-red-100 text-red-800 p-4 rounded-md">
           {message}
         </div>
       )}
@@ -205,10 +163,10 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
         {/* 이메일 및 구독 동의 관련 UI는 필요시 복구 가능 */}
         <button
           type="submit"
-          className='button primary l cursor-pointer'
+          className='button primary l text-center cursor-pointer'
           disabled={isSubmitting}
         >
-          {isSubmitting ? "제출 중..." : "제출하기"}
+          {isSubmitting ? "Submitting..." : "Submit"}
         </button>
       </form>
     </div>

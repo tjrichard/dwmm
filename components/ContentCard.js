@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useCallback } from "react";
 import VoteButton from "./VoteButton";
 import { supabase } from "../lib/supabase";
 
@@ -25,7 +25,12 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
     return `${baseUrl}${baseUrl.includes("?") ? "&" : "?"}${utmParams.toString()}`;
   };
 
-  // Generate a website preview image using the domain
+  // Supabase 썸네일 URL 생성
+  const getSupabaseThumbnailUrl = () => {
+    return `https://lqrkuvemtnnnjgvptnlo.supabase.co/storage/v1/object/public/assets/bookmarks/${id}/thumbnail.webp`;
+  };
+
+  // 기존 dicebear 이미지 URL 생성
   const getWebsitePreviewImage = () => {
     try {
       const domain = new URL(original_link).hostname;
@@ -34,6 +39,18 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
       return `https://api.dicebear.com/7.x/identicon/svg?seed=default`;
     }
   };
+
+  // 이미지 소스 state 관리
+  const [imgSrc, setImgSrc] = useState(getSupabaseThumbnailUrl());
+  const [fallbackUsed, setFallbackUsed] = useState(false);
+
+  // onError 핸들러
+  const handleImgError = useCallback(() => {
+    if (!fallbackUsed) {
+      setImgSrc(getWebsitePreviewImage());
+      setFallbackUsed(true);
+    }
+  }, [fallbackUsed, original_link]);
 
   const handleVoteClick = (e) => {
     e.preventDefault();
@@ -121,9 +138,10 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
       </div>
       <div className="card__image-container">
         <img
-          src={getWebsitePreviewImage()}
+          src={imgSrc}
           alt={title}
           className="card__image"
+          onError={handleImgError}
         />
       </div>
       <div className="card__content">
