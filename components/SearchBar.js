@@ -143,7 +143,7 @@ function SearchBar({
                 className={`cursor-pointer button xs text ${!localSelectedCategory ? "active" : "inactive"}`}
                 onClick={() => handleCategorySelect("")}
               >
-                전체
+                ALL
               </button>
               {categories.map((category) => (
                 <button

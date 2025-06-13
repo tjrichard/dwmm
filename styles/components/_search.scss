@@ -84,18 +84,20 @@
     padding: $spacing-xl;
     width: 100%;
     text-align: center;
-  
+    
+    h3 {
+      color: $black-darkest;
+      margin-bottom: $spacing-s;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    p {
+      color: $black-a-darker;
+    }
+    
     .no-results-message {
       margin-bottom: $spacing-l;
-      
-      h3 {
-        color: $black-darkest;
-        margin-bottom: $spacing-s;
-      }
-  
-      p {
-        color: $black-a-darker;
-      }
   
       .no-results-divider {
         position: relative;

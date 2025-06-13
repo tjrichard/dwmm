@@ -293,9 +293,9 @@ export default function Bookmarks({
         <div className="content-scroll-wrapper">
           {bookmarks.length === 0 && (searchQuery || selectedCategory || selectedTags.length > 0) ? (
             <div className="no-results-container">
-              <h3>검색 결과가 없습니다</h3>
-              <p>다른 검색어나 필터를 사용해보세요.</p>
-              <p className="no-results-divider">또는</p>
+              <h3>There's no result to show..</h3>
+              <p>try another keyword or filter</p>
+              <p className="no-results-divider">..or</p>
               <WebsiteRequestForm />
             </div>
           ) : bookmarks.length === 0 ? (
