@@ -113,7 +113,7 @@ export default function Bookmarks({
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortOrder, setSortOrder] = useState("최신 순"); // 기본 정렬: 최신 순
+  const [sortOrder, setSortOrder] = useState("Newest"); // 기본 정렬: Newest
   const observer = useRef();
   const loadingRef = useRef(null);
   const [userId, setUserId] = useState(null);
@@ -147,9 +147,9 @@ export default function Bookmarks({
         `)
 
       // 정렬 기준 적용
-      if (sortOrder === "최신 순") query = query.order("created_at", { ascending: false })
-      else if (sortOrder === "오래된 순") query = query.order("created_at", { ascending: true })
-      else if (sortOrder === "추천 순") query = query.order("vote_count", { ascending: false })
+      if (sortOrder === "Newest") query = query.order("created_at", { ascending: false })
+      else if (sortOrder === "Oldest") query = query.order("created_at", { ascending: true })
+      else if (sortOrder === "Recommended") query = query.order("vote_count", { ascending: false })
 
       query = query.range((pageNumber - 1) * ITEMS_PER_PAGE, pageNumber * ITEMS_PER_PAGE - 1)
 
@@ -241,7 +241,7 @@ export default function Bookmarks({
     setSearchQuery(params.query || "");
     setSelectedCategory(params.category || "");
     setSelectedTags(params.tags || []);
-    setSortOrder(params.sortOrder || "최신 순"); // 정렬 기준 업데이트
+    setSortOrder(params.sortOrder || "Newest"); // 정렬 기준 업데이트
     setPage(1); 
   };
 

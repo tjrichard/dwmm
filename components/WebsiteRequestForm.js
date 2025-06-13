@@ -17,7 +17,7 @@ const ThankYouComponent = ({ onAddNew }) => {
   )
 }
 
-function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
+function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {}, fromSuggest = false }) {
   // 각 단계별 랜덤 애니메이션 시간 생성 (2초~4초 사이)
   const animationDurations = useMemo(() => {
     return Array.from({ length: 6 }, () => 2 + Math.random() * 2);
@@ -56,8 +56,8 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {} }) {
     setLoadingStep(-1)
     setShowLoadingOverlay(false)
 
-    // 모달을 닫는 콜백 호출
-    if (onComplete) {
+    // fromSuggest가 false일 때만 모달 닫기
+    if (!fromSuggest && onComplete) {
       onComplete();
     }
   }

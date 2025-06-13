@@ -30,7 +30,7 @@ function BookmarkHeader() {
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={closeModal}>×</button>
-            <WebsiteRequestForm onComplete={closeModal} />
+            <WebsiteRequestForm onComplete={closeModal} fromSuggest={true} />
           </div>
         </div>
       )}
@@ -38,4 +38,4 @@ function BookmarkHeader() {
   );
 }
 
-export default BookmarkHeader; 
+export default BookmarkHeader;
