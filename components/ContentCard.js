@@ -13,7 +13,7 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
     vote_count = 0,
     user_has_voted = false,
   } = content;
-  
+
   const getUtmLink = () => {
     const baseUrl = original_link;
     const utmParams = new URLSearchParams({
@@ -22,7 +22,9 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
       utm_content: "b2b-designers",
     });
 
-    return `${baseUrl}${baseUrl.includes("?") ? "&" : "?"}${utmParams.toString()}`;
+    return `${baseUrl}${
+      baseUrl.includes("?") ? "&" : "?"
+    }${utmParams.toString()}`;
   };
 
   // Supabase 썸네일 URL 생성
@@ -69,36 +71,36 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
     e.preventDefault();
     e.stopPropagation();
     if (onTagClick) {
-      onTagClick(String(tagValue || ''));
+      onTagClick(String(tagValue || ""));
     }
   };
 
   const handleClick = async (e) => {
     try {
       // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       // Get referrer and user agent
-      const referrer = document.referrer || '';
+      const referrer = document.referrer || "";
       const userAgent = navigator.userAgent;
 
       // Insert click tracking data
-      const { error } = await supabase
-        .from('click_tracking')
-        .insert([
-          {
-            bookmark_id: id,
-            user_id: user?.id || null,
-            referrer: referrer,
-            user_agent: userAgent
-          }
-        ]);
+      const { error } = await supabase.from("click_tracking").insert([
+        {
+          bookmark_id: id,
+          user_id: user?.id || null,
+          referrer: referrer,
+          user_agent: userAgent,
+        },
+      ]);
 
       if (error) {
-        console.error('Error tracking click:', error);
+        console.error("Error tracking click:", error);
       }
     } catch (error) {
-      console.error('Error in click tracking:', error);
+      console.error("Error in click tracking:", error);
     }
   };
 
@@ -110,30 +112,31 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
       className="content-card card cursor-pointer"
       onClick={handleClick}
     >
+      <div className="card__arrow">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M7 17l9.2-9.2M17 17V7H7" />
+        </svg>
+        <span className="card__visit-text">Visit Website</span>
+      </div>
       <div className="card__top-row">
         <div className="card__meta">
-          <div 
-            className="cursor-pointer card__category button xs text active" 
+          <div
+            className="cursor-pointer card__category button xs text active"
             role="button"
             onClick={(e) => handleCategoryClick(e, category)}
           >
-            {category ? String(category).toUpperCase() : ''}
+            {category ? String(category).toUpperCase() : ""}
           </div>
-        <div className="card__arrow">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M7 17l9.2-9.2M17 17V7H7" />
-          </svg>
-        </div>
         </div>
       </div>
       <div className="card__image-container">
@@ -157,15 +160,16 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
         </div>
         <div className="card__meta">
           <div className="card__tags">
-            {tags && tags.map((tag, index) => (
-              <span 
-                key={index} 
-                className="cursor-pointer tag button xs text"
-                onClick={(e) => handleTagClick(e, tag)}
-              >
-                {String(tag || '')}
-              </span>
-            ))}
+            {tags &&
+              tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="cursor-pointer tag button xs text"
+                  onClick={(e) => handleTagClick(e, tag)}
+                >
+                  {String(tag || "")}
+                </span>
+              ))}
           </div>
         </div>
       </div>

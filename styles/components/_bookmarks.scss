@@ -90,7 +90,7 @@
     }
     .card__arrow {
       opacity: 1;
-      transform: translateX($spacing-s);
+      // transform: translateX($spacing-s);
     }
   }
 
@@ -110,24 +110,62 @@
     object-fit: cover;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-
+  
+  &:hover .card__arrow {
+    display: flex;
+    animation: fadeIn 0.2s ease-out forwards;
+    transform: translateX(0) translateY(0);
+  }
+  
   &__arrow {
     position: absolute;
     top: calc(50% - 20px);
     left: calc(50% - 20px);
-    transform: translateX(-20px) translateY(20px);
-    background-color: $primary-normal;
-    color: $white-a-pure;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+    transform: translateX(-20px);
     display: flex;
     align-items: center;
-    justify-content: center;
+    z-index: 10;
     opacity: 0;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    z-index: 2;
+    background-color: $primary-normal;
+    color: $white-a-pure;
+    min-width: 40px;
+    height: 40px;
+    border-radius: 9999px;
+    padding: 0 8px;
+    gap: 0;
+    transition: all 0.2s ease;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    overflow: hidden;
+    svg {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      display: block;
+    }
+    .card__visit-text {
+      opacity: 0;
+      max-width: 0;
+      margin-left: 0;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      font-size: 0.95em;
+      color: $white-a-pure;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    &:hover {
+      padding-right: 24px;
+      gap: 8px;
+      background: $primary-dark;
+      left: calc(50% - 79px);
+      transition: all 0.2s ease;
+      .card__visit-text {
+        opacity: 1;
+        max-width: 200px;
+        margin-left: 4px;
+      }
+    }
   }
 
   &__top-row {
