@@ -9,6 +9,7 @@ import BookmarkFooter from "../components/BookmarkFooter.js";
 import BookmarkHeader from '../components/BookmarkHeader.js';
 import WebsiteRequestForm from '../components/WebsiteRequestForm.js';
 import ContentGrid from "../components/ContentGrid.js";
+import SkeletonLoader from "../components/SkeletonLoader.js";
 // import SubscribeForm from "../components/SubscribeForm.js";
 
 // Number of items per page
@@ -108,6 +109,8 @@ export default function Bookmarks({
 }) {
   const [bookmarks, setBookmarks] = useState(initialBookmarks);
   const [loading, setLoading] = useState(false);
+  const [isLoadingTotalCount, setIsLoadingTotalCount] = useState(false);
+  const [totalCount, setTotalCount] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const [selectedTags, setSelectedTags] = useState([]);
@@ -118,17 +121,39 @@ export default function Bookmarks({
   const loadingRef = useRef(null);
   const [userId, setUserId] = useState(null);
 
-  useEffect(() => {
-    async function fetchUserId() {
-      const id = await ensureAuthenticated();
-      // 직접 supabase.auth.getUser()로도 확인
-      const { data: { user } } = await supabase.auth.getUser();
-      console.log("ensureAuthenticated userId:", id);
-      console.log("supabase.auth.getUser() userId:", user?.id);
-      setUserId(id);
+  const fetchTotalCount = useCallback(async () => {
+    setIsLoadingTotalCount(true);
+    try {
+      let query = supabase
+        .from("bookmarks_public")
+        .select("id", { count: "exact" });
+
+      if (selectedCategory) {
+        const exactCategory = availableCategories.find(
+          cat => cat.toLowerCase() === selectedCategory.toLowerCase()
+        );
+        if (exactCategory) query = query.eq("category", exactCategory);
+      }
+      if (selectedTags.length > 0) {
+        selectedTags.forEach(tag => {
+          query = query.contains('tags', [tag]);
+        });
+      }
+      if (searchQuery) {
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
+      }
+
+      const { count, error } = await query;
+
+      if (error) throw error;
+      setTotalCount(count);
+    } catch (error) {
+      console.error("Error fetching total count:", error);
+      setTotalCount(0);
+    } finally {
+      setIsLoadingTotalCount(false);
     }
-    fetchUserId();
-  }, []);
+  }, [selectedCategory, selectedTags, searchQuery, availableCategories]);
 
   const fetchBookmarks = useCallback(async (pageNumber) => {
     setLoading(true)
@@ -183,9 +208,74 @@ export default function Bookmarks({
     }
   }, [selectedCategory, selectedTags, searchQuery, availableCategories, sortOrder]) // sortOrder 추가
 
+  const handleCategorySelect = (category) => {
+    const categoryStr = category ? String(category) : "";
+    setSelectedCategory(categoryStr.toLowerCase());
+  };
+
+  const handleTagSelect = (tag) => {
+    const tagStr = String(tag || '');
+    const tagLower = tagStr.toLowerCase();
+    setSelectedTags(prev =>
+      prev.includes(tagLower)
+        ? prev.filter(t => t !== tagLower)
+        : [...prev, tagLower]
+    );
+  };
+
+  const handleSearch = async (params) => {
+    setSearchQuery(params.query || "");
+    setSelectedCategory(params.category || "");
+    setSelectedTags(params.tags || []);
+    setSortOrder(params.sortOrder || "Newest");
+    setPage(1);
+    await fetchTotalCount();
+  };
+
+  const handleCategoryClick = async (category) => {
+    const categoryLower = String(category || '').toLowerCase();
+    if (selectedCategory === categoryLower) {
+      handleCategorySelect("");
+    } else {
+      handleCategorySelect(category);
+    }
+    setPage(1);
+    await fetchTotalCount();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleTagClick = async (tag) => {
+    const tagStr = String(tag || '');
+    if (selectedTags.includes(tagStr)) {
+      setSelectedTags(prev => prev.filter(t => t !== tagStr));
+    } else {
+      setSelectedTags(prev => [...prev, tagStr]);
+    }
+    setPage(1);
+    await fetchTotalCount();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // useEffect hooks
+  useEffect(() => {
+    async function fetchUserId() {
+      const id = await ensureAuthenticated();
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log("ensureAuthenticated userId:", id);
+      console.log("supabase.auth.getUser() userId:", user?.id);
+      setUserId(id);
+    }
+    fetchUserId();
+  }, []);
+
   useEffect(() => {
     fetchBookmarks(page)
   }, [fetchBookmarks, page])
+
+  // 초기 totalCount 로딩
+  useEffect(() => {
+    fetchTotalCount();
+  }, [fetchTotalCount]);
 
   // Intersection Observer callback
   const lastBookmarkRef = useCallback(node => {
@@ -222,51 +312,6 @@ export default function Bookmarks({
     fetchUserVotes();
   }, []); // 최초 1회만 실행
 
-  const handleCategorySelect = (category) => {
-    const categoryStr = category ? String(category) : "";
-    setSelectedCategory(categoryStr.toLowerCase());
-  };
-
-  const handleTagSelect = (tag) => {
-    const tagStr = String(tag || '');
-    const tagLower = tagStr.toLowerCase();
-    setSelectedTags(prev =>
-      prev.includes(tagLower)
-        ? prev.filter(t => t !== tagLower)
-        : [...prev, tagLower]
-    );
-  };
-
-  const handleSearch = (params) => {
-    setSearchQuery(params.query || "");
-    setSelectedCategory(params.category || "");
-    setSelectedTags(params.tags || []);
-    setSortOrder(params.sortOrder || "Newest"); // 정렬 기준 업데이트
-    setPage(1); 
-  };
-
-  const handleCategoryClick = (category) => {
-    const categoryLower = String(category || '').toLowerCase();
-    if (selectedCategory === categoryLower) {
-      handleCategorySelect("");
-    } else {
-      handleCategorySelect(category);
-    }
-    setPage(1);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleTagClick = (tag) => {
-    const tagStr = String(tag || '');
-    if (selectedTags.includes(tagStr)) {
-      setSelectedTags(prev => prev.filter(t => t !== tagStr));
-    } else {
-      setSelectedTags(prev => [...prev, tagStr]);
-    }
-    setPage(1);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   return (
     <div className="bookmarks-page-wrapper">
       {/* userId가 준비된 경우에만 커서 렌더 */}
@@ -291,15 +336,17 @@ export default function Bookmarks({
           onSearch={handleSearch}
         />
         <div className="content-scroll-wrapper">
-          {bookmarks.length === 0 && (searchQuery || selectedCategory || selectedTags.length > 0) ? (
+          {isLoadingTotalCount ? (
+            <div className="skeleton-container">
+              <SkeletonLoader />
+            </div>
+          ) : totalCount === 0 ? (
             <div className="no-results-container">
               <h3>There's no result to show..</h3>
               <p>try another keyword or filter</p>
               <p className="no-results-divider">..or</p>
               <WebsiteRequestForm />
             </div>
-          ) : bookmarks.length === 0 ? (
-            <WebsiteRequestForm />
           ) : (
             <ContentGrid
               contents={bookmarks}
