@@ -41,6 +41,87 @@
   height: 60px;
 }
 
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: $spacing-ml;
+  width: 100%;
+}
+
+.skeleton-bookmark-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100%;
+  border-radius: $radius-m;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  animation: shimmer 1.5s infinite linear;
+}
+
+.skeleton-bookmark-card .card__category.skeleton-box {
+  width: 80px;
+  height: 20px;
+  margin-bottom: $spacing-xs;
+  background: linear-gradient(90deg, $black-a-lightest 25%, $black-a-lighter 50%, $black-a-lightest 75%);
+  background-size: 200% 100%;
+  border-radius: $radius-s;
+  animation: shimmer 1.5s infinite linear;
+}
+
+.skeleton-bookmark-card .card__image.skeleton-box {
+  width: 100%;
+  aspect-ratio: 5/6;
+  margin-bottom: $spacing-m;
+  background: linear-gradient(90deg, $black-a-lightest 25%, $black-a-lighter 50%, $black-a-lightest 75%);
+  background-size: 200% 100%;
+  border-radius: $radius-m;
+  animation: shimmer 1.5s infinite linear;
+}
+
+.skeleton-bookmark-card .card__title.skeleton-box {
+  width: 70%;
+  height: 28px;
+  margin-bottom: $spacing-xs;
+  background: linear-gradient(90deg, $black-a-lightest 25%, $black-a-lighter 50%, $black-a-lightest 75%);
+  background-size: 200% 100%;
+  border-radius: $radius-s;
+  animation: shimmer 1.5s infinite linear;
+}
+
+.skeleton-vote {
+  width: 48px;
+  height: 28px;
+  margin-left: auto;
+  background: linear-gradient(90deg, $black-a-lightest 25%, $black-a-lighter 50%, $black-a-lightest 75%);
+  background-size: 200% 100%;
+  border-radius: $radius-s;
+  animation: shimmer 1.5s infinite linear;
+}
+
+.skeleton-tag {
+  width: 48px;
+  height: 18px;
+  display: inline-block;
+  margin-right: $spacing-xs;
+  margin-top: $spacing-xs;
+  background: linear-gradient(90deg, $black-a-lightest 25%, $black-a-lighter 50%, $black-a-lightest 75%);
+  background-size: 200% 100%;
+  border-radius: $radius-s;
+  animation: shimmer 1.5s infinite linear;
+}
+
+@media (max-width: 768px) {
+  .skeleton-grid {
+    grid-template-columns: 1fr;
+    gap: $spacing-m;
+  }
+  .skeleton-bookmark-card {
+    padding: $spacing-m;
+  }
+}
+
 @keyframes shimmer {
   0% {
     background-position: 200% 0;

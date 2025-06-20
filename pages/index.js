@@ -9,7 +9,7 @@ import BookmarkFooter from "../components/BookmarkFooter.js";
 import BookmarkHeader from '../components/BookmarkHeader.js';
 import WebsiteRequestForm from '../components/WebsiteRequestForm.js';
 import ContentGrid from "../components/ContentGrid.js";
-import SkeletonLoader from "../components/SkeletonLoader.js";
+import SkeletonLoader from "../components/skeletonLoader.js";
 // import SubscribeForm from "../components/SubscribeForm.js";
 
 // Number of items per page
@@ -338,7 +338,7 @@ export default function Bookmarks({
         <div className="content-scroll-wrapper">
           {isLoadingTotalCount ? (
             <div className="skeleton-container">
-              <SkeletonLoader />
+              <SkeletonLoader variant="bookmark"/>
             </div>
           ) : totalCount === 0 ? (
             <div className="no-results-container">
