@@ -344,7 +344,7 @@ export default function Bookmarks({
             <div className="no-results-container">
               <h3>There's no result to show..</h3>
               <p>try another keyword or filter</p>
-              <p className="no-results-divider">..or</p>
+              <p className="no-results-divider">or</p>
               <WebsiteRequestForm />
             </div>
           ) : (

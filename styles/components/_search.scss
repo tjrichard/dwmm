@@ -96,32 +96,28 @@
       color: $black-a-darker;
     }
     
-    .no-results-message {
-      margin-bottom: $spacing-l;
-  
-      .no-results-divider {
-        position: relative;
-        margin: $spacing-l 0;
-        color: $black-a-darker;
-        font-size: 0.875rem;
-  
-        &::before,
-        &::after {
-          content: "";
-          position: absolute;
-          top: 50%;
-          width: 100px;
-          height: 1px;
-          background-color: $black-a-lighter;
-        }
-  
-        &::before {
-          right: calc(50% + $spacing-m);
-        }
-  
-        &::after {
-          left: calc(50% + $spacing-m);
-        }
+    .no-results-divider {
+      position: relative;
+      margin: $spacing-l 0;
+      color: $black-a-darker;
+      font-size: 0.875rem;
+
+      &::before,
+      &::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 100px;
+        height: 1px;
+        background-color: $black-a-lighter;
+      }
+
+      &::before {
+        right: calc(50% + $spacing-m);
+      }
+
+      &::after {
+        left: calc(50% + $spacing-m);
       }
     }
   }  
