@@ -1,14 +1,18 @@
 .website-request-form {
-  background-color: $white-a-pure;
-  padding: $spacing-m;
-  border-radius: $radius-m;
-  max-width: 600px;
-  margin: 0 auto;
+  position: relative;
+  min-height: unset;
   width: 100%;
-  box-sizing: border-box;
+  max-width: 420px;
+  height: 340px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  background: $white-a-pure;
 
-  h3 {
+  > h3 {
     margin-bottom: $spacing-m;
+    line-height: 32px;
     font-weight: 600;
     color: $black-darkest;
     text-align: left;
@@ -30,13 +34,20 @@
   }
 
   .form-container {
-    cursor: none;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    justify-content: flex-start;
+    align-items: stretch;
+    min-height: 0;
+    gap: 1.2rem;
 
     & label {
       cursor: none;
     }
 
     .form-group {
+      flex: 1 1 auto;
       width: 100%;
       margin-bottom: $spacing-s;
       box-sizing: border-box;
@@ -161,18 +172,30 @@
 }
 
 .thank-you-container {
-  background-color: $white-a-pure;
-  padding: $spacing-m;
-  border-radius: $radius-m;
-  text-align: center;
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
+  justify-content: center;
   align-items: center;
-  gap: $spacing-m;
+  min-height: 0;
+  height: 100%;
+  gap: 1.2rem;
+  background-color: $white-a-pure;
+  border-radius: $radius-m;
+  text-align: center;
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
   box-sizing: border-box;
+
+  .thank-you-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    gap: $spacing-xs;
+  }
 
   .thank-you-icon {
     width: 48px;

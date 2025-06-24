@@ -5,8 +5,8 @@ import LoadingOverlay from './LoadingOverlay'
 const ThankYouComponent = ({ onAddNew }) => {
   return (
     <div className="thank-you-container animate-fade-in">
-      <div className="thank-you-icon">✓</div>
-      <div>
+      <div className="thank-you-content">
+        <div className="thank-you-icon">✓</div>
         <h3>💯 Thank you!</h3>
         <p>We will review and add your site soon 😉 </p>
       </div>
@@ -129,16 +129,25 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {}, fromSu
     }
   }
 
-  if (showThankYou) return <ThankYouComponent onAddNew={resetForm} />
-
-  return (
+  if (showThankYou) return (
     <div className="website-request-form">
-      {showLoadingOverlay && (
+      <ThankYouComponent onAddNew={resetForm} />
+    </div>
+  );
+  if (showLoadingOverlay) {
+    return (
+      <div className="website-request-form">
+        <h3>Suggest a website</h3>
         <LoadingOverlay
           currentStep={loadingStep}
           animationDurations={animationDurations}
         />
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="website-request-form">
       <h3>Suggest a website</h3>
       {message && (
         <div className="message bg-red-100 text-red-800 p-4 rounded-md">
@@ -163,7 +172,7 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {}, fromSu
         {/* 이메일 및 구독 동의 관련 UI는 필요시 복구 가능 */}
         <button
           type="submit"
-          className='button primary l text-center cursor-pointer'
+          className='button primary l text-center cursor-pointer submit-btn'
           disabled={isSubmitting}
         >
           {isSubmitting ? "Submitting..." : "Submit"}
