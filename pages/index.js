@@ -4,13 +4,13 @@ import { supabase } from "../lib/supabase.js";
 import { getUserVotedWebsites } from "../lib/voteUtils.js";
 import { RealtimeCursors } from "../components/realtime-cursors.tsx";
 import { ensureAuthenticated } from "../lib/auth.js";
-import LNB from "../components/BookmarkLNB.js";
-import BookmarkFooter from "../components/BookmarkFooter.js";
-import BookmarkHeader from '../components/BookmarkHeader.js';
-import WebsiteRequestForm from '../components/WebsiteRequestForm.js';
+import BookmarkHeader from '../components/bookmark/Header.js';
+import LNB from '../components/bookmark/Lnb.js';
+import BookmarkFooter from '../components/bookmark/Footer.js';
+import WebsiteRequestForm from '../components/bookmark/WebsiteRequestForm.js';
 import ContentGrid from "../components/ContentGrid.js";
-import SkeletonLoader from "../components/skeletonLoader.js";
-// import SubscribeForm from "../components/SubscribeForm.js";
+import SkeletonLoader from "../components/SkeletonLoader.js";
+import ClickCount from "../components/bookmark/ClickCount.js";
 
 // Number of items per page
 const ITEMS_PER_PAGE = 9;
@@ -120,6 +120,7 @@ export default function Bookmarks({
   const observer = useRef();
   const loadingRef = useRef(null);
   const [userId, setUserId] = useState(null);
+  const [bookmarkClickCounts, setBookmarkClickCounts] = useState({})
 
   const fetchTotalCount = useCallback(async () => {
     setIsLoadingTotalCount(true);
@@ -207,6 +208,21 @@ export default function Bookmarks({
       setLoading(false)
     }
   }, [selectedCategory, selectedTags, searchQuery, availableCategories, sortOrder]) // sortOrder 추가
+
+  const fetchClickCounts = useCallback(async (bookmarkIds) => {
+    if (!bookmarkIds || bookmarkIds.length === 0) return
+    const { data, error } = await supabase
+      .from('bookmark_clicks')
+      .select('bookmark_id, click_count')
+      .in('bookmark_id', bookmarkIds)
+    if (!error && data) {
+      const counts = {}
+      data.forEach(row => {
+        counts[row.bookmark_id] = row.click_count || 0
+      })
+      setBookmarkClickCounts(counts)
+    }
+  }, [])
 
   const handleCategorySelect = (category) => {
     const categoryStr = category ? String(category) : "";
@@ -312,6 +328,13 @@ export default function Bookmarks({
     fetchUserVotes();
   }, []); // 최초 1회만 실행
 
+  useEffect(() => {
+    if (bookmarks && bookmarks.length > 0) {
+      const ids = bookmarks.map(b => b.id)
+      fetchClickCounts(ids)
+    }
+  }, [bookmarks, fetchClickCounts])
+
   return (
     <div className="bookmarks-page-wrapper">
       {/* userId가 준비된 경우에만 커서 렌더 */}
@@ -349,7 +372,10 @@ export default function Bookmarks({
             </div>
           ) : (
             <ContentGrid
-              contents={bookmarks}
+              contents={bookmarks.map(b => ({
+                ...b,
+                click_count: bookmarkClickCounts[b.id] || 0
+              }))}
               isSearching={loading}
               lastBookmarkRef={lastBookmarkRef}
               onCategoryClick={handleCategoryClick}

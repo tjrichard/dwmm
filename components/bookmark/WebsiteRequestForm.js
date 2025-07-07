@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase } from '../../lib/supabase'
 import LoadingOverlay from './LoadingOverlay'
+import { Check } from 'lucide-react'
 
 const ThankYouComponent = ({ onAddNew }) => {
   return (
     <div className="thank-you-container animate-fade-in">
       <div className="thank-you-content">
-        <div className="thank-you-icon">✓</div>
+        <div className="thank-you-icon"><Check size={24} /></div>
         <h3>💯 Thank you!</h3>
         <p>We will review and add your site soon 😉 </p>
       </div>

@@ -1,6 +1,35 @@
-import React, { useContext, useState, useCallback } from "react";
-import VoteButton from "./VoteButton";
+import React, { useContext, useState, useCallback, useEffect } from "react";
+import VoteButton from "./bookmark/VoteButton.js";
+import ClickCount from "./bookmark/ClickCount.js";
 import { supabase } from "../lib/supabase";
+import { BookOpen } from 'lucide-react'
+
+// 클릭 카운트 컴포넌트 (비활성)
+// function ClickCount({ count }) {
+//   return (
+//     <div
+//       className="vote-button click-count"
+//       style={{
+//         pointerEvents: 'none',
+//         opacity: 0.7,
+//         minWidth: 40,
+//         height: 32,
+//         display: 'flex',
+//         alignItems: 'center',
+//         justifyContent: 'center',
+//         fontWeight: 600,
+//         fontSize: 16,
+//         borderRadius: 6,
+//         background: '#f5f5f5',
+//         marginRight: 8
+//       }}
+//       aria-label={`클릭 수: ${count}`}
+//       tabIndex={-1}
+//     >
+//       {formatClickCount(count)}
+//     </div>
+//   )
+// }
 
 const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
   const {
@@ -12,6 +41,7 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
     original_link,
     vote_count = 0,
     user_has_voted = false,
+    click_count = 0,
   } = content;
 
   const getUtmLink = () => {
@@ -38,7 +68,8 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
       const domain = new URL(original_link).hostname;
       return `https://api.dicebear.com/7.x/identicon/svg?seed=${domain}`;
     } catch (e) {
-      return `https://api.dicebear.com/7.x/identicon/svg?seed=default`;
+      // identicon 대신 BookOpen 아이콘 사용
+      return <BookOpen size={32} />;
     }
   };
 
@@ -148,14 +179,17 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
         />
       </div>
       <div className="card__content">
-        <div className="card__title-row">
+        <div className="card__title-row" style={{ display: 'flex', alignItems: 'center' }}>
           <h3 className="card__title">{title}</h3>
-          <div onClick={handleVoteClick}>
-            <VoteButton
-              contentId={id}
-              initialVoteCount={vote_count}
-              userHasVoted={user_has_voted}
-            />
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <ClickCount count={click_count} />
+            <div onClick={handleVoteClick}>
+              <VoteButton
+                contentId={id}
+                initialVoteCount={vote_count}
+                userHasVoted={user_has_voted}
+              />
+            </div>
           </div>
         </div>
         <div className="card__meta">

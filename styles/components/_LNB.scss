@@ -30,7 +30,7 @@
       font-size: 2.5rem;
     }
   }
-  
+
   .LNB-subtitle {
     font-size: 1rem;
     text-align: left;
@@ -43,6 +43,69 @@
     }
   }
 
+  .lnb-filter-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    transition: color 0.2s;
+
+    svg {
+      width: 28px;
+      height: 28px;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    .icon-enter {
+      opacity: 0;
+      transform: scale(0.8) rotate(-20deg);
+    }
+
+    .icon-enter-active {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+
+    .icon-exit {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+
+    .icon-exit-active {
+      opacity: 0;
+      transform: scale(1.2) rotate(20deg);
+    }
+  }
+
+
+  .lnb-filter-transition {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.98);
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+
+  .lnb-filter-transition.open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+
+  .lnb-filter-overlay {
+    /* 기존 스타일 유지, 필요시 오버레이 배경 등 추가 */
+    z-index: 100;
+  }
+
+  .lnb-filter-desktop {
+    /* 데스크탑용 패널 스타일, 필요시 조정 */
+  }
+
+
+
   @media (max-width: 768px) {
     width: auto;
     max-width: none;
@@ -53,4 +116,3 @@
     padding: $spacing-ml $spacing-ml $spacing-l;
   }
 }
-  

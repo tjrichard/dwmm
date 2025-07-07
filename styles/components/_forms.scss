@@ -78,7 +78,7 @@
           max-height: 300px;
           margin: auto;
           border-radius: $radius-m;
-          aspect-ratio: 5/6;
+          aspect-ratio: 4/3;
           object-fit: cover;
         }
       }
@@ -201,8 +201,8 @@
   }
 
   .thank-you-icon {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background-color: $success-normal;
     color: $white-a-pure;

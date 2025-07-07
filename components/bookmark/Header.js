@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
-import WebsiteRequestForm from "./WebsiteRequestForm";
+import WebsiteRequestForm from "./WebsiteRequestForm.js";
+import { X } from 'lucide-react';
+
 
 function BookmarkHeader() {
   const [showModal, setShowModal] = useState(false);
@@ -29,7 +31,7 @@ function BookmarkHeader() {
       {showModal && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={closeModal}>×</button>
+            <button className="modal-close" onClick={closeModal}><X /></button>
             <WebsiteRequestForm onComplete={closeModal} fromSuggest={true} />
           </div>
         </div>

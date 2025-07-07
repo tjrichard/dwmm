@@ -1,12 +1,13 @@
 import React, { useMemo, useState, useEffect } from 'react';
+import { Link, Globe, FileText, Folder, Tag, Rocket } from 'lucide-react';
 
 const steps = [
-  { emoji: '🔗', text: 'Checking URL...' },
-  { emoji: '🕸️', text: 'Checking website content...' },
-  { emoji: '📝', text: 'Deciding title...' },
-  { emoji: '📂', text: 'Deciding category...' },
-  { emoji: '🏷️', text: 'Deciding tags...' },
-  { emoji: '🚀', text: 'Submitting website...' }
+  { icon: <Link size={32} />, text: 'Checking URL...' },
+  { icon: <Globe size={32} />, text: 'Checking website content...' },
+  { icon: <FileText size={32} />, text: 'Deciding title...' },
+  { icon: <Folder size={32} />, text: 'Deciding category...' },
+  { icon: <Tag size={32} />, text: 'Deciding tags...' },
+  { icon: <Rocket size={32} />, text: 'Submitting website...' }
 ];
 
 const LoadingOverlay = ({ currentStep = 0, animationDurations }) => {
@@ -30,7 +31,7 @@ const LoadingOverlay = ({ currentStep = 0, animationDurations }) => {
     return () => clearTimeout(timeout);
   }, [currentStep]);
 
-  const { emoji, text } = steps[displayStep] || steps[0];
+  const { icon, text } = steps[displayStep] || steps[0];
 
   return (
     <div className="loading-overlay">
@@ -39,7 +40,7 @@ const LoadingOverlay = ({ currentStep = 0, animationDurations }) => {
           className={`loading-overlay__emoji${show ? ' fade-in' : ''}`}
           style={{ transition: 'opacity 0.4s, transform 0.4s' }}
         >
-          {emoji}
+          {icon}
         </div>
         <div
           className={`loading-overlay__text${show ? ' fade-in' : ''}`}

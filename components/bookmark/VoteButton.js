@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { supabase } from "../lib/supabase";
-import { getCurrentUser } from "../lib/auth";
+import { supabase } from "../../lib/supabase";
+import { getCurrentUser } from "../../lib/auth";
+import { Star } from 'lucide-react'
 
 const VoteButton = ({
   contentId,
@@ -68,7 +69,9 @@ const VoteButton = ({
         disabled={isLoading}
         aria-label={isVoted ? "Remove vote" : "Vote for this content"}
       >
-        <span className="vote-icon">{isVoted ? "★" : "☆"}</span>
+        <span className="vote-icon">
+          <Star size={14} fill={isVoted ? "currentColor" : "none"} stroke={isVoted ? "currentColor" : "currentColor"} />
+        </span>
         <span className="vote-count">{voteCount}</span>
       </button>
     </div>
