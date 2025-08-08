@@ -121,6 +121,7 @@ export function RealtimeCursors({
 
     channel.on("presence", { event: "sync" }, syncCursors);
     channel.on("presence", { event: "leave" }, removeCursor);
+    channel.on("presence", { event: "join" }, syncCursors);
 
     return () => {
       channel.unsubscribe();

@@ -40,6 +40,36 @@ function BlogSkeletonCard() {
   )
 }
 
+function BlogPostSkeleton() {
+  return (
+    <div className="skeleton-blog-post">
+      <div className="skeleton-title lg"></div>
+      <div className="skeleton-meta"></div>
+      <div className="skeleton-hero"></div>
+      <div className="skeleton-paragraph"></div>
+      <div className="skeleton-paragraph"></div>
+      <div className="skeleton-paragraph"></div>
+    </div>
+  )
+}
+
+function PortfolioPageSkeleton() {
+  return (
+    <div className="skeleton-portfolio-page">
+      <div className="skeleton-title lg"></div>
+      <div className="skeleton-meta"></div>
+      <div className="skeleton-wide"></div>
+      <div className="skeleton-paragraph"></div>
+      <div className="skeleton-paragraph"></div>
+      <div className="skeleton-grid">
+        <div className="skeleton-box"></div>
+        <div className="skeleton-box"></div>
+        <div className="skeleton-box"></div>
+      </div>
+    </div>
+  )
+}
+
 function SkeletonLoader({ isLoading = true, variant = 'blog', count = 9 }) {
   const [shouldFadeOut, setShouldFadeOut] = useState(false)
 
@@ -53,6 +83,22 @@ function SkeletonLoader({ isLoading = true, variant = 'blog', count = 9 }) {
         {Array.from({ length: count }).map((_, i) => (
           <BookmarkSkeletonCard key={i} />
         ))}
+      </div>
+    )
+  }
+
+  if (variant === 'blogPost') {
+    return (
+      <div className={`${shouldFadeOut ? 'animate-fade-out' : ''}`}>
+        <BlogPostSkeleton />
+      </div>
+    )
+  }
+
+  if (variant === 'portfolioPage') {
+    return (
+      <div className={`${shouldFadeOut ? 'animate-fade-out' : ''}`}>
+        <PortfolioPageSkeleton />
       </div>
     )
   }

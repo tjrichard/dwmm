@@ -13,8 +13,10 @@ const BookmarkLNB = ({
   onSearch
 }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
-  const [localCategory, setLocalCategory] = useState(selectedCategory)
-  const [localTags, setLocalTags] = useState(selectedTags)
+  const [localCategory, setLocalCategory] = useState(String(selectedCategory || "").trim().toUpperCase())
+  const [localTags, setLocalTags] = useState(
+    Array.isArray(selectedTags) ? selectedTags.map(String) : []
+  )
   const [sortOrder, setSortOrder] = useState("Newest")
   const [isMobile, setIsMobile] = useState(false)
 
@@ -34,9 +36,30 @@ const BookmarkLNB = ({
     .filter(tag => typeof tag === "string" && tag.length > 0)
     .sort((a, b) => a.localeCompare(b))
 
+  // 외부에서 선택 상태가 바뀌면 로컬 상태 동기화
+  useEffect(() => {
+    setLocalCategory(String(selectedCategory || "").trim().toUpperCase())
+  }, [selectedCategory])
+
+  useEffect(() => {
+    const normalized = Array.isArray(selectedTags) ? selectedTags.map(String) : []
+    setLocalTags(normalized)
+  }, [selectedTags])
+
+  // 선택된 태그를 최상단으로 이동 (선택 그룹, 비선택 그룹 각각 알파벳 정렬 유지)
+  const selectedLowerSet = new Set((localTags || []).map(t => String(t).toLowerCase()))
+  const selectedFirst = []
+  const unselected = []
+  for (const tag of sortedTags) {
+    if (selectedLowerSet.has(String(tag).toLowerCase())) selectedFirst.push(tag)
+    else unselected.push(tag)
+  }
+  const prioritizedTags = [...selectedFirst, ...unselected]
+
   function handleCategorySelect(category) {
-    setLocalCategory(category)
-    onSearch({ category, tags: localTags, sortOrder })
+    const normalized = String(category || '').trim().toUpperCase()
+    setLocalCategory(normalized)
+    onSearch({ category: normalized, tags: localTags, sortOrder })
   }
   function handleTagToggle(tag) {
     const tagStr = String(tag || '')
@@ -112,7 +135,7 @@ const BookmarkLNB = ({
           >
             <BookmarkLNBFilterPanel
               categories={categories}
-              tags={sortedTags}
+              tags={prioritizedTags}
               selectedCategory={localCategory}
               selectedTags={localTags}
               sortOrder={sortOrder}
@@ -127,7 +150,7 @@ const BookmarkLNB = ({
           <div className="lnb-filter-desktop lnb-filter-transition open">
             <BookmarkLNBFilterPanel
               categories={categories}
-              tags={sortedTags}
+              tags={prioritizedTags}
               selectedCategory={localCategory}
               selectedTags={localTags}
               sortOrder={sortOrder}

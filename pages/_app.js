@@ -4,10 +4,11 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { ensureAuthenticated, checkUserStatus } from "../lib/auth";
 import { useRouter } from "next/router";
+import 'highlight.js/styles/github-dark.css'; // Import Highlight.js theme
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
-  const isPortfolioPage = router.pathname.startsWith('/portfolio');
+  const isWorksPage = router.pathname.startsWith('/works');
 
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_TEMPO) {
@@ -24,9 +25,9 @@ function MyApp({ Component, pageProps }) {
 
   return (
     <>
-      {isPortfolioPage && <Header />}
+      {(isWorksPage) && <Header />}
       <Component {...pageProps} />
-      {isPortfolioPage && <Footer />}
+      {(isWorksPage) && <Footer />}
     </>
   );
 }

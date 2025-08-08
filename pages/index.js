@@ -131,7 +131,7 @@ export default function Bookmarks({
 
       if (selectedCategory) {
         const exactCategory = availableCategories.find(
-          cat => cat.toLowerCase() === selectedCategory.toLowerCase()
+          cat => String(cat || '').toUpperCase() === String(selectedCategory || '').toUpperCase()
         );
         if (exactCategory) query = query.eq("category", exactCategory);
       }
@@ -181,7 +181,7 @@ export default function Bookmarks({
 
       if (selectedCategory) {
         const exactCategory = availableCategories.find(
-          cat => cat.toLowerCase() === selectedCategory.toLowerCase()
+          cat => String(cat || '').toUpperCase() === String(selectedCategory || '').toUpperCase()
         )
         if (exactCategory) query = query.eq("category", exactCategory)
       }
@@ -226,7 +226,7 @@ export default function Bookmarks({
 
   const handleCategorySelect = (category) => {
     const categoryStr = category ? String(category) : "";
-    setSelectedCategory(categoryStr.toLowerCase());
+    setSelectedCategory(categoryStr.trim().toUpperCase());
   };
 
   const handleTagSelect = (tag) => {
@@ -241,7 +241,7 @@ export default function Bookmarks({
 
   const handleSearch = async (params) => {
     setSearchQuery(params.query || "");
-    setSelectedCategory(params.category || "");
+    setSelectedCategory(String(params.category || "").trim().toUpperCase());
     setSelectedTags(params.tags || []);
     setSortOrder(params.sortOrder || "Newest");
     setPage(1);
@@ -249,11 +249,11 @@ export default function Bookmarks({
   };
 
   const handleCategoryClick = async (category) => {
-    const categoryLower = String(category || '').toLowerCase();
-    if (selectedCategory === categoryLower) {
+    const categoryUpper = String(category || '').trim().toUpperCase();
+    if (selectedCategory === categoryUpper) {
       handleCategorySelect("");
     } else {
-      handleCategorySelect(category);
+      handleCategorySelect(categoryUpper);
     }
     setPage(1);
     await fetchTotalCount();

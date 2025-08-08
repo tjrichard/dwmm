@@ -38,16 +38,21 @@ function BookmarkLNBFilter({
             >
               ALL
             </button>
-            {categories.map((category) => (
-              <button
-                key={category}
-                type="button"
-                className={`cursor-pointer button xs text ${selectedCategory === String(category || '').toLowerCase() ? "active" : "inactive"}`}
-                onClick={() => onCategorySelect(category)}
-              >
-                {String(category || '').toUpperCase()}
-              </button>
-            ))}
+            {categories.map((category) => {
+              const normalizedSelected = String(selectedCategory || '').trim().toUpperCase()
+              const normalizedCategory = String(category || '').trim().toUpperCase()
+              const isActive = normalizedSelected === normalizedCategory
+              return (
+                <button
+                  key={category}
+                  type="button"
+                  className={`cursor-pointer button xs text ${isActive ? "active" : "inactive"}`}
+                  onClick={() => onCategorySelect(normalizedCategory)}
+                >
+                  {normalizedCategory}
+                </button>
+              )
+            })}
           </div>
         </div>
       )}

@@ -8,13 +8,10 @@ function Header() {
         <img src="/logo.svg" className="dwmm-logo" alt="logo" />
         <div className="tab-container">
           <Link href="/" className="button m tertiary bold">
-            Home
+          Bookmarks
           </Link>
-          <Link href="/blog" className="button m tertiary bold">
-            Blog
-          </Link>
-          <Link href="/bookmarks" className="button m tertiary bold">
-            Bookmarks
+          <Link href="/works" className="button m tertiary bold">
+            Works
           </Link>
         </div>
       </div>

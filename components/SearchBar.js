@@ -10,13 +10,13 @@ function SearchBar({
   selectedTags = [],
 }) {
   const [searchQuery, setSearchQuery] = useState("")
-  const [localSelectedCategory, setLocalSelectedCategory] = useState(selectedCategory)
+  const [localSelectedCategory, setLocalSelectedCategory] = useState(String(selectedCategory || '').toUpperCase())
   const [localSelectedTags, setLocalSelectedTags] = useState(selectedTags)
   const [sortOrder, setSortOrder] = useState("Newest") // 기본 정렬: 최신 순
 
   // 외부에서 selectedCategory나 selectedTags가 변경될 때 로컬 상태 업데이트
   useEffect(() => {
-    setLocalSelectedCategory(selectedCategory);
+    setLocalSelectedCategory(String(selectedCategory || '').toUpperCase());
   }, [selectedCategory]);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ function SearchBar({
     debounce((query) => {
       onSearch({
         query: query.trim(),
-        category: localSelectedCategory,
+        category: String(localSelectedCategory || '').toUpperCase(),
         tags: localSelectedTags,
         sortOrder: sortOrder, // 정렬 기준 추가
       });
@@ -56,7 +56,7 @@ function SearchBar({
     // Immediate search on form submit (Enter key)
     onSearch({
       query: searchQuery,
-      category: localSelectedCategory,
+      category: String(localSelectedCategory || '').toUpperCase(),
       tags: localSelectedTags,
       sortOrder: sortOrder, // 정렬 기준 추가
     });

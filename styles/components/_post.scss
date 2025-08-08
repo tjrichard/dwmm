@@ -1,52 +1,399 @@
-.PostLists {
-    width:100svw;
-    display: inline-flex;
-    flex-wrap: wrap;
-    padding: 20px;
-    gap: 20px;
+@import '../utils/variables';
+
+.WorksLists {
+    // Now uses content-grid styles from _content.scss via main.scss
+    // This block is mostly for fallback or specific overrides if needed
+    // but the main grid properties are now handled by .content-grid
 }
-.PostListItem {
-    width: 50%;
-    display: inline-flex;
-    padding: $spacing-m;
-    border-radius: $radius-sm;
-    & a {
-        width: 100%;
-        display: inline-flex;
+
+.works-list-layout {
+    display: flex;
+    gap: $spacing-xl;
+    
+    .works-sidebar {
+        width: 280px;
+        flex-shrink: 0;
+        border-right: 1px solid $grey-04;
+        padding-right: $spacing-l;
+    }
+    
+    .content-grid {
+        flex: 1;
+        padding: 0;
+    }
+}
+
+/* Work Detail Page */
+.work-detail-page {
+  display: flex;
+  justify-content: center;
+}
+
+.work-article.minimal {
+  width: 100%;
+  max-width: 740px;
+  padding: 0 20px 120px;
+}
+
+.work-header {
+  text-align: center;
+  margin-bottom: $spacing-ml;
+}
+
+.work-category {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 600;
+  color: $primary-dark;
+  background: $primary-lightest;
+  padding: 6px 12px;
+  border-radius: $radius-round;
+  margin-bottom: $spacing-s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.work-title {
+  font-size: 36px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  margin: 0 0 $spacing-s;
+  color: $black-darkest;
+  text-align: left;
+}
+
+.work-hero-wrap {
+  width: 100vw;
+  margin: 0 calc(50% - 50vw) $spacing-ml;
+}
+
+.work-hero {
+  width: 100%;
+  height: auto;
+  border-radius: $radius-s;
+  display: block;
+  max-height: 80vh;
+  object-fit: cover;
+}
+
+.work-content {
+  text-align: left;
+  &.prose {
+    margin-top: $spacing-l;
+    font-size: 18px;
+    line-height: 1.8;
+
+    img {
+      display: block;
+      margin: $spacing-l auto;
+      max-width: 100%;
+      height: auto;
+      border-radius: $radius-s;
+    }
+
+    /* editorial image layout inspired by reference */
+    figure {
+      margin: $spacing-xl -6vw;
+      img { width: 100%; height: auto; display: block; }
+      figcaption { text-align: center; color: $grey-09; font-size: 14px; margin-top: $spacing-s; }
+    }
+
+    h2 { font-size: 28px; margin: $spacing-l 0 $spacing-s; color: $black-darkest;}
+    h3 { font-size: 22px; margin: $spacing-m 0 $spacing-s; color: $black-darkest; }
+    p { margin: $spacing-s 0; color: $black-darkest; }
+    ul, ol { padding-left: 1.25rem; }
+    blockquote { border-left: 3px solid $primary-light; padding-left: 12px; color: $black-darker; }
+    code { background: $grey-02; padding: 2px 6px; border-radius: $radius-xs; }
+    pre code { display: block; padding: $spacing-sm; overflow-x: auto; }
+    pre { white-space: pre-wrap; word-break: break-word; }
+  }
+}
+
+/* Highlight.js base tune */
+.hljs {
+  background: $black-darkest;
+  color: $white-darkest;
+  border-radius: $radius-m;
+}
+
+/* Work Card (Blog + Portfolio unified) */
+.WorkCard {
+    background-color: $white-darkest;
+    border: 3px solid $black-light;
+    border-radius: $radius-m;
+    box-shadow: 8px 8px 0px $black-light;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    &:hover {
+        transform: translate(-4px, -4px);
+        box-shadow: 12px 12px 0px $black-dark;
+        border-color: $black-dark;
+    }
+
+    &__link {
+        display: flex;
         flex-direction: column;
-        gap: $spacing-sm;
-        margin-bottom:0;
         text-decoration: none;
+        color: inherit;
+        height: 100%;
+    }
+
+    &__media {
+        border-bottom: 3px solid $black-light;
+        margin-bottom: $spacing-m;
+        overflow: hidden;
+        border-top-left-radius: $radius-s;
+        border-top-right-radius: $radius-s;
+        .img-skeleton {
+            border-radius: 0;
+        }
+    }
+
+    &__body {
+        padding: 0 $spacing-m $spacing-m;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    &__category {
+        font-size: 12px;
+        font-weight: 600;
+        color: $primary-dark;
+        background: $primary-lightest;
+        padding: 4px 8px;
+        border-radius: $radius-round;
+        margin-bottom: $spacing-xs;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        align-self: flex-start;
+    }
+
+    &__title {
+        font-size: 24px;
+        line-height: 1.3;
+        font-weight: 700;
         color: $black-darkest;
-    }
-    & img {
-        width: 100%;
-        border-radius: $radius-s;
-    }
-    & h2, p {
+        margin-bottom: $spacing-xs;
         display: -webkit-box;
+        -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;
     }
-    & .postTitle {
-        -webkit-line-clamp: 1;
+
+    &__excerpt {
+        font-size: 16px;
+        line-height: 1.6;
+        color: $black-darker;
+        margin-bottom: $spacing-m;
+        flex-grow: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
-    & .postContent {    
-        -webkit-line-clamp: 3;    
+
+    &__meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $spacing-xs;
+        align-items: center;
+        margin-top: auto;
     }
-    &:hover {
-        transition: 400ms linear;
-        // shadow-3
-        box-shadow: 0px 4px 16px 0px rgba(0, 0, 0, 0.15), 0px 0px 2px 1px rgba(0, 0, 0, 0.05), 0px 0px 2px 0px rgba(255, 255, 255, 0.12) inset;
+
+    &__date {
+        font-size: 12px;
+        padding: 6px 10px;
+        border: 1px solid $black-light;
+        border-radius: $radius-round;
+        color: $black-a-normal;
+        background: $grey-02;
+    }
+
+    &__tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $spacing-xxs;
+    }
+
+    &__tag {
+        font-size: 12px;
+        padding: 6px 10px;
+        border: 1px solid $black-light;
+        border-radius: $radius-round;
+        color: $black-a-normal;
+        background: $grey-02;
+    }
+}
+
+/* Portfolio Content Blocks */
+.portfolio-content-blocks {
+    margin-top: $spacing-l;
+    
+    .intro-text {
+        font-size: 18px;
+        line-height: 1.6;
+        color: $black-darker;
+        margin-bottom: $spacing-l;
+    }
+    
+    .image-block, .full-width-image-block {
+        margin: $spacing-l 0;
+    }
+    
+    .full-width-image-block {
+        margin: $spacing-l -6vw;
+    }
+    
+    .tabs-component {
+        margin: $spacing-l 0;
+        
+        .tabs-header {
+            display: flex;
+            gap: $spacing-xs;
+            margin-bottom: $spacing-m;
+        }
+        
+        .tab-button {
+            padding: $spacing-xs $spacing-m;
+            border: 2px solid $black-light;
+            background: $white-darkest;
+            border-radius: $radius-s;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            
+            &.active {
+                background: $black-darkest;
+                color: $white-darkest;
+                border-color: $black-darkest;
+            }
+            
+            &:hover:not(.active) {
+                background: $grey-02;
+            }
+        }
+        
+        .tab-content {
+            padding: $spacing-m;
+            border: 2px solid $black-light;
+            border-radius: $radius-s;
+            background: $white-darkest;
+        }
+    }
+    
+    .ascii-image-block {
+        margin: $spacing-l 0;
+        text-align: center;
+        
+        button {
+            margin-bottom: $spacing-m;
+            padding: $spacing-xs $spacing-m;
+            border: 2px solid $black-light;
+            background: $white-darkest;
+            border-radius: $radius-s;
+            cursor: pointer;
+            font-weight: 600;
+            
+            &:hover {
+                background: $grey-02;
+            }
+        }
+        
+        .ascii-text {
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.2;
+            white-space: pre;
+            background: $black-darkest;
+            color: $white-darkest;
+            padding: $spacing-m;
+            border-radius: $radius-s;
+            overflow-x: auto;
+        }
+    }
+    
+    .scroll-interaction-block {
+        margin: $spacing-l 0;
+        
+        .scroll-step {
+            margin-bottom: $spacing-xl;
+            padding: $spacing-l;
+            border: 2px solid $black-light;
+            border-radius: $radius-s;
+            background: $white-darkest;
+            
+            h3 {
+                font-size: 20px;
+                font-weight: 700;
+                margin-bottom: $spacing-s;
+                color: $black-darkest;
+            }
+            
+            p {
+                font-size: 16px;
+                line-height: 1.6;
+                color: $black-darker;
+            }
+        }
+    }
+    
+    .demo-block {
+        margin: $spacing-l 0;
+        padding: $spacing-l;
+        border: 2px solid $black-light;
+        border-radius: $radius-s;
+        background: $grey-02;
+        text-align: center;
+        font-style: italic;
+        color: $black-a-normal;
     }
 }
 
 @media (max-width: 768px) {
-    .PostLists {
+    .works-list-layout {
         flex-direction: column;
+        
+        .works-sidebar {
+            width: 100%;
+            padding: $spacing-l $spacing-m;
+            border-right: none;
+            border-bottom: 1px solid $grey-04;
+        }
+        
+        .content-grid {
+            padding: $spacing-l $spacing-m;
+        }
     }
-    .PostListItem {
-        width: 100%;
+    
+    .WorkCard {
+        &__title {
+            font-size: 20px;
+        }
+        
+        &__excerpt {
+            font-size: 14px;
+        }
+    }
+    
+    .work-title {
+        font-size: 28px;
+    }
+    
+    .portfolio-content-blocks {
+        .full-width-image-block {
+            margin: $spacing-l 0;
+        }
+        
+        .tabs-component {
+            .tabs-header {
+                flex-wrap: wrap;
+            }
+        }
     }
 }

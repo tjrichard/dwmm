@@ -15,6 +15,39 @@
   }
 }
 
+/* Image skeleton utility */
+.img-skeleton {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: $radius-m;
+  background: $black-a-lightest;
+
+  &__shimmer {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, $black-a-lightest 25%, $black-a-lighter 50%, $black-a-lightest 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+  }
+
+  &__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity .25s ease;
+    &.rounded { border-radius: $radius-m; }
+  }
+
+  &.is-loaded {
+    .img-skeleton__shimmer { display: none; }
+    .img-skeleton__img { opacity: 1; }
+  }
+}
+
 .skeleton-item {
   display: flex;
   flex-direction: column;

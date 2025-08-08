@@ -6,11 +6,11 @@ function SearchBar({
   selectedTags = [],
 }) {
   const [searchQuery, setSearchQuery] = useState("")
-  const [localSelectedCategory, setLocalSelectedCategory] = useState(selectedCategory)
+  const [localSelectedCategory, setLocalSelectedCategory] = useState(String(selectedCategory || '').toUpperCase())
   const [localSelectedTags, setLocalSelectedTags] = useState(selectedTags)
 
   useEffect(() => {
-    setLocalSelectedCategory(selectedCategory);
+    setLocalSelectedCategory(String(selectedCategory || '').toUpperCase());
   }, [selectedCategory]);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ function SearchBar({
     debounce((query) => {
       onSearch({
         query: query.trim(),
-        category: localSelectedCategory,
+        category: String(localSelectedCategory || '').toUpperCase(),
         tags: localSelectedTags,
       });
     }, 500),
@@ -44,7 +44,7 @@ function SearchBar({
     if (e) e.preventDefault()
     onSearch({
       query: searchQuery,
-      category: localSelectedCategory,
+      category: String(localSelectedCategory || '').toUpperCase(),
       tags: localSelectedTags,
     });
   }
