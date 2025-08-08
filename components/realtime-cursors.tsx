@@ -4,7 +4,7 @@ import { throttle, generateRandomColor } from "../utils/helpers";
 
 interface RealtimeCursorsProps {
   roomName: string;
-  userId: string; // userId로 변경
+  userId: string | null; // userId를 optional로 변경
   username: string; // 표시용 닉네임
   throttleMs?: number;
 }
@@ -29,12 +29,22 @@ function upsertCursor(cursors: Cursor[], newCursor: Cursor): Cursor[] {
   return updated;
 }
 
+// 임의의 userId 생성 함수
+function generateRandomUserId(): string {
+  return `anonymous_${Math.random().toString(36).slice(2, 11)}`;
+}
+
 export function RealtimeCursors({
   roomName,
   userId,
   username,
   throttleMs = 5,
 }: RealtimeCursorsProps) {
+  // userId를 한 번만 생성하여 안정성 보장
+  const randomUserIdRef = useRef<string | null>(null);
+  const effectiveUserId = userId || (randomUserIdRef.current || (randomUserIdRef.current = generateRandomUserId()));
+  const effectiveUsername = username || 'Anonymous';
+  
   const [cursors, setCursors] = useState<Cursor[]>([]);
   const [lastMouse, setLastMouse] = useState<{ x: number; y: number; transform: string }>({
     x: 100,
@@ -43,13 +53,15 @@ export function RealtimeCursors({
   });
   const cursorRefs = useRef(new Map<string, HTMLDivElement>());
   const channelRef = useRef<any>(null);
+  const previousUserIdRef = useRef<string | null>(null);
+  
   // 내 커서 상태를 별도로 관리하여 setCursors의 불필요한 렌더링 방지
   const myCursorRef = useRef<Cursor>({
-    id: userId,
-    username,
+    id: effectiveUserId,
+    username: effectiveUsername,
     x: 100,
     y: 100,
-    color: generateRandomColor(userId),
+    color: generateRandomColor(effectiveUserId),
     text: "",
   });
 
@@ -85,13 +97,15 @@ export function RealtimeCursors({
 
   // presence sync 이벤트에서 커서 상태를 중복 없이 갱신 (내 커서는 직접 관리)
   function syncCursors() {
+    if (!channelRef.current) return;
+    
     const state = channelRef.current.presenceState();
     const updatedCursors: Cursor[] = [];
     Object.entries(state).forEach(([id, presences]) => {
       const presence = presences[0];
       if (!presence) return;
       // 내 커서는 별도 관리
-      if (presence.id === userId) return;
+      if (presence.id === myCursorRef.current.id) return;
       updatedCursors.push({
         id: presence.id,
         username: presence.username,
@@ -106,12 +120,58 @@ export function RealtimeCursors({
   }
 
   function removeCursor({ key }: { key: string }) {
-    setCursors((prev) => prev.filter((cursor) => cursor.id !== key && cursor.id !== userId));
+    setCursors((prev) => prev.filter((cursor) => cursor.id !== key && cursor.id !== myCursorRef.current.id));
   }
+
+  // userId 변경 감지 및 presence 동기화
+  useEffect(() => {
+    const currentUserId = userId || effectiveUserId;
+    
+    // userId가 변경되었는지 확인
+    if (previousUserIdRef.current !== null && previousUserIdRef.current !== currentUserId) {
+      console.log(`User ID changed from ${previousUserIdRef.current} to ${currentUserId}`);
+      
+      // 이전 presence 제거
+      if (channelRef.current) {
+        channelRef.current.untrack();
+      }
+      
+      // 새로운 ID로 커서 업데이트
+      myCursorRef.current = {
+        id: currentUserId,
+        username: effectiveUsername,
+        x: lastMouse.x,
+        y: lastMouse.y,
+        color: generateRandomColor(currentUserId),
+        text: "",
+      };
+      
+      // 새로운 presence 등록
+      if (channelRef.current) {
+        channelRef.current.track(myCursorRef.current);
+      }
+    }
+    
+    // 현재 userId 저장
+    previousUserIdRef.current = currentUserId;
+  }, [userId, effectiveUserId, effectiveUsername, lastMouse.x, lastMouse.y]);
 
   useEffect(() => {
     const channel = supabase.channel(`realtime-cursors:${roomName}`);
     channelRef.current = channel;
+
+    // myCursorRef.current를 최신 상태로 업데이트
+    myCursorRef.current = {
+      id: effectiveUserId,
+      username: effectiveUsername,
+      x: lastMouse.x,
+      y: lastMouse.y,
+      color: generateRandomColor(effectiveUserId),
+      text: "",
+    };
+
+    // 초기 userId 저장
+    previousUserIdRef.current = effectiveUserId;
 
     channel.subscribe(async (status: any) => {
       if (status === "SUBSCRIBED") {
@@ -124,10 +184,14 @@ export function RealtimeCursors({
     channel.on("presence", { event: "join" }, syncCursors);
 
     return () => {
+      // 컴포넌트 언마운트 시 presence 정리
+      if (channelRef.current) {
+        channelRef.current.untrack();
+      }
       channel.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomName, throttleMs, userId, username]);
+  }, [roomName, throttleMs]);
 
   // body 커서 숨김
   useEffect(() => {
@@ -152,7 +216,7 @@ export function RealtimeCursors({
   useEffect(() => {
     setCursors([myCursorRef.current]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [myCursorRef.current.id]);
 
   return (
     <div className="realtime-cursors">

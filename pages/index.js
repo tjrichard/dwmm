@@ -120,7 +120,21 @@ export default function Bookmarks({
   const observer = useRef();
   const loadingRef = useRef(null);
   const [userId, setUserId] = useState(null);
-  const [bookmarkClickCounts, setBookmarkClickCounts] = useState({})
+  const [bookmarkClickCounts, setBookmarkClickCounts] = useState({});
+
+  // useRef를 사용하여 의존성 배열 문제 해결
+  const sortOrderRef = useRef(sortOrder);
+  const selectedCategoryRef = useRef(selectedCategory);
+  const selectedTagsRef = useRef(selectedTags);
+  const searchQueryRef = useRef(searchQuery);
+
+  // ref 값들을 최신으로 유지
+  useEffect(() => {
+    sortOrderRef.current = sortOrder;
+    selectedCategoryRef.current = selectedCategory;
+    selectedTagsRef.current = selectedTags;
+    searchQueryRef.current = searchQuery;
+  }, [sortOrder, selectedCategory, selectedTags, searchQuery]);
 
   const fetchTotalCount = useCallback(async () => {
     setIsLoadingTotalCount(true);
@@ -129,19 +143,19 @@ export default function Bookmarks({
         .from("bookmarks_public")
         .select("id", { count: "exact" });
 
-      if (selectedCategory) {
+      if (selectedCategoryRef.current) {
         const exactCategory = availableCategories.find(
-          cat => String(cat || '').toUpperCase() === String(selectedCategory || '').toUpperCase()
+          cat => String(cat || '').toUpperCase() === String(selectedCategoryRef.current || '').toUpperCase()
         );
         if (exactCategory) query = query.eq("category", exactCategory);
       }
-      if (selectedTags.length > 0) {
-        selectedTags.forEach(tag => {
+      if (selectedTagsRef.current.length > 0) {
+        selectedTagsRef.current.forEach(tag => {
           query = query.contains('tags', [tag]);
         });
       }
-      if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
+      if (searchQueryRef.current) {
+        query = query.or(`title.ilike.%${searchQueryRef.current}%,description.ilike.%${searchQueryRef.current}%`);
       }
 
       const { count, error } = await query;
@@ -154,7 +168,7 @@ export default function Bookmarks({
     } finally {
       setIsLoadingTotalCount(false);
     }
-  }, [selectedCategory, selectedTags, searchQuery, availableCategories]);
+  }, [availableCategories]);
 
   const fetchBookmarks = useCallback(async (pageNumber) => {
     setLoading(true)
@@ -173,25 +187,25 @@ export default function Bookmarks({
         `)
 
       // 정렬 기준 적용
-      if (sortOrder === "Newest") query = query.order("created_at", { ascending: false })
-      else if (sortOrder === "Oldest") query = query.order("created_at", { ascending: true })
-      else if (sortOrder === "Recommended") query = query.order("vote_count", { ascending: false })
+      if (sortOrderRef.current === "Newest") query = query.order("created_at", { ascending: false })
+      else if (sortOrderRef.current === "Oldest") query = query.order("created_at", { ascending: true })
+      else if (sortOrderRef.current === "Recommended") query = query.order("vote_count", { ascending: false })
 
       query = query.range((pageNumber - 1) * ITEMS_PER_PAGE, pageNumber * ITEMS_PER_PAGE - 1)
 
-      if (selectedCategory) {
+      if (selectedCategoryRef.current) {
         const exactCategory = availableCategories.find(
-          cat => String(cat || '').toUpperCase() === String(selectedCategory || '').toUpperCase()
+          cat => String(cat || '').toUpperCase() === String(selectedCategoryRef.current || '').toUpperCase()
         )
         if (exactCategory) query = query.eq("category", exactCategory)
       }
-      if (selectedTags.length > 0) {
-        selectedTags.forEach(tag => {
+      if (selectedTagsRef.current.length > 0) {
+        selectedTagsRef.current.forEach(tag => {
           query = query.contains('tags', [tag])
         })
       }
-      if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)
+      if (searchQueryRef.current) {
+        query = query.or(`title.ilike.%${searchQueryRef.current}%,description.ilike.%${searchQueryRef.current}%`)
       }
 
       const { data, error } = await query
@@ -207,7 +221,7 @@ export default function Bookmarks({
     } finally {
       setLoading(false)
     }
-  }, [selectedCategory, selectedTags, searchQuery, availableCategories, sortOrder]) // sortOrder 추가
+  }, [availableCategories])
 
   const fetchClickCounts = useCallback(async (bookmarkIds) => {
     if (!bookmarkIds || bookmarkIds.length === 0) return
@@ -337,14 +351,12 @@ export default function Bookmarks({
 
   return (
     <div className="bookmarks-page-wrapper">
-      {/* userId가 준비된 경우에만 커서 렌더 */}
-      {userId && (
-        <RealtimeCursors
-          roomName="dwmm-bookmarks"
-          userId={userId}
-          username={""} // 필요시 닉네임 전달
-        />
-      )}
+      {/* RealtimeCursors를 항상 렌더링하되 내부에서 조건부 처리 */}
+      <RealtimeCursors
+        roomName="dwmm-bookmarks"
+        userId={userId}
+        username={""} // 필요시 닉네임 전달
+      />
       <BookmarkHeader />
       <Meta title={title} description={description} />
       <div 
