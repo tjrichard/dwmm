@@ -16,22 +16,23 @@ function ContentGrid({ contents = [], isSearching = false, lastBookmarkRef = nul
         const stableId = stableIds[index];
         
         const isLastItem = contents.length === index + 1
-        const Wrapper = ({ children }) => (
-          <div key={stableId} ref={isLastItem ? lastBookmarkRef : null} className="fade-in">{children}</div>
-        )
 
         if (typeof renderItem === 'function') {
-          return <Wrapper>{renderItem(content, index, isLastItem)}</Wrapper>
+          return (
+            <div key={stableId} ref={isLastItem ? lastBookmarkRef : null} className="fade-in">
+              {renderItem(content, index, isLastItem)}
+            </div>
+          )
         }
 
         return (
-          <Wrapper>
+          <div key={stableId} ref={isLastItem ? lastBookmarkRef : null} className="fade-in">
             <ContentCard
               content={content}
               onCategoryClick={onCategoryClick}
               onTagClick={onTagClick}
             />
-          </Wrapper>
+          </div>
         )
       })}
     </div>

@@ -23,6 +23,12 @@ const escapeHtml = (str) => {
 
 // HTML sanitization utility function
 const sanitizeHtml = (html) => {
+  // 서버 사이드에서는 sanitization 없이 반환
+  if (typeof window === 'undefined') {
+    return html;
+  }
+  
+  // 클라이언트에서만 DOMPurify 사용
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: [
       'p', 'br', 'strong', 'em', 'u', 's', 'del', 'ins',
@@ -44,7 +50,7 @@ const sanitizeHtml = (html) => {
 };
 
 // Portfolio Block Renderer Component
-const BlockRenderer = ({ blocks }) => {
+const BlockRenderer = ({ blocks, isClient = false }) => {
   const [showAscii, setShowAscii] = useState({});
 
   const toggleAscii = (index) => {
@@ -89,7 +95,7 @@ const BlockRenderer = ({ blocks }) => {
             );
           case 'demo':
             return (
-              <div key={index} className="demo-block" dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.embed_html) }} />
+              <div key={index} className="demo-block" dangerouslySetInnerHTML={{ __html: isClient ? sanitizeHtml(block.embed_html) : block.embed_html }} />
             );
           case 'ascii_image':
             return (
@@ -159,40 +165,64 @@ export default function WorkDetailPage() {
   const [entry, setEntry] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [isClient, setIsClient] = useState(false)
 
   // Hooks must be called in the same order on every render
   const content = entry?.content_markdown?.replace(/\\n/g, '\n') || ''
 
-  const md = useMemo(() => new MarkdownIt({
-    html: true,
-    linkify: true,
-    typographer: true,
-    breaks: true,
-    highlight: function (str, lang) {
-      let highlighted;
-      if (lang && hljs.getLanguage(lang)) {
-        try {
-          highlighted = hljs.highlight(str, { language: lang, ignoreIllegals: true }).value;
-        } catch (_) { }
+  const md = useMemo(() => {
+    const mdInstance = new MarkdownIt({
+      html: true,
+      linkify: true,
+      typographer: true,
+      breaks: true,
+      highlight: function (str, lang) {
+        let highlighted;
+        if (lang && hljs.getLanguage(lang)) {
+          try {
+            highlighted = hljs.highlight(str, { language: lang, ignoreIllegals: true }).value;
+          } catch (_) { }
+        }
+        if (!highlighted) {
+          try {
+            highlighted = hljs.highlightAuto(str).value;
+          } catch (_) { }
+        }
+        const finalCode = highlighted || escapeHtml(str);
+        return `<pre><code class="hljs">${finalCode}</code></pre>`;
+      },
+    });
+
+    // 이미지 렌더링 규칙을 수정하여 lazy loading 추가
+    const defaultImageRender = mdInstance.renderer.rules.image || function(tokens, idx, options, env, renderer) {
+      return renderer.renderToken(tokens, idx, options);
+    };
+
+    mdInstance.renderer.rules.image = function(tokens, idx, options, env, renderer) {
+      const token = tokens[idx];
+      const aIndex = token.attrIndex('src');
+      
+      if (aIndex >= 0) {
+        // lazy loading 속성 추가
+        token.attrPush(['loading', 'lazy']);
+        token.attrPush(['decoding', 'async']);
+        token.attrPush(['class', 'post-content-image']);
       }
-      if (!highlighted) {
-        try {
-          highlighted = hljs.highlightAuto(str).value;
-        } catch (_) { }
-      }
-      const finalCode = highlighted || escapeHtml(str);
-      return `<pre><code class="hljs">${finalCode}</code></pre>`;
-    },
-  }).use(require('markdown-it-image-lazy_loading'), {
-    loading: 'lazy',
-    decoding: 'async',
-    class: 'post-content-image'
-  }), []);
+      
+      return defaultImageRender(tokens, idx, options, env, renderer);
+    };
+
+    return mdInstance;
+  }, []);
 
   const renderedHtml = useMemo(() => {
     const rawHtml = md.render(content);
-    return sanitizeHtml(rawHtml);
-  }, [md, content]);
+    return isClient ? sanitizeHtml(rawHtml) : rawHtml;
+  }, [md, content, isClient]);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     if (!slug) return
@@ -252,7 +282,7 @@ export default function WorkDetailPage() {
         {entry.category === 'Blog' ? (
           <div className="work-content prose" dangerouslySetInnerHTML={{ __html: renderedHtml }} />
         ) : (
-          <BlockRenderer blocks={entry.content_blocks || []} />
+                          <BlockRenderer blocks={entry.content_blocks || []} isClient={isClient} />
         )}
       </article>
     </div>
