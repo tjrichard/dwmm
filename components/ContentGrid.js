@@ -1,7 +1,7 @@
 import React, { useMemo } from "react"
 import ContentCard from "./ContentCard"
 
-function ContentGrid({ contents = [], isSearching = false, lastBookmarkRef = null, onCategoryClick, onTagClick, renderItem }) {
+function ContentGrid({ contents = [], isSearching = false, lastBookmarkRef = null, onCategoryClick, onTagClick, selectedTags = [], renderItem }) {
   // stableId들을 미리 계산하여 Hook 호출 순서 안정화
   const stableIds = useMemo(() => 
     contents.map((content, index) => 
@@ -31,6 +31,7 @@ function ContentGrid({ contents = [], isSearching = false, lastBookmarkRef = nul
               content={content}
               onCategoryClick={onCategoryClick}
               onTagClick={onTagClick}
+              selectedTags={selectedTags}
             />
           </div>
         )

@@ -137,33 +137,55 @@ export default function Bookmarks({
   }, [sortOrder, selectedCategory, selectedTags, searchQuery]);
 
   const fetchTotalCount = useCallback(async () => {
+    console.log("📊 fetchTotalCount called");
+    console.log("🔍 Current filter state for count:", {
+      selectedCategory: selectedCategoryRef.current,
+      selectedTags: selectedTagsRef.current,
+      searchQuery: searchQueryRef.current
+    });
+    
     setIsLoadingTotalCount(true);
     try {
       let query = supabase
         .from("bookmarks_public")
         .select("id", { count: "exact" });
 
+      console.log("🔧 Building count query...");
+
       if (selectedCategoryRef.current) {
         const exactCategory = availableCategories.find(
           cat => String(cat || '').toUpperCase() === String(selectedCategoryRef.current || '').toUpperCase()
         );
-        if (exactCategory) query = query.eq("category", exactCategory);
+        if (exactCategory) {
+          query = query.eq("category", exactCategory);
+          console.log("🏷️ Applied category filter for count:", exactCategory);
+        } else {
+          console.log("⚠️ Category not found in availableCategories for count:", selectedCategoryRef.current);
+        }
       }
       if (selectedTagsRef.current.length > 0) {
         selectedTagsRef.current.forEach(tag => {
           query = query.contains('tags', [tag]);
         });
+        console.log("🏷️ Applied tags filter for count:", selectedTagsRef.current);
       }
       if (searchQueryRef.current) {
         query = query.or(`title.ilike.%${searchQueryRef.current}%,description.ilike.%${searchQueryRef.current}%`);
+        console.log("🔍 Applied search filter for count:", searchQueryRef.current);
       }
 
+      console.log("🚀 Executing count query...");
       const { count, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error("❌ Count query error:", error);
+        throw error;
+      }
+      
+      console.log("✅ Count query successful, total count:", count);
       setTotalCount(count);
     } catch (error) {
-      console.error("Error fetching total count:", error);
+      console.error("❌ Error fetching total count:", error);
       setTotalCount(0);
     } finally {
       setIsLoadingTotalCount(false);
@@ -171,6 +193,14 @@ export default function Bookmarks({
   }, [availableCategories]);
 
   const fetchBookmarks = useCallback(async (pageNumber) => {
+    console.log("📚 fetchBookmarks called with pageNumber:", pageNumber);
+    console.log("🔍 Current filter state:", {
+      sortOrder: sortOrderRef.current,
+      selectedCategory: selectedCategoryRef.current,
+      selectedTags: selectedTagsRef.current,
+      searchQuery: searchQueryRef.current
+    });
+    
     setLoading(true)
     try {
       let query = supabase
@@ -186,38 +216,69 @@ export default function Bookmarks({
           created_at
         `)
 
+      console.log("🔧 Building query with select fields...");
+
       // 정렬 기준 적용
-      if (sortOrderRef.current === "Newest") query = query.order("created_at", { ascending: false })
-      else if (sortOrderRef.current === "Oldest") query = query.order("created_at", { ascending: true })
-      else if (sortOrderRef.current === "Recommended") query = query.order("vote_count", { ascending: false })
+      if (sortOrderRef.current === "Newest") {
+        query = query.order("created_at", { ascending: false })
+        console.log("📊 Applied sort: Newest (created_at DESC)");
+      }
+      else if (sortOrderRef.current === "Oldest") {
+        query = query.order("created_at", { ascending: true })
+        console.log("📊 Applied sort: Oldest (created_at ASC)");
+      }
+      else if (sortOrderRef.current === "Recommended") {
+        query = query.order("vote_count", { ascending: false })
+        console.log("📊 Applied sort: Recommended (vote_count DESC)");
+      }
 
       query = query.range((pageNumber - 1) * ITEMS_PER_PAGE, pageNumber * ITEMS_PER_PAGE - 1)
+      console.log("📄 Applied range:", (pageNumber - 1) * ITEMS_PER_PAGE, "to", pageNumber * ITEMS_PER_PAGE - 1);
 
       if (selectedCategoryRef.current) {
         const exactCategory = availableCategories.find(
           cat => String(cat || '').toUpperCase() === String(selectedCategoryRef.current || '').toUpperCase()
         )
-        if (exactCategory) query = query.eq("category", exactCategory)
+        if (exactCategory) {
+          query = query.eq("category", exactCategory)
+          console.log("🏷️ Applied category filter:", exactCategory);
+        } else {
+          console.log("⚠️ Category not found in availableCategories:", selectedCategoryRef.current);
+        }
       }
       if (selectedTagsRef.current.length > 0) {
         selectedTagsRef.current.forEach(tag => {
           query = query.contains('tags', [tag])
         })
+        console.log("🏷️ Applied tags filter:", selectedTagsRef.current);
       }
       if (searchQueryRef.current) {
         query = query.or(`title.ilike.%${searchQueryRef.current}%,description.ilike.%${searchQueryRef.current}%`)
+        console.log("🔍 Applied search filter:", searchQueryRef.current);
       }
 
+      console.log("🚀 Executing query...");
       const { data, error } = await query
 
-      if (error) throw error
+      if (error) {
+        console.error("❌ Query error:", error);
+        throw error;
+      }
+
+      console.log("✅ Query successful, data length:", data?.length);
+      console.log("📋 First item sample:", data?.[0]);
 
       if (data.length < ITEMS_PER_PAGE) setHasMore(false)
 
-      if (pageNumber === 1) setBookmarks(data)
-      else setBookmarks(prev => [...prev, ...data])
+      if (pageNumber === 1) {
+        console.log("🔄 Setting bookmarks (page 1)");
+        setBookmarks(data)
+      } else {
+        console.log("➕ Appending bookmarks (page", pageNumber, ")");
+        setBookmarks(prev => [...prev, ...data])
+      }
     } catch (error) {
-      console.error("Error fetching bookmarks:", error)
+      console.error("❌ Error fetching bookmarks:", error)
     } finally {
       setLoading(false)
     }
@@ -254,15 +315,24 @@ export default function Bookmarks({
   };
 
   const handleSearch = async (params) => {
+    console.log("🔍 handleSearch called with params:", params);
     setSearchQuery(params.query || "");
     setSelectedCategory(String(params.category || "").trim().toUpperCase());
     setSelectedTags(params.tags || []);
     setSortOrder(params.sortOrder || "Newest");
     setPage(1);
+    setHasMore(true); // hasMore 상태 초기화 추가
+    
+    // 상태 업데이트 후 ref 값들이 동기화될 때까지 잠시 대기
+    await new Promise(resolve => setTimeout(resolve, 0));
+    
+    console.log("🔄 handleSearch: calling fetchTotalCount and fetchBookmarks");
     await fetchTotalCount();
+    await fetchBookmarks(1); // fetchBookmarks 호출 추가
   };
 
   const handleCategoryClick = async (category) => {
+    console.log("🔍 handleCategoryClick called with category:", category);
     const categoryUpper = String(category || '').trim().toUpperCase();
     if (selectedCategory === categoryUpper) {
       handleCategorySelect("");
@@ -270,11 +340,19 @@ export default function Bookmarks({
       handleCategorySelect(categoryUpper);
     }
     setPage(1);
+    setHasMore(true); // hasMore 상태 초기화 추가
+    
+    // 상태 업데이트 후 ref 값들이 동기화될 때까지 잠시 대기
+    await new Promise(resolve => setTimeout(resolve, 0));
+    
+    console.log("🔄 handleCategoryClick: calling fetchTotalCount and fetchBookmarks");
     await fetchTotalCount();
+    await fetchBookmarks(1); // fetchBookmarks 호출 추가
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleTagClick = async (tag) => {
+    console.log("🔍 handleTagClick called with tag:", tag);
     const tagStr = String(tag || '');
     if (selectedTags.includes(tagStr)) {
       setSelectedTags(prev => prev.filter(t => t !== tagStr));
@@ -282,7 +360,14 @@ export default function Bookmarks({
       setSelectedTags(prev => [...prev, tagStr]);
     }
     setPage(1);
+    setHasMore(true); // hasMore 상태 초기화 추가
+    
+    // 상태 업데이트 후 ref 값들이 동기화될 때까지 잠시 대기
+    await new Promise(resolve => setTimeout(resolve, 0));
+    
+    console.log("🔄 handleTagClick: calling fetchTotalCount and fetchBookmarks");
     await fetchTotalCount();
+    await fetchBookmarks(1); // fetchBookmarks 호출 추가
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -301,6 +386,15 @@ export default function Bookmarks({
   useEffect(() => {
     fetchBookmarks(page)
   }, [fetchBookmarks, page])
+
+  // 필터 상태 변경 시 데이터 다시 가져오기
+  useEffect(() => {
+    if (page === 1) {
+      console.log("🔄 Filter state changed, refetching data...");
+      fetchTotalCount();
+      fetchBookmarks(1);
+    }
+  }, [selectedCategory, selectedTags, searchQuery, sortOrder, fetchTotalCount, fetchBookmarks]);
 
   // 초기 totalCount 로딩
   useEffect(() => {
@@ -375,7 +469,7 @@ export default function Bookmarks({
             <div className="skeleton-container">
               <SkeletonLoader variant="bookmark"/>
             </div>
-          ) : totalCount === 0 ? (
+          ) : (totalCount === 0 || bookmarks.length === 0) ? (
             <div className="no-results-container">
               <h3>There's no result to show..</h3>
               <p>try another keyword or filter</p>
@@ -392,6 +486,7 @@ export default function Bookmarks({
               lastBookmarkRef={lastBookmarkRef}
               onCategoryClick={handleCategoryClick}
               onTagClick={handleTagClick}
+              selectedTags={selectedTags}
             />
           )}
           {/* <SubscribeForm /> */}

@@ -31,7 +31,7 @@ import { BookOpen } from 'lucide-react'
 //   )
 // }
 
-const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
+const ContentCard = ({ content, onCategoryClick, onTagClick, selectedTags = [] }) => {
   const {
     id,
     title,
@@ -195,15 +195,19 @@ const ContentCard = ({ content, onCategoryClick, onTagClick }) => {
         <div className="card__meta">
           <div className="card__tags">
             {tags &&
-              tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="cursor-pointer tag button xs text"
-                  onClick={(e) => handleTagClick(e, tag)}
-                >
-                  {String(tag || "")}
-                </span>
-              ))}
+              tags.map((tag, index) => {
+                const tagStr = String(tag || "");
+                const isSelected = selectedTags.includes(tagStr);
+                return (
+                  <span
+                    key={index}
+                    className={`cursor-pointer tag button xs text ${isSelected ? "selected" : "inactive"}`}
+                    onClick={(e) => handleTagClick(e, tag)}
+                  >
+                    {tagStr}
+                  </span>
+                );
+              })}
           </div>
         </div>
       </div>
