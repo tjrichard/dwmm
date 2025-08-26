@@ -5,6 +5,10 @@
   "dependencies": {
     "@google/genai": "^0.6.0",
     "@google/generative-ai": "^0.24.0",
+    "@sanity/client": "^7.9.0",
+    "@sanity/image-url": "^1.1.0",
+    "@sanity/vision": "^4.5.0",
+    "@sanity/visual-editing": "^3.0.3",
     "@supabase/supabase-js": "^2.45.1",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -15,12 +19,15 @@
     "highlight.js": "^11.11.1",
     "lucide-react": "^0.523.0",
     "markdown-it": "^14.1.0",
-    "next": "^14.2.5",
+    "next": "^15.5.0",
     "next-mdx-remote": "^5.0.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-scripts": "^3.0.1",
+    "next-sanity": "^10.0.14",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "rxjs": "^7.8.2",
+    "sanity": "^4.5.0",
     "sass": "^1.77.8",
+    "styled-components": "^6.1.19",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -48,6 +55,10 @@
   },
   "devDependencies": {
     "@types/dompurify": "^3.0.5",
-    "cross-env": "^7.0.3"
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.11",
+    "@types/react-dom": "^19.1.8",
+    "cross-env": "^7.0.3",
+    "typescript": "~5.6.3"
   }
 }
