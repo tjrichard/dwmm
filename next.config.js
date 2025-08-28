@@ -1,8 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    // Disable by providing an empty allowlist to avoid rxjs barrel optimization issues
-    optimizePackageImports: [],
+    // Optimize framer-motion to avoid export * issues
+    optimizePackageImports: ['framer-motion'],
+  },
+  webpack: (config, { isServer }) => {
+    // Handle framer-motion client-side only imports
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+      };
+    }
+    return config;
   },
 };
 

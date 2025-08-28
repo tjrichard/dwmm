@@ -102,7 +102,7 @@ export function RealtimeCursors({
     const state = channelRef.current.presenceState();
     const updatedCursors: Cursor[] = [];
     Object.entries(state).forEach(([id, presences]) => {
-      const presence = presences[0];
+      const presence = (presences as any[])[0];
       if (!presence) return;
       // 내 커서는 별도 관리
       if (presence.id === myCursorRef.current.id) return;
