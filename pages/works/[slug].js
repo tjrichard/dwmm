@@ -1,12 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
 import Meta from '../../components/Meta'
-import { supabase } from '../../lib/supabase'
 import SkeletonLoader from '../../components/SkeletonLoader'
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
 import ImageWithSkeleton from '../../components/ImageWithSkeleton'
 import DOMPurify from 'dompurify'
+import { client } from '../../src/sanity/client'
+import { WORK_BY_SLUG_QUERY, WORKS_QUERY } from '../../src/sanity/lib/queries'
+import { urlFor } from '../../src/sanity/lib/image'
+import { PortableText } from '@portabletext/react'
 
 // Helper for HTML escaping
 const escapeHtml = (str) => {
@@ -153,123 +156,122 @@ const TabComponent = ({ tabs }) => {
         ))}
       </div>
       <div className="tab-content">
-        {tabs[activeTab]?.content}
+        {tab[activeTab]?.content}
       </div>
     </div>
   );
 };
 
-export default function WorkDetailPage() {
+// Sanity Portable Text 컴포넌트
+const portableTextComponents = {
+  types: {
+    image: ({ value }) => {
+      if (!value?.asset) return null;
+      return (
+        <div className="portable-text-image">
+          <ImageWithSkeleton
+            src={urlFor(value).url()}
+            alt={value.alt || ''}
+            aspectRatio="16/9"
+            loading="lazy"
+            decoding="async"
+          />
+          {value.caption && (
+            <figcaption className="image-caption">{value.caption}</figcaption>
+          )}
+        </div>
+      );
+    },
+    imageGallery: ({ value }) => {
+      if (!value?.images || !Array.isArray(value.images)) return null;
+      return (
+        <div className="image-gallery">
+          {value.images.map((image, index) => (
+            <div key={index} className="gallery-item">
+              <ImageWithSkeleton
+                src={urlFor(image).url()}
+                alt={image.alt || ''}
+                aspectRatio="4/3"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+          ))}
+        </div>
+      );
+    },
+    embed: ({ value }) => {
+      if (!value?.url) return null;
+      return (
+        <div className="embed-container">
+          <iframe
+            src={value.url}
+            title={value.title || 'Embedded content'}
+            width="100%"
+            height="400"
+            frameBorder="0"
+            allowFullScreen
+          />
+        </div>
+      );
+    }
+  }
+};
+
+export default function WorkDetailPage({ work, error: staticError }) {
   const router = useRouter()
-  const { slug } = router.query
-  const [entry, setEntry] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
   const [isClient, setIsClient] = useState(false)
-
-  // Hooks must be called in the same order on every render
-  const content = entry?.content_markdown?.replace(/\\n/g, '\n') || ''
-
-  const md = useMemo(() => {
-    const mdInstance = new MarkdownIt({
-      html: true,
-      linkify: true,
-      typographer: true,
-      breaks: true,
-      highlight: function (str, lang) {
-        let highlighted;
-        if (lang && hljs.getLanguage(lang)) {
-          try {
-            highlighted = hljs.highlight(str, { language: lang, ignoreIllegals: true }).value;
-          } catch (_) { }
-        }
-        if (!highlighted) {
-          try {
-            highlighted = hljs.highlightAuto(str).value;
-          } catch (_) { }
-        }
-        const finalCode = highlighted || escapeHtml(str);
-        return `<pre><code class="hljs">${finalCode}</code></pre>`;
-      },
-    });
-
-    // 이미지 렌더링 규칙을 수정하여 lazy loading 추가
-    const defaultImageRender = mdInstance.renderer.rules.image || function(tokens, idx, options, env, renderer) {
-      return renderer.renderToken(tokens, idx, options);
-    };
-
-    mdInstance.renderer.rules.image = function(tokens, idx, options, env, renderer) {
-      const token = tokens[idx];
-      const aIndex = token.attrIndex('src');
-      
-      if (aIndex >= 0) {
-        // lazy loading 속성 추가
-        token.attrPush(['loading', 'lazy']);
-        token.attrPush(['decoding', 'async']);
-        token.attrPush(['class', 'post-content-image']);
-      }
-      
-      return defaultImageRender(tokens, idx, options, env, renderer);
-    };
-
-    return mdInstance;
-  }, []);
-
-  const renderedHtml = useMemo(() => {
-    const rawHtml = md.render(content);
-    return isClient ? sanitizeHtml(rawHtml) : rawHtml;
-  }, [md, content, isClient]);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  useEffect(() => {
-    if (!slug) return
+  // 정적 생성 중 에러가 발생한 경우
+  if (staticError) {
+    return (
+      <div className="error-container" style={{ padding: '2rem', textAlign: 'center' }}>
+        <h3>데이터를 불러오는 중 오류가 발생했습니다</h3>
+        <p>{staticError}</p>
+      </div>
+    );
+  }
 
-    const fetchEntry = async () => {
-      try {
-        let { data, error } = await supabase
-          .from("works")
-          .select("*")
-          .eq("slug", slug)
-          .eq("public", true)
-          .single();
+  // work 데이터가 없는 경우
+  if (!work) {
+    return (
+      <div className="error-container" style={{ padding: '2rem', textAlign: 'center' }}>
+        <h3>작업물을 찾을 수 없습니다</h3>
+        <p>요청하신 작업물이 존재하지 않거나 삭제되었을 수 있습니다.</p>
+      </div>
+    );
+  }
 
-        if (error) {
-          console.error("Supabase error:", error);
-          setError(error);
-        } else {
-          setEntry(data);
-        }
-      } catch (err) {
-        console.error("Fetch error:", err);
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchEntry()
-  }, [slug])
-
-  if (loading) return <SkeletonLoader variant="blogPost" />
-  if (error) return <div>오류가 발생했습니다: {error.message}</div>
-  if (!entry) return <div>작업물을 찾을 수 없습니다.</div>
+  // fallback 상태에서 로딩 표시
+  if (router.isFallback) {
+    return <SkeletonLoader variant="blogPost" />;
+  }
 
   return (
     <div className="work-detail-page">
-      <Meta title={entry.title} description={entry.excerpt || entry.title} />
+      <Meta 
+        title={work.title} 
+        description={work.excerpt || work.title}
+        image={work.coverImage ? urlFor(work.coverImage).url() : undefined}
+      />
       <article className="work-article minimal">
         <header className="work-header">
-          <div className="work-category">{entry.category}</div>
-          <h1 className="work-title">{entry.title}</h1>
+          <div className="work-category">{work.categories?.[0]?.title || 'Uncategorized'}</div>
+          <h1 className="work-title">{work.title}</h1>
+          {work.excerpt && (
+            <p className="work-excerpt">{work.excerpt}</p>
+          )}
         </header>
-        {entry.thumbnail && (
+        
+        {work.coverImage && (
           <figure className="work-hero-wrap">
             <ImageWithSkeleton
-              src={entry.thumbnail}
-              alt={entry.title}
+              src={urlFor(work.coverImage).url()}
+              alt={work.title}
               aspectRatio="16/9"
               className="work-hero"
               imgStyle={{ objectFit: 'cover' }}
@@ -279,14 +281,100 @@ export default function WorkDetailPage() {
           </figure>
         )}
         
-        {entry.category === 'Blog' ? (
-          <div className="work-content prose" dangerouslySetInnerHTML={{ __html: renderedHtml }} />
+        {work.contentKind === 'Blog' ? (
+          // Blog 타입인 경우 Portable Text 렌더링
+          <div className="work-content prose">
+            {work.body && <PortableText value={work.body} components={portableTextComponents} />}
+          </div>
         ) : (
-                          <BlockRenderer blocks={entry.content_blocks || []} isClient={isClient} />
+          // Portfolio 타입인 경우 기존 블록 렌더러 사용
+          <div className="work-content">
+            {work.body && <PortableText value={work.body} components={portableTextComponents} />}
+          </div>
+        )}
+
+        {/* 태그 표시 */}
+        {work.tags && work.tags.length > 0 && (
+          <div className="work-tags">
+            {work.tags.map((tag, index) => (
+              <span key={index} className="work-tag">#{tag.title}</span>
+            ))}
+          </div>
+        )}
+
+        {/* 외부 링크가 있는 경우 */}
+        {work.externalUrl && (
+          <div className="work-external-link">
+            <a href={work.externalUrl} target="_blank" rel="noopener noreferrer" className="external-link-button">
+              프로젝트 보기 →
+            </a>
+          </div>
         )}
       </article>
     </div>
   )
+}
+
+// 정적 경로 생성
+export async function getStaticPaths() {
+  try {
+    const works = await client.fetch(WORKS_QUERY);
+    
+    const paths = works
+      .filter(work => work.slug?.current)
+      .map(work => ({
+        params: { slug: work.slug.current }
+      }));
+
+    return {
+      paths,
+      fallback: 'blocking' // 새로운 slug가 추가되면 빌드 시 자동으로 생성
+    };
+  } catch (error) {
+    console.error('Error generating static paths:', error);
+    return {
+      paths: [],
+      fallback: 'blocking'
+    };
+  }
+}
+
+// 정적 props 생성
+export async function getStaticProps({ params }) {
+  try {
+    const { slug } = params;
+    
+    if (!slug) {
+      return {
+        notFound: true
+      };
+    }
+
+    const work = await client.fetch(WORK_BY_SLUG_QUERY, { slug });
+
+    if (!work) {
+      return {
+        notFound: true
+      };
+    }
+
+    return {
+      props: {
+        work
+      },
+      revalidate: 60 // 1분마다 재검증
+    };
+  } catch (error) {
+    console.error('Error fetching work data:', error);
+    
+    return {
+      props: {
+        work: null,
+        error: error.message
+      },
+      revalidate: 60
+    };
+  }
 }
 
 

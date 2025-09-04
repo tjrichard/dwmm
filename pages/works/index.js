@@ -1,12 +1,14 @@
-// pages/blog/index.js
+// pages/works/index.js
 import React, { useEffect, useMemo, useState } from "react";
 import Meta from "../../components/Meta.js";
-import { supabase } from "../../lib/supabase";
 import Link from 'next/link';
 import SkeletonLoader from '../../components/SkeletonLoader.js';
 import ImageWithSkeleton from '../../components/ImageWithSkeleton.js'
 import BookmarkLNB from '../../components/bookmark/Lnb.js';
 import ContentGrid from '../../components/ContentGrid.js';
+import { client } from "../../src/sanity/client";
+import { WORKS_QUERY, CATEGORIES_QUERY, TAGS_QUERY } from "../../src/sanity/lib/queries";
+import { urlFor } from "../../src/sanity/lib/image";
 
 // Helper functions
 const stripHtml = (html) => {
@@ -40,10 +42,26 @@ const formatDate = (dateString) => {
   });
 };
 
-function FetchWorksLists() {
-  const [data, setData] = useState([]);
+// Sanity 데이터를 기존 UI에 맞게 변환하는 함수
+const transformSanityData = (sanityWorks) => {
+  return sanityWorks.map(work => ({
+    _id: work._id,
+    title: work.title,
+    slug: work.slug?.current,
+    excerpt: work.excerpt,
+    content_markdown: work.excerpt, // 기존 UI 호환성을 위해
+    thumbnail: work.coverImage ? urlFor(work.coverImage).url() : null,
+    category: work.categories?.[0]?.title || 'Uncategorized',
+    tags: work.tags?.map(tag => tag.title) || [],
+    created_at: work.publishedAt,
+    public: true // Sanity에서는 published 상태로 관리
+  }));
+};
+
+function FetchWorksLists({ initialWorks, initialCategories, initialTags }) {
+  const [data, setData] = useState(initialWorks || []);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedTag, setSelectedTag] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -71,33 +89,6 @@ function FetchWorksLists() {
     })
   }, [data, search, selectedTag, selectedCategory]);
 
-  async function fetchData() {
-    try {
-      let { data, error } = await supabase
-        .from("works")
-        .select("*")
-        .eq("public", true)
-        .order("created_at", { ascending: false })
-        .limit(50);
-
-      if (error) {
-        console.error("Supabase error:", error);
-        setError(error);
-      } else {
-        setData(data || []);
-      }
-    } catch (err) {
-      console.error("Fetch error:", err);
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   if (loading) {
     return (
       <div className="WorksLists">
@@ -109,7 +100,13 @@ function FetchWorksLists() {
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return (
+      <div className="error-container" style={{ padding: '2rem', textAlign: 'center' }}>
+        <h3>데이터를 불러오는 중 오류가 발생했습니다</h3>
+        <p>{error.message}</p>
+        <p>잠시 후 다시 시도해주세요.</p>
+      </div>
+    );
   }
 
   return (
@@ -166,13 +163,13 @@ function FetchWorksLists() {
   );
 }
 
-function Works({ title, description }) {
+function Works({ title, description, works, categories, tags }) {
   return (
     <div>
       <Meta title={title} description={description} />
       <main>
         <section>
-          <FetchWorksLists />
+          <FetchWorksLists initialWorks={works} initialCategories={categories} initialTags={tags} />
         </section>
       </main>
     </div>
@@ -180,13 +177,45 @@ function Works({ title, description }) {
 }
 
 export async function getStaticProps() {
-  const pageProps = {
-    title: "DWMM | Works",
-    description: "My thoughts and creative works",
-  };
-  return {
-    props: pageProps,
-  };
+  try {
+    // Sanity에서 works, categories, tags 데이터 가져오기
+    const [works, categories, tags] = await Promise.all([
+      client.fetch(WORKS_QUERY),
+      client.fetch(CATEGORIES_QUERY),
+      client.fetch(TAGS_QUERY)
+    ]);
+
+    // Sanity 데이터를 기존 UI에 맞게 변환
+    const transformedWorks = transformSanityData(works);
+
+    const pageProps = {
+      title: "DWMM | Works",
+      description: "My thoughts and creative works",
+      works: transformedWorks,
+      categories: categories || [],
+      tags: tags || []
+    };
+
+    return {
+      props: pageProps,
+      revalidate: 60, // 1분마다 재검증
+    };
+  } catch (error) {
+    console.error('Error fetching data from Sanity:', error);
+    
+    // 에러 발생 시 기본 props 반환
+    return {
+      props: {
+        title: "DWMM | Works",
+        description: "My thoughts and creative works",
+        works: [],
+        categories: [],
+        tags: [],
+        error: error.message
+      },
+      revalidate: 60,
+    };
+  }
 }
 
 export default Works;

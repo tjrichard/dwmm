@@ -5,15 +5,16 @@
  *
  * You can learn more about the next-sanity package here:
  * https://github.com/sanity-io/next-sanity
+ * 
+ * framer-motion export * 에러를 피하기 위해 클라이언트 컴포넌트로 변경
  */
 
 'use client'
 
-import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import config from '../../../../sanity.config'
 
-// Dynamically import NextStudio with no SSR to avoid framer-motion export * issues
+// framer-motion export * 에러를 피하기 위해 동적 import 사용
 const NextStudio = dynamic(
   () => import('next-sanity/studio').then((mod) => ({ default: mod.NextStudio })),
   {
@@ -34,20 +35,5 @@ const NextStudio = dynamic(
 )
 
 export default function StudioPage() {
-  return (
-    <Suspense fallback={
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        fontSize: '16px',
-        color: '#666'
-      }}>
-        Loading Sanity Studio...
-      </div>
-    }>
-      <NextStudio config={config} />
-    </Suspense>
-  )
+  return <NextStudio config={config} />
 }
