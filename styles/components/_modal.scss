@@ -58,6 +58,79 @@
   }
 }
 
+// FedCM 가이드 모달 스타일
+.fedcm-guide {
+  max-width: 500px;
+  
+  .fedcm-guide-content {
+    padding: $spacing-s;
+  }
+  
+  .fedcm-guide-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-s;
+    margin-bottom: $spacing-m;
+    
+    .fedcm-icon {
+      color: $error-normal;
+      width: 24px;
+      height: 24px;
+    }
+    
+    h3 {
+      margin: 0;
+      color: $black-darkest;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+  }
+  
+  .fedcm-guide-body {
+    p {
+      margin-bottom: $spacing-m;
+      color: $grey-08;
+      line-height: 1.5;
+    }
+  }
+  
+  .fedcm-guide-steps {
+    margin-bottom: $spacing-l;
+    
+    h4 {
+      margin: $spacing-m 0 $spacing-s 0;
+      color: $black-darkest;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    
+    ol {
+      margin: 0;
+      padding-left: $spacing-m;
+      
+      li {
+        margin-bottom: $spacing-xs;
+        color: $grey-08;
+        line-height: 1.4;
+        
+        strong {
+          color: $black-darkest;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+  
+  .fedcm-guide-actions {
+    display: flex;
+    gap: $spacing-s;
+    justify-content: flex-end;
+    margin-top: $spacing-m;
+    padding-top: $spacing-m;
+    border-top: 1px solid $black-a-lightest;
+  }
+}
+
 @keyframes slideUp {
   from {
     opacity: 0;
