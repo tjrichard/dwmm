@@ -1,7 +1,11 @@
 // _home.scss
+@use '../utils/variables' as *;
+@use '../utils/mixins' as *;
+@use 'sass:color';
+
 .home {
     @include flex-center;
     height: 100vh;
-    background-color: lighten($black-lighter, 40%);
+    background-color: color.adjust($black-lighter, $lightness: 40%);
   }
   

@@ -1,4 +1,6 @@
 // _button.scss
+@use '../utils/variables' as *;
+
 .button {
   padding: $spacing-xxs $spacing-sm;
   border: none;

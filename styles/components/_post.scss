@@ -1,4 +1,4 @@
-@import '../utils/variables';
+@use '../utils/variables' as *;
 
 .WorksLists {
     // Now uses content-grid styles from _content.scss via main.scss

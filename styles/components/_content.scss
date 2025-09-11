@@ -1,3 +1,5 @@
+@use '../utils/variables' as *;
+
 .content-grid {
   padding: $spacing-l;
   display: grid;

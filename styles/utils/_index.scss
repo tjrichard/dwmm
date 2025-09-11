@@ -1,0 +1,5 @@
+// utils/_index.scss
+// Utils 모듈의 진입점 - variables와 mixins를 forward
+
+@forward "variables";
+@forward "mixins";

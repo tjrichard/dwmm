@@ -1,4 +1,6 @@
 // _footer.scss
+@use '../utils/variables' as *;
+
 .footer {
     background-color: $black-lighter;
     padding: $spacing-xl;

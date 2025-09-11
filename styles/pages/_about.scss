@@ -1,4 +1,6 @@
 // _about.scss
+@use '../utils/variables' as *;
+
 .about {
     padding: $spacing-xl;
   }

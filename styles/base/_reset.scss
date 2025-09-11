@@ -1,4 +1,6 @@
 // _reset.scss
+@use '../utils/variables' as *;
+
 *,
 *::before,
 *::after {
