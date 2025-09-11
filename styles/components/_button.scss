@@ -83,4 +83,31 @@ a.button {
   &:hover {
     background-color: $black-a-lightest;
   }
-} 
+
+  &.loading {
+    cursor: not-allowed;
+    pointer-events: none;
+    background-color: $black-a-lightest;
+
+    &:hover {
+      background-color: none;
+    }
+  }
+}
+
+// Loading spinner
+button .loading-spinner {
+  display: inline-block;
+  width: 0.875rem;
+  height: 0.875rem;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: $spacing-xxs;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
