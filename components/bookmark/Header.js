@@ -21,94 +21,49 @@ function BookmarkHeader() {
 
   const handleSignOut = async () => {
     try {
+      console.log('🚪 Header: Starting sign out process...');
       await signOut();
+      console.log('✅ Header: Sign out completed successfully');
     } catch (error) {
-      console.error('Sign out failed:', error);
+      console.error('❌ Header: Sign out failed:', error);
     }
   };
 
   const handleCustomSignIn = async () => {
     try {
+      console.log('🔐 Header: Starting custom Google sign in...');
       await signInWithGoogle();
+      console.log('✅ Header: Custom Google sign in initiated');
     } catch (error) {
-      console.error('Custom sign in failed:', error);
+      console.error('❌ Header: Custom sign in failed:', error);
     }
   };
 
   useEffect(() => {
-    // Google GSI 초기화를 지연시켜서 스크립트가 완전히 로드된 후 실행
-    const initializeGoogle = () => {
+    // Google pre-built 방식에서는 자동 초기화되므로 간단한 로드 확인만 수행
+    const checkGoogleLoaded = () => {
       if (typeof window !== 'undefined' && window.google && window.google.accounts && window.google.accounts.id) {
-        try {
-          console.log('Initializing Google GSI...');
-          
-          // 이미 초기화되었는지 확인
-          if (window.google.accounts.id._initialized) {
-            console.log('Google GSI already initialized');
-            renderGoogleButton();
-            return;
-          }
-
-          window.google.accounts.id.initialize({
-            client_id: '101631927675-8nath7oncb52rlitu07h7dknhsqklm2c.apps.googleusercontent.com',
-            callback: 'handleSignInWithGoogle',
-            context: 'signup',
-            ux_mode: 'popup', // redirect 대신 popup 사용
-            itp_support: true,
-            auto_select: false,
-            cancel_on_tap_outside: true
-          });
-          
-          console.log('Google GSI initialized successfully');
-          renderGoogleButton();
-        } catch (error) {
-          console.error('Error initializing Google GSI:', error);
-          setGoogleButtonError(true);
-        }
+        console.log('✅ Header: Google GSI loaded and ready for pre-built buttons');
+        setGoogleButtonLoaded(true);
+        setGoogleButtonError(false);
       } else {
-        console.log('Google GSI not ready, retrying in 100ms...');
-        setTimeout(initializeGoogle, 100);
-      }
-    };
-
-    // Google 버튼을 명시적으로 렌더링
-    const renderGoogleButton = () => {
-      try {
-        const buttonElement = document.getElementById('google-signin-button');
-        if (buttonElement && window.google && window.google.accounts && window.google.accounts.id) {
-          window.google.accounts.id.renderButton(buttonElement, {
-            type: 'standard',
-            shape: 'rectangular',
-            theme: 'filled_black',
-            text: 'continue_with',
-            size: 'medium',
-            logo_alignment: 'left'
-          });
-          console.log('Google button rendered successfully');
-          setGoogleButtonLoaded(true);
-          setGoogleButtonError(false);
-        } else {
-          console.warn('Button element not found or Google GSI not ready');
-          setGoogleButtonError(true);
-        }
-      } catch (error) {
-        console.error('Error rendering Google button:', error);
-        setGoogleButtonError(true);
+        console.log('⏳ Header: Google GSI not ready, retrying in 100ms...');
+        setTimeout(checkGoogleLoaded, 100);
       }
     };
 
     // 스크립트 로드 완료 이벤트 리스너
     const handleGoogleLoaded = () => {
-      console.log('Google script loaded event received');
-      initializeGoogle();
+      console.log('📜 Header: Google script loaded event received');
+      checkGoogleLoaded();
     };
 
     if (typeof window !== 'undefined') {
       window.addEventListener('google-loaded', handleGoogleLoaded);
       
-      // 이미 로드되어 있다면 즉시 초기화
+      // 이미 로드되어 있다면 즉시 확인
       if (window.google && window.google.accounts) {
-        initializeGoogle();
+        checkGoogleLoaded();
       }
     }
 
@@ -133,29 +88,37 @@ function BookmarkHeader() {
               </button>
             ) : (
               <>
+                {/* Google pre-built 로그인 버튼 */}
                 <div 
-                  id="google-signin-button"
+                  id="g_id_onload"
+                  data-client_id="101631927675-8nath7oncb52rlitu07h7dknhsqklm2c.apps.googleusercontent.com"
+                  data-context="signin"
+                  data-ux_mode="popup"
+                  data-callback="handleSignInWithGoogle"
+                  data-login_uri="http://localhost:3000"
+                  data-auto_select="true"
+                  data-itp_support="true"
+                  data-use_fedcm_for_prompt="true"
+                  style={{ display: 'none' }}
+                ></div>
+
+                <div 
+                  className="g_id_signin"
+                  data-type="icon"
+                  data-shape="square"
+                  data-theme="outline"
+                  data-text="continue_with"
+                  data-size="small"
                   style={{ 
-                    display: (googleButtonLoaded && !googleButtonError) ? 'inline-block' : 'none',
-                    height: '32px',
-                    minWidth: '120px'
+                    display: (googleButtonLoaded && !googleButtonError) ? 'inline-block' : 'none'
                   }}
                 ></div>
+
+                {/* 폴백 버튼 - Google GSI 로드 실패 시에만 표시 */}
                 {(!googleButtonLoaded || googleButtonError) && (
                   <button 
-                    className="button s tertiary cursor-pointer" 
+                    className="button s tertiary cursor-pointer google-fallback-btn" 
                     onClick={handleCustomSignIn}
-                    style={{
-                      display: 'inline-block',
-                      height: '32px',
-                      minWidth: '120px',
-                      backgroundColor: '#4285f4',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '14px',
-                      fontWeight: '500'
-                    }}
                   >
                     Sign in with Google
                   </button>

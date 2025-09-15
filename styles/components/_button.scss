@@ -111,3 +111,24 @@ button .loading-spinner {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+// Google 폴백 버튼 스타일
+.google-fallback-btn {
+  height: 32px;
+  min-width: 120px;
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-block;
+  
+  &:hover {
+    background-color: #3367d6;
+  }
+  
+  &:active {
+    background-color: #2c5aa0;
+  }
+}
