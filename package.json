@@ -5,27 +5,24 @@
   "dependencies": {
     "@google/genai": "^0.6.0",
     "@google/generative-ai": "^0.24.0",
+    "@notionhq/client": "latest",
     "@portabletext/react": "^4.0.3",
-    "@sanity/client": "^7.6.0",
-    "@sanity/image-url": "^1.2.0",
-    "@sanity/vision": "^4.6.1",
     "@supabase/supabase-js": "^2.45.1",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "caniuse-lite": "^1.0.30001702",
     "dompurify": "^3.2.6",
+    "dotenv": "^17.2.3",
     "gray-matter": "^4.0.3",
     "highlight.js": "^11.11.1",
     "lucide-react": "^0.523.0",
     "markdown-it": "^14.1.0",
     "next": "^15.5.0",
     "next-mdx-remote": "^5.0.0",
-    "next-sanity": "^9.12.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "rxjs": "^7.8.2",
-    "sanity": "^3.99.0",
     "sass": "^1.77.8",
     "styled-components": "^6.1.19",
     "web-vitals": "^2.1.4"
@@ -33,10 +30,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "predev": "npm run typegen",
-    "prebuild": "npm run typegen",
-    "typegen": "sanity schema extract --path=src/sanity/extract.json && sanity typegen generate"
+    "start": "next start"
   },
   "browserslist": {
     "production": [
