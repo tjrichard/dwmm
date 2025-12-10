@@ -1,34 +1,27 @@
 // pages/works/index.js
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Meta from "../../components/Meta.js";
 import Link from 'next/link';
 import SkeletonLoader from '../../components/SkeletonLoader.js';
 import ImageWithSkeleton from '../../components/ImageWithSkeleton.js'
 import BookmarkLNB from '../../components/bookmark/Lnb.js';
 import ContentGrid from '../../components/ContentGrid.js';
-import { client } from "../../src/sanity/client";
-import { WORKS_QUERY, CATEGORIES_QUERY, TAGS_QUERY } from "../../src/sanity/lib/queries";
-import { urlFor } from "../../src/sanity/lib/image";
+import { getPublishedPosts } from "../../lib/notion.js";
 
 // Helper functions
-const stripHtml = (html) => {
-  if (!html) return '';
-  return html.replace(/<[^>]*>/g, '');
-};
-
 const stripMarkdown = (markdown) => {
   if (!markdown) return '';
   return markdown
-    .replace(/^### (.*$)/gim, '$1') // h3
-    .replace(/^## (.*$)/gim, '$1') // h2
-    .replace(/^# (.*$)/gim, '$1') // h1
-    .replace(/^\- (.*$)/gim, '$1') // list
-    .replace(/\*\*(.*)\*\*/gim, '$1') // bold
-    .replace(/\*(.*)\*/gim, '$1') // italic
-    .replace(/\[([^\]]+)\]\([^)]+\)/gim, '$1') // links
-    .replace(/`([^`]+)`/gim, '$1') // code
-    .replace(/\n/g, ' ') // newlines
-    .replace(/\s+/g, ' ') // multiple spaces
+    .replace(/^### (.*$)/gim, '$1')
+    .replace(/^## (.*$)/gim, '$1')
+    .replace(/^# (.*$)/gim, '$1')
+    .replace(/^\- (.*$)/gim, '$1')
+    .replace(/\*\*(.*)\*\*/gim, '$1')
+    .replace(/\*(.*)\*/gim, '$1')
+    .replace(/\ \[([^\]]+)\]\(([^)]+)\)/gim, '$1')
+    .replace(/`([^`]+)`/gim, '$1')
+    .replace(/\n/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim();
 };
 
@@ -42,31 +35,30 @@ const formatDate = (dateString) => {
   });
 };
 
-// Sanity 데이터를 기존 UI에 맞게 변환하는 함수
-const transformSanityData = (sanityWorks) => {
-  return sanityWorks.map(work => ({
-    _id: work._id,
-    title: work.title,
-    slug: work.slug?.current,
-    excerpt: work.excerpt,
-    content_markdown: work.excerpt, // 기존 UI 호환성을 위해
-    thumbnail: work.coverImage ? urlFor(work.coverImage).url() : null,
-    category: work.categories?.[0]?.title || 'Uncategorized',
-    tags: work.tags?.map(tag => tag.title) || [],
-    created_at: work.publishedAt,
-    public: true // Sanity에서는 published 상태로 관리
-  }));
+// Notion 데이터를 기존 UI에 맞게 변환하는 함수
+const transformNotionData = (notionPosts) => {
+  return notionPosts.map(post => {
+    const properties = post.properties;
+    return {
+      _id: post.id,
+      title: properties.title?.title[0]?.plain_text || '제목 없음',
+      slug: properties.slug?.rich_text[0]?.plain_text,
+      excerpt: properties.summary?.rich_text[0]?.plain_text || '',
+      thumbnail: properties.thumbnail?.url || null,
+      category: properties.category?.select?.name || '미분류',
+      tags: properties.tags?.multi_select?.map(tag => tag.name) || [],
+      created_at: properties.publishedAt?.date?.start || post.created_time,
+    };
+  });
 };
 
-function FetchWorksLists({ initialWorks, initialCategories, initialTags }) {
+function FetchWorksLists({ initialWorks, initialCategories, initialTags, error }) {
   const [data, setData] = useState(initialWorks || []);
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedTag, setSelectedTag] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
 
-  // Hooks moved to top for consistent order
   const allTags = useMemo(() => {
     const set = new Set();
     (data || []).forEach(p => (p.tags || []).forEach(t => set.add(t)));
@@ -103,8 +95,8 @@ function FetchWorksLists({ initialWorks, initialCategories, initialTags }) {
     return (
       <div className="error-container" style={{ padding: '2rem', textAlign: 'center' }}>
         <h3>데이터를 불러오는 중 오류가 발생했습니다</h3>
-        <p>{error.message}</p>
-        <p>잠시 후 다시 시도해주세요.</p>
+        <p>{error}</p>
+        <p>잠시 후 다시 시도해주세요. (.env.local 파일의 Notion 키를 확인해보세요)</p>
       </div>
     );
   }
@@ -142,7 +134,7 @@ function FetchWorksLists({ initialWorks, initialCategories, initialTags }) {
                 <div className="WorkCard__category">{item.category}</div>
                 <h2 className="WorkCard__title">{item.title}</h2>
                 <p className="WorkCard__excerpt">
-                  {(item.excerpt && item.excerpt.slice(0, 160)) || stripMarkdown(item.content_markdown).slice(0, 160)}...
+                  {(item.excerpt && item.excerpt.slice(0, 160)) || ''}...
                 </p>
                 <div className="WorkCard__meta">
                   <span className="WorkCard__date">{formatDate(item.created_at)}</span>
@@ -163,13 +155,13 @@ function FetchWorksLists({ initialWorks, initialCategories, initialTags }) {
   );
 }
 
-function Works({ title, description, works, categories, tags }) {
+function Works({ title, description, works, categories, tags, error }) {
   return (
     <div>
       <Meta title={title} description={description} />
       <main>
         <section>
-          <FetchWorksLists initialWorks={works} initialCategories={categories} initialTags={tags} />
+          <FetchWorksLists initialWorks={works} initialCategories={categories} initialTags={tags} error={error} />
         </section>
       </main>
     </div>
@@ -178,32 +170,27 @@ function Works({ title, description, works, categories, tags }) {
 
 export async function getStaticProps() {
   try {
-    // Sanity에서 works, categories, tags 데이터 가져오기
-    const [works, categories, tags] = await Promise.all([
-      client.fetch(WORKS_QUERY),
-      client.fetch(CATEGORIES_QUERY),
-      client.fetch(TAGS_QUERY)
-    ]);
+    const notionPosts = await getPublishedPosts();
+    console.log('Fetched Notion Posts:', JSON.stringify(notionPosts, null, 2));
 
-    // Sanity 데이터를 기존 UI에 맞게 변환
-    const transformedWorks = transformSanityData(works);
+    const transformedWorks = transformNotionData(notionPosts);
 
-    const pageProps = {
-      title: "DWMM | Works",
-      description: "My thoughts and creative works",
-      works: transformedWorks,
-      categories: categories || [],
-      tags: tags || []
-    };
+    const categories = [...new Set(transformedWorks.map(work => work.category))];
+    const tags = [...new Set(transformedWorks.flatMap(work => work.tags))];
 
     return {
-      props: pageProps,
-      revalidate: 60, // 1분마다 재검증
+      props: {
+        title: "DWMM | Works",
+        description: "My thoughts and creative works",
+        works: transformedWorks,
+        categories: categories,
+        tags: tags,
+        error: null
+      },
+      revalidate: 60,
     };
   } catch (error) {
-    console.error('Error fetching data from Sanity:', error);
-    
-    // 에러 발생 시 기본 props 반환
+    console.error('Error fetching data from Notion:', error);
     return {
       props: {
         title: "DWMM | Works",
@@ -211,7 +198,7 @@ export async function getStaticProps() {
         works: [],
         categories: [],
         tags: [],
-        error: error.message
+        error: error.message || "An unexpected error occurred."
       },
       revalidate: 60,
     };
