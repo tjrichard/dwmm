@@ -52,3 +52,7 @@ yarn-error.log*
 *.njsproj
 *.sln
 supabase/
+.env*
+.flaskenv*
+!.env.project
+!.env.vault
