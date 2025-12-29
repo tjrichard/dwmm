@@ -25,8 +25,8 @@ Deno.serve(async (req)=>{
     });
   }
   if (req.method === "POST") {
-    const { url } = await req.json();
     try {
+      const { url } = await req.json();
       const bookmarkId = await processBookmark(url);
       return new Response(JSON.stringify({
         message: "Bookmark created successfully",
