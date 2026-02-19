@@ -3,10 +3,12 @@ import ContentCard from "./ContentCard"
 
 function ContentGrid({ contents = [], isSearching = false, lastBookmarkRef = null, onCategoryClick, onTagClick, selectedTags = [], renderItem }) {
   // stableId들을 미리 계산하여 Hook 호출 순서 안정화
-  const stableIds = useMemo(() => 
-    contents.map((content, index) => 
-      content.id || `content-${index}-${Math.random().toString(36).slice(2, 11)}`
-    ), 
+  const stableIds = useMemo(
+    () =>
+      contents.map(
+        (content, index) =>
+          content.id || content._id || content.slug || `content-${index}`
+      ),
     [contents]
   );
 

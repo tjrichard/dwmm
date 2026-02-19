@@ -40,15 +40,34 @@ function BlogSkeletonCard() {
   )
 }
 
-function BlogPostSkeleton() {
+function WorkCardSkeleton() {
   return (
-    <div className="skeleton-blog-post">
-      <div className="skeleton-title lg"></div>
-      <div className="skeleton-meta"></div>
-      <div className="skeleton-hero"></div>
-      <div className="skeleton-paragraph"></div>
-      <div className="skeleton-paragraph"></div>
-      <div className="skeleton-paragraph"></div>
+    <div className="WorkCard WorkCard--skeleton">
+      <div className="WorkCard__media">
+        <div className="work-card-skeleton__media"></div>
+      </div>
+      <div className="WorkCard__body">
+        <div className="WorkCard__meta-line">
+          <span className="work-card-skeleton__meta"></span>
+          <span className="work-card-skeleton__meta small"></span>
+        </div>
+        <div className="work-card-skeleton__title"></div>
+        <div className="work-card-skeleton__excerpt"></div>
+        <div className="work-card-skeleton__excerpt short"></div>
+        <div className="WorkCard__meta">
+          <span className="work-card-skeleton__date"></span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function BlogPostSkeleton({ lines = 8 }) {
+  return (
+    <div className="skeleton-post">
+      {Array.from({ length: lines }).map((_, i) => (
+        <div key={i} className="skeleton-line"></div>
+      ))}
     </div>
   )
 }
@@ -90,7 +109,7 @@ function SkeletonLoader({ isLoading = true, variant = 'blog', count = 9 }) {
   if (variant === 'blogPost') {
     return (
       <div className={`${shouldFadeOut ? 'animate-fade-out' : ''}`}>
-        <BlogPostSkeleton />
+        <BlogPostSkeleton lines={count} />
       </div>
     )
   }
@@ -100,6 +119,16 @@ function SkeletonLoader({ isLoading = true, variant = 'blog', count = 9 }) {
       <div className={`${shouldFadeOut ? 'animate-fade-out' : ''}`}>
         <PortfolioPageSkeleton />
       </div>
+    )
+  }
+
+  if (variant === 'workCard') {
+    return (
+      <>
+        {Array.from({ length: count }).map((_, i) => (
+          <WorkCardSkeleton key={i} />
+        ))}
+      </>
     )
   }
 

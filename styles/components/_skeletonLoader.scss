@@ -46,6 +46,19 @@
     .img-skeleton__shimmer { display: none; }
     .img-skeleton__img { opacity: 1; }
   }
+
+  &.is-auto {
+    background: transparent;
+    overflow: visible;
+
+    .img-skeleton__img {
+      position: static;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      opacity: 1;
+    }
+  }
 }
 
 .skeleton-item {
@@ -72,6 +85,63 @@
 .skeleton-content {
   width: 100%;
   height: 60px;
+}
+
+.WorkCard--skeleton {
+  pointer-events: none;
+  animation: fadeIn 0.4s ease-out forwards;
+
+  &:hover {
+    transform: none;
+  }
+}
+
+.WorkCard--skeleton .work-card-skeleton__media {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: $radius-xs;
+  background: linear-gradient(90deg, $black-a-lightest 25%, $black-a-lighter 50%, $black-a-lightest 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+.WorkCard--skeleton .work-card-skeleton__meta,
+.WorkCard--skeleton .work-card-skeleton__title,
+.WorkCard--skeleton .work-card-skeleton__excerpt,
+.WorkCard--skeleton .work-card-skeleton__date {
+  display: block;
+  border-radius: $radius-s;
+  background: linear-gradient(90deg, $black-a-lightest 25%, $black-a-lighter 50%, $black-a-lightest 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+.WorkCard--skeleton .work-card-skeleton__meta {
+  width: 80px;
+  height: 12px;
+
+  &.small {
+    width: 48px;
+  }
+}
+
+.WorkCard--skeleton .work-card-skeleton__title {
+  width: 70%;
+  height: 22px;
+}
+
+.WorkCard--skeleton .work-card-skeleton__excerpt {
+  width: 100%;
+  height: 14px;
+
+  &.short {
+    width: 60%;
+  }
+}
+
+.WorkCard--skeleton .work-card-skeleton__date {
+  width: 90px;
+  height: 12px;
 }
 
 .skeleton-grid {
@@ -139,6 +209,22 @@
   display: inline-block;
   margin-right: $spacing-xs;
   margin-top: $spacing-xs;
+  background: linear-gradient(90deg, $black-a-lightest 25%, $black-a-lighter 50%, $black-a-lightest 75%);
+  background-size: 200% 100%;
+  border-radius: $radius-s;
+  animation: shimmer 1.5s infinite linear;
+}
+
+.skeleton-post {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-s;
+  padding: $spacing-m 0;
+}
+
+.skeleton-line {
+  width: 60%;
+  height: 14px;
   background: linear-gradient(90deg, $black-a-lightest 25%, $black-a-lighter 50%, $black-a-lightest 75%);
   background-size: 200% 100%;
   border-radius: $radius-s;

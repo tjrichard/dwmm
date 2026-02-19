@@ -1,9 +1,15 @@
 @use '../utils/variables' as *;
 
 .WorksLists {
-    // Now uses content-grid styles from _content.scss via main.scss
-    // This block is mostly for fallback or specific overrides if needed
-    // but the main grid properties are now handled by .content-grid
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px;
+  width: 100%;
+  max-width: 100%;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .works-list-layout {
@@ -23,54 +29,213 @@
     }
 }
 
+/* Works List Page (Rachel-inspired) */
+.works-page {
+  background: #f6f2ea;
+  color: $grey-12;
+  min-height: 100vh;
+}
+
+.works-main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 64px $spacing-l 120px;
+}
+
+.works-hero {
+  display: grid;
+  grid-template-columns: minmax(280px, 1.2fr) minmax(240px, 1fr);
+  gap: $spacing-xl;
+  align-items: start;
+  margin-bottom: 56px;
+}
+
+.works-hero__title {
+  font-family: "Instrument Serif", serif;
+  font-weight: 400;
+  font-size: 56px;
+  line-height: 1.05;
+  margin: 0 0 $spacing-m;
+  color: $grey-12;
+
+  em {
+    font-style: italic;
+  }
+}
+
+.works-hero__subtitle {
+  font-size: 16px;
+  line-height: 1.7;
+  color: $grey-10;
+  max-width: 28rem;
+  margin: 0;
+}
+
+.works-hero__timeline {
+  display: grid;
+  gap: $spacing-sm;
+}
+
+.works-hero__timeline-item {
+  display: grid;
+  grid-template-columns: minmax(120px, 160px) 1fr;
+  grid-template-rows: auto;
+  column-gap: $spacing-m;
+  row-gap: 2px;
+  padding: $spacing-xs 0;
+  border-bottom: 1px solid #e3ddd3;
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s ease;
+  cursor: default;
+
+  &:hover {
+    color: $grey-11;
+  }
+}
+
+.works-hero__period {
+  grid-row: 1;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: $grey-09;
+}
+
+.works-hero__info {
+  display: grid;
+  gap: 4px;
+}
+
+.works-hero__item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: $grey-12;
+}
+
+.works-hero__item-note {
+  font-size: 12px;
+  color: $grey-10;
+  line-height: 1.4;
+}
+
+.works-grid {
+  margin-top: $spacing-xl;
+
+  .content-grid {
+    padding: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px;
+  }
+}
+
+.works-grid__loading {
+  padding-bottom: 240px;
+}
+
 /* Work Detail Page */
 .work-detail-page {
   display: flex;
   justify-content: center;
+  background: #f6f2ea;
+  padding-top: $spacing-xl;
 }
 
 .work-article.minimal {
   width: 100%;
-  max-width: 740px;
-  padding: 0 20px 120px;
+  max-width: 920px;
+  padding: 0 24px 120px;
 }
 
 .work-header {
-  text-align: center;
-  margin-bottom: $spacing-ml;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: $spacing-xl;
+  align-items: start;
+  text-align: left;
+  margin-bottom: $spacing-l;
+  padding-bottom: $spacing-m;
+  border-bottom: 1px solid #e3ddd3;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    row-gap: $spacing-m;
+  }
 }
 
-.work-category {
-  display: inline-block;
-  font-size: 14px;
-  font-weight: 600;
-  color: $primary-dark;
-  background: $primary-lightest;
-  padding: 6px 12px;
-  border-radius: $radius-round;
-  margin-bottom: $spacing-s;
+.work-header__nav {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.12em;
+  color: $grey-09;
+}
+
+.work-back {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+  transition: border-color 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    color: $grey-12;
+    border-bottom-color: $grey-10;
+  }
+}
+
+.work-header__main {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.work-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+  align-items: center;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: $grey-09;
+  margin-bottom: $spacing-xs;
+}
+
+.work-meta-dot {
+  font-size: 10px;
+  line-height: 1;
 }
 
 .work-title {
-  font-size: 36px;
+  font-family: "Instrument Serif", serif;
+  font-size: 40px;
   line-height: 1.25;
   letter-spacing: -0.01em;
   margin: 0 0 $spacing-s;
-  color: $black-darkest;
-  text-align: left;
+  color: $grey-12;
+
+  @media (max-width: 768px) {
+    font-size: 32px;
+  }
+}
+
+.work-excerpt {
+  font-size: 16px;
+  line-height: 1.7;
+  color: $grey-10;
+  margin: 0;
 }
 
 .work-hero-wrap {
-  width: 100vw;
-  margin: 0 calc(50% - 50vw) $spacing-ml;
+  width: 100%;
+  margin: $spacing-l 0 $spacing-ml;
 }
 
 .work-hero {
   width: 100%;
   height: auto;
-  border-radius: $radius-s;
+  border-radius: $radius-xs;
   display: block;
   max-height: 80vh;
   object-fit: cover;
@@ -82,6 +247,7 @@
     margin-top: $spacing-l;
     font-size: 18px;
     line-height: 1.8;
+    font-weight: 400;
 
     img {
       display: block;
@@ -91,22 +257,147 @@
       border-radius: $radius-s;
     }
 
-    /* editorial image layout inspired by reference */
+    /* editorial image layout */
     figure {
-      margin: $spacing-xl -6vw;
+      margin: $spacing-l 0;
       img { width: 100%; height: auto; display: block; }
       figcaption { text-align: center; color: $grey-09; font-size: 14px; margin-top: $spacing-s; }
     }
 
-    h2 { font-size: 28px; margin: $spacing-l 0 $spacing-s; color: $black-darkest;}
-    h3 { font-size: 22px; margin: $spacing-m 0 $spacing-s; color: $black-darkest; }
-    p { margin: $spacing-s 0; color: $black-darkest; }
-    ul, ol { padding-left: 1.25rem; }
-    blockquote { border-left: 3px solid $primary-light; padding-left: 12px; color: $black-darker; }
+    h2 { font-size: 26px; margin: $spacing-l 0 $spacing-s; color: $grey-12;}
+    h3 { font-size: 20px; margin: $spacing-m 0 $spacing-s; color: $grey-12; }
+    p { margin: $spacing-s 0; color: $grey-12; }
+    a { color: $grey-12; text-decoration: underline; text-underline-offset: 3px; }
+    a.notion-inline-link { text-decoration: none; }
+    ul, ol { padding-left: 1.25rem; margin: $spacing-s 0; }
+    blockquote { border-left: 2px solid #e3ddd3; padding-left: 12px; color: $grey-10; }
     code { background: $grey-02; padding: 2px 6px; border-radius: $radius-xs; }
     pre code { display: block; padding: $spacing-sm; overflow-x: auto; }
     pre { white-space: pre-wrap; word-break: break-word; }
   }
+}
+
+.work-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: $spacing-l;
+  padding-bottom: $spacing-l;
+  margin-bottom: $spacing-l;
+  border-bottom: 1px solid #e3ddd3;
+}
+
+.work-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.work-info-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: $grey-09;
+}
+
+.work-info-value {
+  font-size: 14px;
+  line-height: 1.6;
+  color: $grey-12;
+}
+
+.work-info-line {
+  display: block;
+}
+
+.work-content-error {
+  font-size: 14px;
+  color: $grey-10;
+  margin: $spacing-m 0;
+}
+
+.work-content-sentinel {
+  display: flex;
+  justify-content: center;
+  margin: $spacing-m 0;
+  min-height: 120px;
+  width: 100%;
+  transition: min-height 0.25s ease;
+}
+
+.work-content-sentinel.is-loading {
+  min-height: 520px;
+  align-items: flex-start;
+}
+
+.work-load-more {
+  border: 1px solid #e3ddd3;
+  background: rgba(255, 255, 255, 0.7);
+  color: $grey-11;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: $radius-round;
+  cursor: pointer;
+}
+
+.work-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+  margin-top: $spacing-l;
+}
+
+.work-tag {
+  font-size: 12px;
+  color: $grey-10;
+  padding: 4px 10px;
+  border-radius: $radius-round;
+  border: 1px solid #e3ddd3;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.work-external-link {
+  margin-top: $spacing-l;
+}
+
+.external-link-button {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: 8px 14px;
+  border: 1px solid #e3ddd3;
+  border-radius: $radius-round;
+  color: $grey-11;
+  text-decoration: none;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: rgba(255, 255, 255, 0.7);
+  transition: border-color 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    border-color: $grey-08;
+    color: $grey-12;
+  }
+}
+
+.works-grid__sentinel {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: $spacing-m 0;
+  min-height: 120px;
+  transition: min-height 0.25s ease;
+}
+
+.works-grid__sentinel .WorksLists {
+  width: 100%;
+}
+
+.works-grid__sentinel.is-loading {
+  min-height: 420px;
+  align-items: flex-start;
 }
 
 /* Highlight.js base tune */
@@ -118,20 +409,18 @@
 
 /* Work Card (Blog + Portfolio unified) */
 .WorkCard {
-    background-color: $white-darkest;
-    border: 3px solid $black-light;
-    border-radius: $radius-m;
-    box-shadow: 8px 8px 0px $black-light;
-    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    transition: transform 0.2s ease-out;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     height: 100%;
 
     &:hover {
-        transform: translate(-4px, -4px);
-        box-shadow: 12px 12px 0px $black-dark;
-        border-color: $black-dark;
+        transform: translateY(-2px);
     }
 
     &__link {
@@ -143,11 +432,10 @@
     }
 
     &__media {
-        border-bottom: 3px solid $black-light;
+        border: 1px solid #e3ddd3;
         margin-bottom: $spacing-m;
         overflow: hidden;
-        border-top-left-radius: $radius-s;
-        border-top-right-radius: $radius-s;
+        border-radius: $radius-xs;
         .img-skeleton {
             border-radius: 0;
         }
@@ -161,23 +449,15 @@
     }
 
     &__category {
-        font-size: 12px;
-        font-weight: 600;
-        color: $primary-dark;
-        background: $primary-lightest;
-        padding: 4px 8px;
-        border-radius: $radius-round;
-        margin-bottom: $spacing-xs;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        align-self: flex-start;
+        display: none;
     }
 
     &__title {
-        font-size: 24px;
-        line-height: 1.3;
-        font-weight: 700;
-        color: $black-darkest;
+        font-family: "Instrument Serif", serif;
+        font-size: 22px;
+        line-height: 1.35;
+        font-weight: 400;
+        color: $grey-12;
         margin-bottom: $spacing-xs;
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -187,9 +467,9 @@
     }
 
     &__excerpt {
-        font-size: 16px;
+        font-size: 14px;
         line-height: 1.6;
-        color: $black-darker;
+        color: $grey-10;
         margin-bottom: $spacing-m;
         flex-grow: 1;
         display: -webkit-box;
@@ -207,13 +487,19 @@
         margin-top: auto;
     }
 
+    &__meta-line {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: $grey-09;
+        display: flex;
+        gap: $spacing-sm;
+        margin-bottom: $spacing-xs;
+    }
+
     &__date {
         font-size: 12px;
-        padding: 6px 10px;
-        border: 1px solid $black-light;
-        border-radius: $radius-round;
-        color: $black-a-normal;
-        background: $grey-02;
+        color: $grey-09;
     }
 
     &__tags {
@@ -355,20 +641,168 @@
     }
 }
 
+/* Notion Content Extensions */
+.notion-content {
+  hr {
+    border: none;
+    border-top: 1px solid #e3ddd3;
+    margin: $spacing-l 0;
+  }
+
+  figure {
+    margin: $spacing-l 0;
+  }
+
+  figcaption {
+    margin-top: $spacing-xs;
+    font-size: 12px;
+    color: $grey-09;
+  }
+
+  > * {
+    animation: notion-fade-in 0.35s ease both;
+  }
+}
+
+@keyframes notion-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notion-paragraph {
+  margin-bottom: $spacing-m;
+}
+
+.notion-list {
+  margin: $spacing-s 0 $spacing-m;
+  padding-left: 1.25rem;
+}
+
+.notion-todo {
+  margin: $spacing-xs 0;
+
+  input {
+    margin-right: $spacing-xs;
+  }
+}
+
+.notion-column {
+  min-width: 0;
+}
+
+.notion-inline-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  margin: 0 2px;
+  border-radius: $radius-round;
+  border: 1px solid #e3ddd3;
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  color: $grey-11;
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: baseline;
+  transition: border-color 0.2s ease, color 0.2s ease;
+
+  img {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+  }
+
+  &:hover {
+    border-color: $grey-08;
+    color: $grey-12;
+  }
+}
+
+.notion-image-row {
+  display: flex;
+  gap: $spacing-m;
+  overflow-x: auto;
+  padding-bottom: $spacing-xs;
+  scroll-snap-type: x mandatory;
+
+  figure {
+    flex: 0 0 auto;
+    min-width: 240px;
+    scroll-snap-align: start;
+    margin: 0;
+  }
+
+  img {
+    border-radius: $radius-xs;
+  }
+}
+
+.notion-columns {
+  display: grid;
+  gap: $spacing-l;
+  margin: $spacing-l 0;
+}
+
+.notion-callout {
+  display: flex;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-m;
+  border: 1px solid #e3ddd3;
+  border-radius: $radius-xs;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.notion-table-wrap {
+  overflow-x: auto;
+  margin: $spacing-m 0;
+}
+
+.notion-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  color: $grey-11;
+
+  th,
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #e3ddd3;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    font-weight: 600;
+    color: $grey-12;
+  }
+}
+
 @media (max-width: 768px) {
-    .works-list-layout {
-        flex-direction: column;
-        
-        .works-sidebar {
-            width: 100%;
-            padding: $spacing-l $spacing-m;
-            border-right: none;
-            border-bottom: 1px solid $grey-04;
-        }
-        
-        .content-grid {
-            padding: $spacing-l $spacing-m;
-        }
+    .works-main {
+        padding: 48px $spacing-m 96px;
+    }
+
+    .works-hero {
+        grid-template-columns: 1fr;
+        gap: $spacing-l;
+    }
+
+    .works-hero__title {
+        font-size: 40px;
+    }
+
+    .works-grid .content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .works-hero__timeline-item {
+        grid-template-columns: 1fr;
     }
     
     .WorkCard {
@@ -382,7 +816,11 @@
     }
     
     .work-title {
-        font-size: 28px;
+        font-size: 26px;
+    }
+
+    .notion-columns {
+        grid-template-columns: 1fr !important;
     }
     
     .portfolio-content-blocks {

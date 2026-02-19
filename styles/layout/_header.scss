@@ -5,42 +5,21 @@
   width: 100%;
   display: flex;
   justify-content: center;
-  position: sticky;
-  top: 0;
-  z-index: 999;
-  padding: $spacing-ml 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  position: static;
+  padding: $spacing-l 0 $spacing-ml;
+  background: #f6f2ea;
 }
 
 .header {
-  padding: $spacing-xxs $spacing-sm;
+  padding: 0;
   display: flex;
   align-items: center;
   gap: $spacing-m;
   justify-content: center;
   position: relative;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.78) 0%, rgba(245, 245, 245, 0.86) 100%);
-  border-radius: $radius-m;
-  border: 1px solid $black-a-lighter;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-  
-  &:hover {
-    border-color: $primary-normal;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-  }
-  
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    box-shadow: 0px 0px 0px 0px $white-a-pure;
-    backdrop-filter: blur(2px);
-    border-radius: $radius-m;
-    z-index: -1;
-  }
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .dwmm-logo {
@@ -60,13 +39,17 @@
 
   a {
     text-decoration: none;
-    color: $black-a-darker;
+    color: $grey-10;
     padding: $spacing-xs;
     border-radius: $radius-m;
-    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 12px;
+    transition: color 0.2s ease;
 
     &:hover {
-      background: rgba(0, 0, 0, 0.05);
+      background: transparent;
+      color: $grey-12;
     }
   }
 }

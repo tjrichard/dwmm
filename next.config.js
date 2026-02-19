@@ -1,5 +1,8 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  outputFileTracingRoot: path.resolve(__dirname),
   webpack: (config, { isServer }) => {
     // framer-motion export * 에러 해결을 위한 설정
     if (!isServer) {
@@ -20,5 +23,4 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
-
 

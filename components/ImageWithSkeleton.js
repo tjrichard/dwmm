@@ -15,6 +15,7 @@ export default function ImageWithSkeleton({
 }) {
   const imgRef = useRef(null)
   const [loaded, setLoaded] = useState(false)
+  const isAuto = aspectRatio === 'auto'
 
   useEffect(() => {
     const img = imgRef.current
@@ -31,17 +32,17 @@ export default function ImageWithSkeleton({
 
   return (
     <div
-      className={`img-skeleton ${loaded ? 'is-loaded' : ''} ${className}`}
-      style={{ aspectRatio, ...style }}
+      className={`img-skeleton ${loaded ? 'is-loaded' : ''} ${isAuto ? 'is-auto' : ''} ${className}`}
+      style={{ aspectRatio: isAuto ? undefined : aspectRatio, ...style }}
     >
-      {!loaded && <div className="img-skeleton__shimmer" />}
+      {!loaded && !isAuto && <div className="img-skeleton__shimmer" />}
       {src && (
         <img
           ref={imgRef}
           src={src}
           alt={alt}
           onLoad={handleLoad}
-          className={`img-skeleton__img ${rounded ? 'rounded' : ''}`}
+          className={`img-skeleton__img ${rounded ? 'rounded' : ''} ${isAuto ? 'is-auto' : ''}`}
           style={imgStyle}
           loading={loading}
           decoding={decoding}
@@ -51,5 +52,4 @@ export default function ImageWithSkeleton({
     </div>
   )
 }
-
 
