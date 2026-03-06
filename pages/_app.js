@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import "../styles/main.scss";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+import Header from "../components/header";
+import Footer from "../components/footer";
 import { ensureAuthenticated, checkUserStatus } from "../lib/auth";
 import { useRouter } from "next/router";
 import { AuthProvider } from "../contexts/AuthContext";

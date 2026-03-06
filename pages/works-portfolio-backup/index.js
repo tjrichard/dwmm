@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import Meta from "../../components/Meta";
+import Meta from "../../components/meta";
 import { supabase } from '../../lib/supabase'
-import SkeletonLoader from '../../components/SkeletonLoader'
+import SkeletonLoader from '../../components/skeletonLoader'
 import ImageWithSkeleton from '../../components/ImageWithSkeleton'
 
 export default function PortfolioIndex() {

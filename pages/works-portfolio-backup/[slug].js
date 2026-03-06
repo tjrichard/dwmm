@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import Meta from '../../components/Meta'
+import Meta from '../../components/meta'
 import { supabase } from '../../lib/supabase'
-import SkeletonLoader from '../../components/SkeletonLoader'
+import SkeletonLoader from '../../components/skeletonLoader'
 import ImageWithSkeleton from '../../components/ImageWithSkeleton'
 import DOMPurify from 'dompurify'
 
