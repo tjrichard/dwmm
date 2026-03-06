@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import Meta from "../components/Meta.js";
+import Meta from "../components/meta.js";
 import { supabase } from "../lib/supabase.js";
 import { getUserVotedWebsites } from "../lib/voteUtils.js";
 import { RealtimeCursors } from "../components/realtime-cursors.tsx";
@@ -9,7 +9,7 @@ import LNB from '../components/bookmark/Lnb.js';
 import BookmarkFooter from '../components/bookmark/Footer.js';
 import WebsiteRequestForm from '../components/bookmark/WebsiteRequestForm.js';
 import ContentGrid from "../components/ContentGrid.js";
-import SkeletonLoader from "../components/SkeletonLoader.js";
+import SkeletonLoader from "../components/skeletonLoader.js";
 import ClickCount from "../components/bookmark/ClickCount.js";
 
 // Number of items per page

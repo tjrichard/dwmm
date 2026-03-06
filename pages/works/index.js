@@ -1,8 +1,8 @@
 // pages/works/index.js
 import React, { useMemo, useState } from "react";
-import Meta from "../../components/Meta.js";
+import Meta from "../../components/meta.js";
 import Link from 'next/link';
-import SkeletonLoader from '../../components/SkeletonLoader.js';
+import SkeletonLoader from '../../components/skeletonLoader.js';
 import ImageWithSkeleton from '../../components/ImageWithSkeleton.js'
 import BookmarkLNB from '../../components/bookmark/Lnb.js';
 import ContentGrid from '../../components/ContentGrid.js';

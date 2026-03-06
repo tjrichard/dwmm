@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import Meta from '../../components/Meta';
-import SkeletonLoader from '../../components/SkeletonLoader';
+import Meta from '../../components/meta';
+import SkeletonLoader from '../../components/skeletonLoader';
 import ImageWithSkeleton from '../../components/ImageWithSkeleton';
 import { getPublishedPosts, getPostBySlug, getPostContent } from '../../lib/notion';
 
