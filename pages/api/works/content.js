@@ -21,6 +21,8 @@ export default async function handler(req, res) {
     return res.status(200).json(cached.data);
   }
 
+  res.setHeader('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=600');
+
   try {
     const { content, nextCursor, hasMore } = await getPostContentChunk(id, cursor, pageSize);
     const payload = { content, nextCursor, hasMore };

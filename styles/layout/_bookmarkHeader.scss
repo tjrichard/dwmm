@@ -36,3 +36,42 @@
     transform: scale(1.1);
   }
 }
+
+.bookmark-header-left {
+  display: flex;
+  align-items: center;
+  gap: $spacing-m;
+}
+
+.bookmark-nav {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.bookmark-nav__link {
+  text-decoration: none;
+  color: $grey-10;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 8px;
+  border-radius: $radius-s;
+
+  &:hover {
+    color: $grey-12;
+    background: $black-a-lightest;
+  }
+
+  &.is-active {
+    color: $grey-12;
+    background: $black-a-lightest;
+    font-weight: 600;
+  }
+}
+
+@media (max-width: 860px) {
+  .bookmark-nav {
+    display: none;
+  }
+}

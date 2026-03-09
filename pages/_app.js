@@ -12,6 +12,8 @@ import 'highlight.js/styles/github-dark.css'; // Import Highlight.js theme
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
   const isWorksPage = router.pathname.startsWith('/works');
+  const isHubPage = router.pathname === '/';
+  const shouldShowGlobalChrome = isWorksPage || isHubPage;
 
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_TEMPO) {
@@ -30,9 +32,9 @@ function MyApp({ Component, pageProps }) {
     <AuthProvider>
       <GoogleScript />
       <GoogleSignIn />
-      {(isWorksPage) && <Header />}
+      {shouldShowGlobalChrome && <Header />}
       <Component {...pageProps} />
-      {(isWorksPage) && <Footer />}
+      {shouldShowGlobalChrome && <Footer />}
     </AuthProvider>
   );
 }
