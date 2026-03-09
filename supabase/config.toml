@@ -1,0 +1,7 @@
+project_id = "lqrkuvemtnnnjgvptnlo"
+
+[functions.notion-webhook]
+verify_jwt = false
+
+[db]
+major_version = 15
