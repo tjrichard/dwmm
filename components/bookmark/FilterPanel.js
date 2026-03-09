@@ -1,5 +1,5 @@
 import React from "react"
-import BookmarkLNBFilter from "./filter.js"
+import BookmarkLNBFilter from "./Filter.js"
 
 function BookmarkLNBFilterPanel({ categories, tags, selectedCategory, selectedTags, onCategorySelect, onTagToggle, onSortOrderChange, onClose, sortOrder }) {
   function handlePanelClick(e) {

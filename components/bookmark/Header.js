@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import Link from "next/link";
 import WebsiteRequestForm from "./WebsiteRequestForm.js";
 import { X } from 'lucide-react';
@@ -6,10 +7,16 @@ import { useAuth } from '../../contexts/AuthContext';
 
 
 function BookmarkHeader() {
+  const router = useRouter();
   const [showModal, setShowModal] = useState(false);
   const [googleButtonLoaded, setGoogleButtonLoaded] = useState(false);
   const [googleButtonError, setGoogleButtonError] = useState(false);
   const { user, signInWithGoogle, signOut, isAuthenticated, isAnonymous, signInLoading } = useAuth();
+
+  const isActive = (href) => {
+    if (href === "/") return router.pathname === "/";
+    return router.pathname === href || router.pathname.startsWith(`${href}/`);
+  };
 
   const openModal = () => {
     setShowModal(true);
@@ -78,9 +85,16 @@ function BookmarkHeader() {
     <>
       <div className="bookmark-header-container">
         <div className="bookmark-header">
-          <Link href="/" className="logo-link cursor-pointer">
-            <img src="/logo.svg" className="dwmm-logo" alt="logo" />
-          </Link>
+          <div className="bookmark-header-left">
+            <Link href="/" className="logo-link cursor-pointer">
+              <img src="/logo.svg" className="dwmm-logo" alt="logo" />
+            </Link>
+            <nav className="bookmark-nav" aria-label="Bookmarks navigation">
+              <Link href="/" className={`bookmark-nav__link ${isActive("/") ? "is-active" : ""}`}>Hub</Link>
+              <Link href="/bookmarks" className={`bookmark-nav__link ${isActive("/bookmarks") ? "is-active" : ""}`}>Bookmarks</Link>
+              <Link href="/works" className={`bookmark-nav__link ${isActive("/works") ? "is-active" : ""}`}>Works/Blog</Link>
+            </nav>
+          </div>
           <div className="bookmark-buttons">
             {isAuthenticated ? (
               <button className="button s tertiary cursor-pointer" onClick={handleSignOut}>
