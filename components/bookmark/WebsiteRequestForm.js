@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import LoadingOverlay from './LoadingOverlay'
 import { Check } from 'lucide-react'
@@ -19,11 +19,6 @@ const ThankYouComponent = ({ onAddNew }) => {
 }
 
 function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {}, fromSuggest = false }) {
-  // 각 단계별 랜덤 애니메이션 시간 생성 (2초~4초 사이)
-  const animationDurations = useMemo(() => {
-    return Array.from({ length: 6 }, () => 2 + Math.random() * 2);
-  }, []);
-
   const [url, setUrl] = useState('')
   const [email, setEmail] = useState('')
   const [subscribeConsent, setSubscribeConsent] = useState(false)
@@ -66,7 +61,7 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {}, fromSu
   // 로딩 단계를 일정 시간 간격으로 자동 진행하는 효과
   useEffect(() => {
     if (!showLoadingOverlay) return;
-    const stepTimes = [1000, 2000, 2000, 2000, 2000, 2000];
+    const stepTimes = [450, 650, 850, 900, 950, 650];
     let timer;
     if (loadingStep < 5) {
       timer = setTimeout(() => {
@@ -139,9 +134,9 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {}, fromSu
     return (
       <div className="website-request-form">
         <h3>Suggest a website</h3>
+        <p className="website-request-form__caption">좋은 발견이 더 빨리 공유되도록, 큐레이션 파이프라인을 실행하고 있어요.</p>
         <LoadingOverlay
           currentStep={loadingStep}
-          animationDurations={animationDurations}
         />
       </div>
     );
@@ -176,7 +171,7 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {}, fromSu
           className='button primary l text-center cursor-pointer submit-btn'
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Submitting..." : "Submit"}
+          {isSubmitting ? "Curating..." : "Submit"}
         </button>
       </form>
     </div>

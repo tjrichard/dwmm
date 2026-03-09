@@ -1,29 +1,14 @@
 // pages/works/index.js
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Meta from "../../components/meta.js";
 import Link from 'next/link';
 import SkeletonLoader from '../../components/skeletonLoader.js';
 import ImageWithSkeleton from '../../components/ImageWithSkeleton.js'
-import BookmarkLNB from '../../components/bookmark/Lnb.js';
 import ContentGrid from '../../components/ContentGrid.js';
-import { getPublishedPosts } from "../../lib/notion.js";
+import { getPublishedPostsPage, getCareerEntries } from "../../lib/notion.js";
+import { getNotionThumbnail } from "../../utils/notion";
 
-// Helper functions
-const stripMarkdown = (markdown) => {
-  if (!markdown) return '';
-  return markdown
-    .replace(/^### (.*$)/gim, '$1')
-    .replace(/^## (.*$)/gim, '$1')
-    .replace(/^# (.*$)/gim, '$1')
-    .replace(/^\- (.*$)/gim, '$1')
-    .replace(/\*\*(.*)\*\*/gim, '$1')
-    .replace(/\*(.*)\*/gim, '$1')
-    .replace(/\ \[([^\]]+)\]\(([^)]+)\)/gim, '$1')
-    .replace(/`([^`]+)`/gim, '$1')
-    .replace(/\n/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-};
+const PAGE_SIZE = 5;
 
 const formatDate = (dateString) => {
   if (!dateString) return '';
@@ -35,16 +20,51 @@ const formatDate = (dateString) => {
   });
 };
 
+const formatYear = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.getFullYear();
+};
+
+const formatTimelineDate = (value) => {
+  if (!value) return '';
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (/^\d{4}$/.test(trimmed)) return trimmed;
+    const parts = trimmed.split(/[./-]/).filter(Boolean);
+    if (parts.length >= 2 && /^\d{4}$/.test(parts[0])) {
+      return `${parts[0]}.${String(parts[1]).padStart(2, '0')}`;
+    }
+    const parsed = new Date(trimmed);
+    if (Number.isNaN(parsed.getTime())) return trimmed;
+    const month = parsed.getMonth() + 1;
+    return `${parsed.getFullYear()}.${String(month).padStart(2, '0')}`;
+  }
+  if (value instanceof Date) {
+    const month = value.getMonth() + 1;
+    return `${value.getFullYear()}.${String(month).padStart(2, '0')}`;
+  }
+  return '';
+};
+
+const formatPeriod = (start, end) => {
+  const startText = formatTimelineDate(start);
+  const endText = formatTimelineDate(end) || '현재';
+  if (!startText && !endText) return '';
+  return `${startText || '현재'} - ${endText}`;
+};
+
 // Notion 데이터를 기존 UI에 맞게 변환하는 함수
 const transformNotionData = (notionPosts) => {
   return notionPosts.map(post => {
     const properties = post.properties;
     return {
+      id: post.id,
       _id: post.id,
       title: properties.title?.title[0]?.plain_text || '제목 없음',
       slug: properties.slug?.rich_text[0]?.plain_text,
       excerpt: properties.summary?.rich_text[0]?.plain_text || '',
-      thumbnail: properties.thumbnail?.url || null,
+      thumbnail: getNotionThumbnail(post),
       category: properties.category?.select?.name || '미분류',
       tags: properties.tags?.multi_select?.map(tag => tag.name) || [],
       created_at: properties.publishedAt?.date?.start || post.created_time,
@@ -52,43 +72,9 @@ const transformNotionData = (notionPosts) => {
   });
 };
 
-function FetchWorksLists({ initialWorks, initialCategories, initialTags, error }) {
-  const [data, setData] = useState(initialWorks || []);
-  const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState("");
-  const [selectedTag, setSelectedTag] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-
-  const allTags = useMemo(() => {
-    const set = new Set();
-    (data || []).forEach(p => (p.tags || []).forEach(t => set.add(t)));
-    return Array.from(set);
-  }, [data]);
-
-  const allCategories = useMemo(() => {
-    const set = new Set();
-    (data || []).forEach(p => set.add(p.category));
-    return Array.from(set);
-  }, [data]);
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return (data || []).filter(p => {
-      const matchText = !q || p.title?.toLowerCase().includes(q) || (p.excerpt || stripMarkdown(p.content_markdown || "")).toLowerCase().includes(q)
-      const matchTag = !selectedTag || (p.tags || []).includes(selectedTag)
-      const matchCategory = !selectedCategory || p.category === selectedCategory
-      return matchText && matchTag && matchCategory
-    })
-  }, [data, search, selectedTag, selectedCategory]);
-
-  if (loading) {
-    return (
-      <div className="WorksLists">
-        {[...Array(10)].map((_, index) => (
-          <SkeletonLoader key={index} />
-        ))}
-      </div>
-    );
+function WorksList({ works, careerTimeline, loading, loadingMore, hasMore, loadMoreRef, error }) {
+  if (!works) {
+    return null;
   }
 
   if (error) {
@@ -102,66 +88,176 @@ function FetchWorksLists({ initialWorks, initialCategories, initialTags, error }
   }
 
   return (
-    <div className="works-list-layout">
-      <aside className="works-sidebar">
-        <BookmarkLNB
-          categories={allCategories}
-          tags={allTags}
-          selectedCategory={selectedCategory}
-          selectedTags={selectedTag ? [selectedTag] : []}
-          onSearch={({ tags, category }) => {
-            setSelectedTag(tags[0] || "");
-            setSelectedCategory(category || "");
-          }}
-        />
-      </aside>
+    <div className="works-page">
+      <div className="works-main">
+        <section className="works-hero">
+          <div className="works-hero__intro">
+            <h1 className="works-hero__title">
+              I'm DWMM, a designer who <em>builds</em>.
+            </h1>
+            <p className="works-hero__subtitle">
+              노션을 CMS로 사용하고, 제품과 브랜드에 의미 있는 경험을 설계합니다.
+            </p>
+          </div>
+          {careerTimeline.length > 0 && (
+            <div className="works-hero__timeline">
+              {careerTimeline.map((item) => (
+                <div key={item.id} className="works-hero__timeline-item">
+                  <span className="works-hero__period">{formatPeriod(item.start, item.end)}</span>
+                  <div className="works-hero__info">
+                    <span className="works-hero__item-title">
+                      {item.role ? `${item.name} • ${item.role}` : item.name}
+                    </span>
+                    {item.note && <span className="works-hero__item-note">{item.note}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
-      <ContentGrid
-        contents={filtered.map(p => ({
-          ...p,
-          thumbnail: p.thumbnail
-        }))}
-        isSearching={loading}
-        renderItem={(item) => (
-          <div className="WorkCard animate-fade-in">
-            <Link href={`/works/${item.slug}`} className="WorkCard__link">
-              {item.thumbnail && (
-                <div className="WorkCard__media">
-                  <ImageWithSkeleton src={item.thumbnail} alt={item.title} aspectRatio="16/9" loading="lazy" decoding="async" />
+        <section className="works-grid">
+          {loading && (
+            <div className="works-grid__loading">
+              <div className="WorksLists">
+                <SkeletonLoader variant="workCard" count={1} />
+              </div>
+            </div>
+          )}
+          {!loading && works.length > 0 && (
+            <ContentGrid
+              contents={works.map(p => ({
+                ...p,
+                thumbnail: p.thumbnail
+              }))}
+              renderItem={(item) => (
+                <div className="WorkCard animate-fade-in">
+                  <Link href={`/works/${item.slug}`} className="WorkCard__link">
+                    {item.thumbnail && (
+                      <div className="WorkCard__media">
+                        <ImageWithSkeleton src={item.thumbnail} alt={item.title} aspectRatio="16/9" loading="lazy" decoding="async" />
+                      </div>
+                    )}
+                    <div className="WorkCard__body">
+                      <div className="WorkCard__meta-line">
+                        <span>{item.category}</span>
+                        <span>{formatYear(item.created_at)}</span>
+                      </div>
+                      <h2 className="WorkCard__title">{item.title}</h2>
+                      <p className="WorkCard__excerpt">
+                        {item.excerpt ? `${item.excerpt.slice(0, 160)}...` : ''}
+                      </p>
+                      <div className="WorkCard__meta">
+                        <span className="WorkCard__date">{formatDate(item.created_at)}</span>
+                      </div>
+                    </div>
+                  </Link>
                 </div>
               )}
-              <div className="WorkCard__body">
-                <div className="WorkCard__category">{item.category}</div>
-                <h2 className="WorkCard__title">{item.title}</h2>
-                <p className="WorkCard__excerpt">
-                  {(item.excerpt && item.excerpt.slice(0, 160)) || ''}...
-                </p>
-                <div className="WorkCard__meta">
-                  <span className="WorkCard__date">{formatDate(item.created_at)}</span>
-                  {item.tags && item.tags.length > 0 && (
-                    <div className="WorkCard__tags">
-                      {item.tags.slice(0, 3).map((t, i) => (
-                        <span key={i} className="WorkCard__tag">#{t}</span>
-                      ))}
-                    </div>
-                  )}
+            />
+          )}
+          {hasMore && !loading && (
+            <div
+              className={`works-grid__sentinel ${loadingMore ? 'is-loading' : ''}`}
+              ref={loadMoreRef}
+            >
+              {loadingMore && (
+                <div className="WorksLists">
+                  <SkeletonLoader variant="workCard" count={1} />
                 </div>
-              </div>
-            </Link>
-          </div>
-        )}
-      />
+              )}
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
 
-function Works({ title, description, works, categories, tags, error }) {
+function Works({ title, description, works, careerTimeline, error, deferred, nextCursor, initialHasMore }) {
+  const [clientWorks, setClientWorks] = useState(works || []);
+  const [clientCareer, setClientCareer] = useState(careerTimeline || []);
+  const [loading, setLoading] = useState(deferred || !works?.length);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [clientError, setClientError] = useState(error || null);
+  const [cursor, setCursor] = useState(nextCursor || null);
+  const [hasMore, setHasMore] = useState(initialHasMore ?? true);
+  const loadMoreRef = useRef(null);
+
+  const fetchPage = useCallback(async ({ cursor: next, isInitial }) => {
+    if (isInitial) {
+      setLoading(true);
+    } else {
+      setLoadingMore(true);
+    }
+    setClientError(null);
+
+    try {
+      const params = new URLSearchParams();
+      params.set('page_size', String(PAGE_SIZE));
+      if (next) params.set('cursor', next);
+      const response = await fetch(`/api/works/list?${params.toString()}`);
+      if (!response.ok) throw new Error('Failed to load works list');
+      const data = await response.json();
+      setClientWorks((prev) => (isInitial ? data.works || [] : [...prev, ...(data.works || [])]));
+      if (data.careerTimeline && data.careerTimeline.length > 0) {
+        setClientCareer(data.careerTimeline);
+      }
+      setCursor(data.nextCursor || null);
+      setHasMore(Boolean(data.hasMore));
+    } catch (err) {
+      setClientError('데이터를 불러오는 중 오류가 발생했습니다');
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const hasInitialData = Array.isArray(works) && works.length > 0 && !deferred;
+    if (hasInitialData) {
+      setLoading(false);
+      setHasMore(initialHasMore ?? false);
+      setCursor(nextCursor || null);
+      return;
+    }
+
+    fetchPage({ cursor: null, isInitial: true });
+  }, [deferred, works, fetchPage, initialHasMore, nextCursor]);
+
+  useEffect(() => {
+    if (!hasMore || loading || loadingMore) return;
+    const target = loadMoreRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && hasMore && !loadingMore) {
+          fetchPage({ cursor, isInitial: false });
+        }
+      },
+      { rootMargin: '200px', threshold: 0.01 }
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [cursor, fetchPage, hasMore, loading, loadingMore]);
+
   return (
     <div>
       <Meta title={title} description={description} />
       <main>
         <section>
-          <FetchWorksLists initialWorks={works} initialCategories={categories} initialTags={tags} error={error} />
+          <WorksList
+            works={clientWorks}
+            careerTimeline={clientCareer}
+            loading={loading}
+            loadingMore={loadingMore}
+            hasMore={hasMore}
+            loadMoreRef={loadMoreRef}
+            error={clientError}
+          />
         </section>
       </main>
     </div>
@@ -170,22 +266,35 @@ function Works({ title, description, works, categories, tags, error }) {
 
 export async function getStaticProps() {
   try {
-    const notionPosts = await getPublishedPosts();
-    console.log('Fetched Notion Posts:', JSON.stringify(notionPosts, null, 2));
+    const eagerList = process.env.NOTION_EAGER_WORKS_LIST === 'true';
+    let transformedWorks = [];
+    let careerTimeline = [];
+    let nextCursor = null;
+    let hasMore = false;
 
-    const transformedWorks = transformNotionData(notionPosts);
+    if (eagerList) {
+      const response = await getPublishedPostsPage({ pageSize: PAGE_SIZE });
+      transformedWorks = transformNotionData(response.results || []);
+      nextCursor = response.next_cursor || null;
+      hasMore = Boolean(response.has_more);
 
-    const categories = [...new Set(transformedWorks.map(work => work.category))];
-    const tags = [...new Set(transformedWorks.flatMap(work => work.tags))];
+      try {
+        careerTimeline = await getCareerEntries();
+      } catch (careerError) {
+        console.error('Error fetching career data from Notion:', careerError);
+      }
+    }
 
     return {
       props: {
         title: "DWMM | Works",
         description: "My thoughts and creative works",
         works: transformedWorks,
-        categories: categories,
-        tags: tags,
-        error: null
+        careerTimeline,
+        error: null,
+        deferred: !eagerList,
+        nextCursor,
+        initialHasMore: hasMore
       },
       revalidate: 60,
     };
@@ -196,9 +305,11 @@ export async function getStaticProps() {
         title: "DWMM | Works",
         description: "My thoughts and creative works",
         works: [],
-        categories: [],
-        tags: [],
-        error: error.message || "An unexpected error occurred."
+        careerTimeline: [],
+        error: error.message || "An unexpected error occurred.",
+        deferred: true,
+        nextCursor: null,
+        initialHasMore: true
       },
       revalidate: 60,
     };
