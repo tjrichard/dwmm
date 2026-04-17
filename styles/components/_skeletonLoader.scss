@@ -42,6 +42,14 @@
     &.rounded { border-radius: $radius-m; }
   }
 
+  &__fallback {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(135deg, rgba(244, 93, 72, 0.16), rgba(254, 215, 102, 0.24)),
+      linear-gradient(45deg, #ffffff, #eef7ef);
+  }
+
   &.is-loaded {
     .img-skeleton__shimmer { display: none; }
     .img-skeleton__img { opacity: 1; }
