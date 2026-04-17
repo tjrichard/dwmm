@@ -1,34 +1,46 @@
-import Link from 'next/link';
-import Meta from '../components/meta';
+import React from "react";
+import { useRouter } from "next/router";
+import Meta from "../components/meta.js";
+import WorkspaceShell from "../components/workspace/WorkspaceShell.js";
+import { getPublicResources } from "../lib/publicResources.js";
+import { getPublishedPosts } from "../lib/notion.js";
+import { normalizeNotionPosts } from "../lib/workspace.js";
 
-export default function HomeHub() {
+export async function getStaticProps() {
+  const [resourceResult, notionResult] = await Promise.allSettled([
+    getPublicResources(),
+    getPublishedPosts(),
+  ]);
+  const resources = resourceResult.status === "fulfilled" ? resourceResult.value : [];
+  const essays = notionResult.status === "fulfilled" ? normalizeNotionPosts(notionResult.value) : [];
+
+  return {
+    props: {
+      title: "DWMM | Product Design Workspace",
+      description: "A public workspace for B2B SaaS product design, AI workflows, essays, and resources.",
+      essays,
+      resources,
+      error: null,
+    },
+    revalidate: 3600,
+  };
+}
+
+export default function WorkspaceHome({ title, description, essays, resources, error }) {
+  const router = useRouter();
+  const selectedNodeId = String(router.query.node || "overview");
+  const resourceQuery = String(router.query.resourceQuery || "");
+
   return (
-    <main className="dwmm-hub">
-      <Meta
-        title="DWMM | Hub"
-        description="Navigate to Bookmarks and Works/Blog from a single DWMM hub."
+    <>
+      <Meta title={title} description={description} />
+      <WorkspaceShell
+        essays={essays}
+        resources={resources}
+        selectedNodeId={selectedNodeId}
+        resourceQuery={resourceQuery}
+        pageError={error}
       />
-      <section className="dwmm-hub__hero">
-        <p className="dwmm-hub__eyebrow">DWMM HUB</p>
-        <h1>Design what matters most.</h1>
-        <p className="dwmm-hub__subtitle">
-          북마크 큐레이션과 Works/Blog 콘텐츠를 하나의 허브에서 시작하세요.
-        </p>
-      </section>
-
-      <section className="dwmm-hub__grid" aria-label="Primary navigation">
-        <Link href="/bookmarks" className="dwmm-hub__card">
-          <span className="dwmm-hub__card-kicker">Curated</span>
-          <h2>Bookmarks</h2>
-          <p>디자인 리소스를 검색/필터/정렬하며 빠르게 탐색합니다.</p>
-        </Link>
-
-        <Link href="/works" className="dwmm-hub__card">
-          <span className="dwmm-hub__card-kicker">Case studies</span>
-          <h2>Works / Blog</h2>
-          <p>동일한 Notion 소스에서 카테고리로 구분된 글을 확인합니다.</p>
-        </Link>
-      </section>
-    </main>
+    </>
   );
 }

@@ -1,133 +1,93 @@
-import React from 'react';
-import { useRouter } from 'next/router';
-import Meta from '../../components/meta';
-import SkeletonLoader from '../../components/skeletonLoader';
-import ArticleHero from '../../components/ArticleHero';
-import { getPublishedPosts, getPostBySlug, getPostContent } from '../../lib/notion';
+import React from "react";
+import { useRouter } from "next/router";
+import Meta from "../../components/meta";
+import SkeletonLoader from "../../components/skeletonLoader";
+import WorkspaceShell from "../../components/workspace/WorkspaceShell";
+import { getPublishedPosts, getPostBySlug, getPostContent } from "../../lib/notion";
+import { normalizeNotionPosts } from "../../lib/workspace";
+import { getPublicResources } from "../../lib/publicResources";
 
-import NotionBlockRenderer from '../../components/NotionBlockRenderer';
-
-// Notion 페이지 데이터를 UI에 맞게 변환하는 함수
-const transformPostData = (post) => {
-  if (!post) return null;
-  const properties = post.properties;
-  return {
-    _id: post.id,
-    title: properties.title?.title[0]?.plain_text || '제목 없음',
-    slug: properties.slug?.rich_text[0]?.plain_text || null,
-    excerpt: properties.summary?.rich_text[0]?.plain_text || '',
-    thumbnail: properties.thumbnail?.url || null,
-    category: properties.category?.select?.name || '미분류',
-    tags: properties.tags?.multi_select?.map(tag => tag.name) || [],
-    created_at: properties.publishedAt?.date?.start || post.created_time,
-    externalUrl: properties.externalUrl?.url || null,
-  };
-};
-
-export default function WorkDetailPage({ post, content, error: staticError }) {
+export default function WorkDetailPage({ essays, resources, post, content, error }) {
   const router = useRouter();
-
-  if (staticError) {
-    return (
-      <div className="error-container" style={{ padding: '2rem', textAlign: 'center' }}>
-        <h3>데이터를 불러오는 중 오류가 발생했습니다</h3>
-        <p>{staticError}</p>
-      </div>
-    );
-  }
 
   if (router.isFallback) {
     return <SkeletonLoader variant="blogPost" />;
   }
 
-  if (!post) {
+  if (error) {
     return (
-      <div className="error-container" style={{ padding: '2rem', textAlign: 'center' }}>
-        <h3>작업물을 찾을 수 없습니다</h3>
-        <p>콘텐츠를 준비 중이거나, 요청하신 작업물이 존재하지 않을 수 있습니다.</p>
-      </div>
+      <WorkspaceShell
+        essays={essays || []}
+        resources={resources || []}
+        selectedEssaySlug={router.query.slug}
+        pageError={error}
+      />
     );
   }
 
   return (
-    <div className="work-detail-page">
-      <Meta 
-        title={post.title}
-        description={post.excerpt || post.title}
-        image={post.thumbnail}
+    <>
+      <Meta title={post?.title || "DWMM Essay"} description={post?.excerpt || post?.summary || ""} image={post?.thumbnail} />
+      <WorkspaceShell
+        essays={essays || []}
+        resources={resources || []}
+        selectedEssaySlug={post?.slug || router.query.slug}
+        notionContent={content}
       />
-      <article className="work-article minimal">
-        <ArticleHero post={post} />
-        
-        <div className="work-content prose">
-          <NotionBlockRenderer content={content} />
-        </div>
-
-        {post.tags && post.tags.length > 0 && (
-          <div className="work-tags">
-            {post.tags.map((tag, index) => (
-              <span key={index} className="work-tag">#{tag}</span>
-            ))}
-          </div>
-        )}
-
-        {post.externalUrl && (
-          <div className="work-external-link">
-            <a href={post.externalUrl} target="_blank" rel="noopener noreferrer" className="external-link-button">
-              프로젝트 보기 →
-            </a>
-          </div>
-        )}
-      </article>
-    </div>
+    </>
   );
 }
 
 export async function getStaticPaths() {
   try {
     const posts = await getPublishedPosts();
-    const paths = posts.map(post => ({
-      params: { slug: post.properties.slug?.rich_text[0]?.plain_text },
-    })).filter(p => p.params.slug);
-
+    const essays = normalizeNotionPosts(posts);
     return {
-      paths,
-      fallback: 'blocking',
+      paths: essays.map((essay) => ({ params: { slug: essay.slug } })),
+      fallback: "blocking",
     };
   } catch (error) {
-    console.error('Error in getStaticPaths:', error);
     return {
       paths: [],
-      fallback: 'blocking',
+      fallback: "blocking",
     };
   }
 }
 
 export async function getStaticProps({ params }) {
   try {
-    const postData = await getPostBySlug(params.slug);
+    const [allPosts, postData, resourceResult] = await Promise.all([
+      getPublishedPosts(),
+      getPostBySlug(params.slug),
+      getPublicResources().catch(() => []),
+    ]);
 
     if (!postData) {
       return { notFound: true };
     }
 
+    const essays = normalizeNotionPosts(allPosts);
+    const [post] = normalizeNotionPosts([postData]);
     const content = await getPostContent(postData.id);
-    const transformedPost = transformPostData(postData);
 
     return {
       props: {
-        post: transformedPost,
+        essays,
+        resources: resourceResult,
+        post,
         content,
+        error: null,
       },
       revalidate: 60,
     };
   } catch (error) {
-    console.error(`Error in getStaticProps for slug: ${params.slug}`, error);
     return {
       props: {
+        essays: [],
+        resources: [],
         post: null,
         content: null,
-        error: 'Failed to fetch post data.',
+        error: error.message || "Failed to fetch post data.",
       },
       revalidate: 60,
     };
