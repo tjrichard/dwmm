@@ -31,4 +31,6 @@
 - `.playwright-cli/` browser artifacts are ignored and not committed.
 
 ## Push
-- Pending at document creation time.
+- Pushed `main` to `origin/main`.
+- Range pushed: `aa380cc..f89bf8b`.
+- Push output: `main -> main`.
