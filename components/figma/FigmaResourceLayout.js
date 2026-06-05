@@ -252,7 +252,7 @@ export function FigmaResourceLayout({
         )}
       </main>
 
-      <BottomHeader
+      <FigmaBottomHeader
         showSubmit={showSubmit}
         panelOpen={panelOpen}
         onAsk={() => {
@@ -285,7 +285,7 @@ export function FigmaResourceLayout({
   );
 }
 
-function BottomHeader({
+export function FigmaBottomHeader({
   showSubmit = true,
   panelOpen = false,
   onAsk = () => {},
@@ -300,7 +300,7 @@ function BottomHeader({
       <nav className="figma-bottom-header__nav" aria-label="Primary">
         <Link href="/" prefetch={false}>Visiting</Link>
         <Link href="/works" prefetch={false}>Sharing</Link>
-        <Link href="/?node=about-ryan" prefetch={false}>About</Link>
+        <Link href="/about" prefetch={false}>About</Link>
       </nav>
       <div className="figma-bottom-header__actions" role="toolbar" aria-label="Page actions">
         <button type="button" onClick={onAsk}>
@@ -369,7 +369,7 @@ export function FigmaDetailLayout({ post, content, metaRows = [], children }) {
           ))}
         </section>
       </aside>
-      <BottomHeader
+      <FigmaBottomHeader
         showSubmit={false}
         panelOpen={askOpen}
         onAsk={() => setAskOpen(true)}
@@ -417,7 +417,7 @@ export function FigmaProfileLayout({ profile, onAsk }) {
           ))}
         </section>
       </aside>
-      <BottomHeader
+      <FigmaBottomHeader
         showSubmit={false}
         panelOpen={askOpen}
         onAsk={() => setAskOpen(true)}

@@ -40,23 +40,28 @@ for (const relativePath of removedLegacyFiles) {
   assert.equal(exists(relativePath), false, `${relativePath} should remain removed`);
 }
 
-assertIncludes("components/figma/FigmaResourceLayout.js", /function BottomHeader/);
+assertIncludes("components/figma/FigmaResourceLayout.js", /function FigmaBottomHeader/);
 assertIncludes("components/figma/FigmaResourceLayout.js", /figma-bottom-header__panel-toggle/);
 assertIncludes("components/figma/FigmaResourceLayout.js", /WebsiteRequestForm/);
 assertIncludes("components/figma/FigmaResourceLayout.js", /RealtimeCursors/);
 assertIncludes("components/figma/FigmaResourceLayout.js", /Mocked answer/);
 assertIncludes("components/figma/FigmaResourceLayout.js", /href="\/works"/);
-assertIncludes("components/figma/FigmaResourceLayout.js", /href="\/\?node=about-ryan"/);
+assertIncludes("components/figma/FigmaResourceLayout.js", /href="\/about"/);
 assertIncludes("components/figma/FigmaResourceLayout.js", /PanelRightOpen|PanelRightClose/);
 
-assertIncludes("styles/components/_figmaRedesign.scss", /\.figma-cursors[\s\S]*z-index: 90/);
+assertIncludes("styles/components/_figmaRedesign.scss", /\.figma-cursors[\s\S]*z-index: 120/);
 assertIncludes("styles/components/_figmaRedesign.scss", /\.figma-bottom-header[\s\S]*z-index: 90/);
 assertIncludes("styles/components/_figmaRedesign.scss", /\.figma-bottom-header__panel-toggle[\s\S]*border-left/);
+assertIncludes("styles/components/_figmaRedesign.scss", /\.ui-badge/);
+assertIncludes("styles/components/_figmaRedesign.scss", /\.about-page/);
 assertIncludes("styles/main.scss", /components\/figmaRedesign/);
 assertNotIncludes("styles/main.scss", /components\/workspace|layout\/header|layout\/bookmarkHeader/);
 
 assertIncludes("pages/index.js", /FigmaResourceLayout/);
 assertIncludes("pages/index.js", /FigmaProfileLayout/);
+assertIncludes("pages/about.js", /Badge/);
+assertIncludes("pages/about.js", /about-hero__portrait/);
+assertIncludes("pages/about.js", /FigmaBottomHeader/);
 assertIncludes("pages/bookmarks/index.js", /bookmark_categories/);
 assertIncludes("pages/bookmarks/index.js", /bookmark_tags/);
 assertIncludes("pages/bookmarks/index.js", /bookmarks_public/);
