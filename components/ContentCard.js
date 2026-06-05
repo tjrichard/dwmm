@@ -1,8 +1,7 @@
 import React, { useContext, useState, useCallback, useEffect } from "react";
 import VoteButton from "./bookmark/VoteButton.js";
 import ClickCount from "./bookmark/ClickCount.js";
-import { supabase } from "../lib/supabase";
-import { BookOpen } from 'lucide-react'
+import { getSupabaseBookmarkThumbnailUrl, supabase } from "../lib/supabase";
 
 // 클릭 카운트 컴포넌트 (비활성)
 // function ClickCount({ count }) {
@@ -59,7 +58,7 @@ const ContentCard = ({ content, onCategoryClick, onTagClick, selectedTags = [] }
 
   // Supabase 썸네일 URL 생성
   const getSupabaseThumbnailUrl = () => {
-    return `https://lqrkuvemtnnnjgvptnlo.supabase.co/storage/v1/object/public/assets/bookmarks/${id}/thumbnail.webp`;
+    return getSupabaseBookmarkThumbnailUrl(id);
   };
 
   // 기존 dicebear 이미지 URL 생성
@@ -68,13 +67,12 @@ const ContentCard = ({ content, onCategoryClick, onTagClick, selectedTags = [] }
       const domain = new URL(original_link).hostname;
       return `https://api.dicebear.com/7.x/identicon/svg?seed=${domain}`;
     } catch (e) {
-      // identicon 대신 BookOpen 아이콘 사용
-      return <BookOpen size={32} />;
+      return "https://api.dicebear.com/7.x/identicon/svg?seed=dwmm";
     }
   };
 
   // 이미지 소스 state 관리
-  const [imgSrc, setImgSrc] = useState(getSupabaseThumbnailUrl());
+  const [imgSrc, setImgSrc] = useState(getSupabaseThumbnailUrl() || getWebsitePreviewImage());
   const [fallbackUsed, setFallbackUsed] = useState(false);
 
   // onError 핸들러
@@ -108,11 +106,6 @@ const ContentCard = ({ content, onCategoryClick, onTagClick, selectedTags = [] }
 
   const handleClick = async (e) => {
     try {
-      // Get current user
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
       // Get referrer and user agent
       const referrer = document.referrer || "";
       const userAgent = navigator.userAgent;
@@ -121,7 +114,7 @@ const ContentCard = ({ content, onCategoryClick, onTagClick, selectedTags = [] }
       const { error } = await supabase.from("click_tracking").insert([
         {
           bookmark_id: id,
-          user_id: user?.id || null,
+          user_id: null,
           referrer: referrer,
           user_agent: userAgent,
         },

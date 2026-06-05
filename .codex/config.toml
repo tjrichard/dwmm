@@ -1,3 +1,15 @@
 [mcp_servers.shadcn]
 command = "npx"
 args = ["shadcn@latest", "mcp"]
+
+[mcp_servers.supabase]
+url = "https://mcp.supabase.com/mcp"
+
+[mcp_servers.supabase.tools.execute_sql]
+approval_mode = "approve"
+
+[mcp_servers.supabase.tools.apply_migration]
+approval_mode = "approve"
+
+[mcp_servers.supabase.tools.deploy_edge_function]
+approval_mode = "approve"

@@ -40,6 +40,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "lint": "eslint .",
+    "test": "node scripts/verify-figma-redesign.mjs",
     "start": "next start"
   },
   "browserslist": {

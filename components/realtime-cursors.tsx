@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { supabase } from "../lib/supabase";
+import { canUseSupabaseRealtime, supabase } from "../lib/supabase";
 import { throttle, generateRandomColor } from "../utils/helpers";
 
 interface RealtimeCursorsProps {
@@ -76,9 +76,21 @@ export function RealtimeCursors({
     const x = e.clientX;
     const y = e.clientY;
 
-    // 이벤트 위임 방식으로 "cursor-pointer" 클래스 확인
-    const isOnCard = (e.target as HTMLElement)?.closest(".cursor-pointer");
-    const transform = isOnCard
+    const interactiveSelector = [
+      ".cursor-pointer",
+      "a[href]",
+      "button",
+      "input",
+      "select",
+      "textarea",
+      "summary",
+      "[role='button']",
+      "[role='link']",
+      "[role='menuitem']",
+      "[tabindex]:not([tabindex='-1'])",
+    ].join(",");
+    const isOnInteractiveElement = (e.target as HTMLElement)?.closest(interactiveSelector);
+    const transform = isOnInteractiveElement
       ? "translate(-100%, 0) rotate(90deg)"
       : "translate(0, 0) rotate(0deg)";
 
@@ -157,6 +169,11 @@ export function RealtimeCursors({
   }, [userId, effectiveUserId, effectiveUsername, lastMouse.x, lastMouse.y]);
 
   useEffect(() => {
+    if (!canUseSupabaseRealtime()) {
+      setCursors([myCursorRef.current]);
+      return undefined;
+    }
+
     const channel = supabase.channel(`realtime-cursors:${roomName}`);
     channelRef.current = channel;
 

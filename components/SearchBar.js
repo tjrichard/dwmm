@@ -48,7 +48,6 @@ function SearchBar({
   // Trigger debounced search only when searchQuery changes
   useEffect(() => {
     debouncedQuerySearch(searchQuery);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]); // searchQuery만 의존성으로 가짐
 
   const handleSearch = (e) => {

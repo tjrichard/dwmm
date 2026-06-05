@@ -1,7 +1,63 @@
 import React, { useState, useEffect } from 'react'
-import { supabase } from '../../lib/supabase'
 import LoadingOverlay from './LoadingOverlay'
 import { Check } from 'lucide-react'
+
+const SCRAPE_TIMEOUT_MS = 35000;
+
+function getPayloadMessage(payload) {
+  if (!payload) return null;
+  if (typeof payload.error === 'string') return payload.error;
+  if (payload.error?.message) return payload.error.message;
+  if (typeof payload.message === 'string') return payload.message;
+  return null;
+}
+
+async function invokeScrapeWebsite(url) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), SCRAPE_TIMEOUT_MS);
+
+  try {
+    const response = await fetch('/api/scrape-website', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ url }),
+      signal: controller.signal,
+    });
+
+    const responseText = await response.text();
+    let payload = null;
+    try {
+      payload = responseText ? JSON.parse(responseText) : null;
+    } catch (error) {
+      payload = { message: responseText };
+    }
+
+    if (!response.ok) {
+      return {
+        data: null,
+        error: new Error(getPayloadMessage(payload) || `Edge Function failed with ${response.status}`),
+      };
+    }
+
+    return { data: payload, error: null };
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      return {
+        data: null,
+        error: new Error('스크래핑 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.'),
+      };
+    }
+
+    return {
+      data: null,
+      error,
+    };
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
 
 const ThankYouComponent = ({ onAddNew }) => {
   return (
@@ -82,20 +138,14 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {}, fromSu
     setShowLoadingOverlay(true)
     setLoadingStep(0)
     try {
-      // Edge Function에 POST 요청
-      const edgeFunctionUrl = `https://lqrkuvemtnnnjgvptnlo.supabase.co/functions/v1/scrape-website`
-      const edgeResponse = await fetch(edgeFunctionUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url }),
-      })
-      if (!edgeResponse.ok) {
-        console.error('Edge Function error:', edgeResponse.status, edgeResponse.statusText)
-        throw new Error('서버에서 데이터를 가져오지 못했습니다. URL을 확인하거나 잠시 후 다시 시도해주세요.')
+      const { data: edgeFunctionData, error: edgeFunctionError } = await invokeScrapeWebsite(url)
+
+      if (edgeFunctionError) {
+        setShowLoadingOverlay(false)
+        setMessage(`요청 처리 중 오류가 발생했습니다. ${edgeFunctionError.message || 'URL을 확인하거나 잠시 후 다시 시도해주세요.'}`)
+        return
       }
-      const edgeFunctionData = await edgeResponse.json()
+
       // 성공 처리
       if (onSubmit && edgeFunctionData) {
         onSubmit(edgeFunctionData)
@@ -105,7 +155,6 @@ function WebsiteRequestForm({ onComplete = () => {}, onSubmit = () => {}, fromSu
         setShowThankYou(true)
       }, 1000);
     } catch (error) {
-      console.error('Error:', error)
       setShowLoadingOverlay(false)
       let errorMessage = '요청 처리 중 오류가 발생했습니다. '
       if (error.message.includes('Failed to fetch')) {
