@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import LoadingOverlay from './LoadingOverlay'
 import { Check } from 'lucide-react'
 
-const SCRAPE_TIMEOUT_MS = 35000;
+const SCRAPE_TIMEOUT_MS = 65000;
 
 function getPayloadMessage(payload) {
   if (!payload) return null;
