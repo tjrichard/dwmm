@@ -1,6 +1,44 @@
-import { getSupabaseFunctionUrl, getSupabasePublicKey } from '../../lib/supabase';
+const SCRAPE_TIMEOUT_MS = 60000;
 
-const SCRAPE_TIMEOUT_MS = 30000;
+function decodeJwtPayload(token) {
+  try {
+    const payload = token?.split('.')?.[1];
+    if (!payload) return null;
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(Buffer.from(normalized, 'base64').toString('utf8'));
+  } catch (error) {
+    return null;
+  }
+}
+
+function getProjectUrlFromKey(token) {
+  const ref = decodeJwtPayload(token)?.ref;
+  return ref ? `https://${ref}.supabase.co` : null;
+}
+
+function getScrapeFunctionUrl(functionName) {
+  const projectUrl =
+    process.env.SCRAPE_WEBSITE_SUPABASE_URL ||
+    process.env.NEXT_PUBLIC_DWMM_SUPABASE_URL ||
+    getProjectUrlFromKey(process.env.NEXT_PUBLIC_SUPABASE_KEY) ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+  if (!projectUrl || !functionName) return null;
+  return `${projectUrl.replace(/\/$/, '')}/functions/v1/${functionName}`;
+}
+
+function getScrapeFunctionKey() {
+  return (
+    process.env.SCRAPE_WEBSITE_SUPABASE_KEY ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.NEXT_PUBLIC_DWMM_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_KEY ||
+    null
+  );
+}
 
 function normalizeSubmittedUrl(value) {
   const trimmedUrl = String(value || '').trim();
@@ -42,10 +80,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Valid URL is required' });
   }
 
-  const functionUrl = getSupabaseFunctionUrl('scrape-website');
-  const publicKey = getSupabasePublicKey();
+  const functionUrl = getScrapeFunctionUrl('scrape-website');
+  const functionKey = getScrapeFunctionKey();
 
-  if (!functionUrl || !publicKey) {
+  if (!functionUrl || !functionKey) {
     return res.status(500).json({ error: 'Supabase function configuration is missing.' });
   }
 
@@ -57,8 +95,8 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        apikey: publicKey,
-        Authorization: `Bearer ${publicKey}`,
+        apikey: functionKey,
+        Authorization: `Bearer ${functionKey}`,
       },
       body: JSON.stringify({ url }),
       signal: controller.signal,

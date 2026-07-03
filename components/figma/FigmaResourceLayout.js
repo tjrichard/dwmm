@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight, MessageCircle, PanelRightClose, PanelRightOpen, Plus, Search, X } from "lucide-react";
 import WebsiteRequestForm from "../bookmark/WebsiteRequestForm";
 import { RealtimeCursors } from "../realtime-cursors.tsx";
+import { normalizeBookmarkThumbnail } from "../../lib/bookmarkThumbnail";
 
 const fallbackImages = [
   "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=900&q=80",
@@ -16,7 +17,8 @@ const fallbackImages = [
 const failedImageSources = new Set();
 
 function getCardImage(item, index) {
-  if (item.thumbnail) return item.thumbnail;
+  const thumbnail = normalizeBookmarkThumbnail(item.thumbnail);
+  if (thumbnail) return thumbnail;
   if (item.image) return item.image;
   return fallbackImages[index % fallbackImages.length];
 }

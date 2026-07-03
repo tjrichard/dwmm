@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import Meta from "../../components/meta.js";
 import { hasUsableSupabasePublicConfig, supabase } from "../../lib/supabase.js";
+import { normalizeBookmarkThumbnail } from "../../lib/bookmarkThumbnail.js";
 import { FigmaResourceLayout } from "../../components/figma/FigmaResourceLayout.js";
 import { curatedResources } from "../../data/workspace/workspaceContent.js";
 
@@ -61,6 +62,7 @@ export async function getStaticProps() {
 
     const processedBookmarks = bookmarks.map(item => ({
       ...item,
+      thumbnail: normalizeBookmarkThumbnail(item.thumbnail),
       url: item.original_link // original_link를 url로 매핑
     }));
 
@@ -117,6 +119,7 @@ export default function Bookmarks({
   const loadingRef = useRef(null);
   const [bookmarkClickCounts, setBookmarkClickCounts] = useState({});
   const canUseSupabase = hasUsableSupabasePublicConfig();
+  const fallbackTotalCountRef = useRef(initialBookmarks.length);
 
   // useRef를 사용하여 의존성 배열 문제 해결
   const sortOrderRef = useRef(sortOrder);
@@ -135,7 +138,7 @@ export default function Bookmarks({
 
   const fetchTotalCount = useCallback(async () => {
     if (!canUseSupabase) {
-      setTotalCount(bookmarks.length);
+      setTotalCount(fallbackTotalCountRef.current);
       setIsLoadingTotalCount(false);
       return;
     }
@@ -176,7 +179,7 @@ export default function Bookmarks({
     } finally {
       setIsLoadingTotalCount(false);
     }
-  }, [availableCategories, bookmarks.length, canUseSupabase]);
+  }, [availableCategories, canUseSupabase]);
 
   const fetchBookmarks = useCallback(async (pageNumber) => {
     if (!canUseSupabase) {
@@ -238,12 +241,17 @@ export default function Bookmarks({
         throw error;
       }
 
-      setHasMore(data.length === ITEMS_PER_PAGE)
+      const processedBookmarks = (data || []).map((item) => ({
+        ...item,
+        thumbnail: normalizeBookmarkThumbnail(item.thumbnail),
+      }))
+
+      setHasMore(processedBookmarks.length === ITEMS_PER_PAGE)
 
       if (pageNumber === 1) {
-        setBookmarks(data)
+        setBookmarks(processedBookmarks)
       } else {
-        setBookmarks(prev => [...prev, ...data])
+        setBookmarks(prev => [...prev, ...processedBookmarks])
       }
     } catch (error) {
       console.error("❌ Error fetching bookmarks:", error)
@@ -359,7 +367,8 @@ export default function Bookmarks({
   // 초기 totalCount 로딩
   useEffect(() => {
     fetchTotalCount();
-  }, [fetchTotalCount]);
+    fetchBookmarks(1);
+  }, [fetchTotalCount, fetchBookmarks]);
 
   useEffect(() => {
     if (bookmarks && bookmarks.length > 0) {
